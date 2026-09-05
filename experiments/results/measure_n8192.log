@@ -1,0 +1,8 @@
+C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f629\scratchpad\bdhvenv\Lib\site-packages\torch\_subclasses\functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\utils\tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+n=8192 params=3,153,920  TASK_LEARNED=True  first_expo=2.8797 repetition=0.0070  (5 eval passes, 1280 sequences)
+  layer 0 xy: MEM 0.2295 REP 0.2901 ratio 0.7913  [0.7904 .. 0.7928]
+  layer 1 xy: MEM 0.0838 REP 0.0564 ratio 1.4856  [1.4828 .. 1.4898]
+  layer 2 xy: MEM 0.0718 REP 0.0364 ratio 1.9731  [1.9695 .. 1.9798]
+  layer 3 xy: MEM 0.0607 REP 0.0629 ratio 0.9647  [0.9628 .. 0.9677]
+appended 12 rows to results/measured.csv

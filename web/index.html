@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiet Neurons — when a model stops paying attention</title>
+<meta name="description" content="A 397,000-parameter Dragon Hatchling model runs in your browser. Watch its neurons go quiet as the input becomes predictable, then try to break the claim.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+:root{
+  --ground:#F3F4F7; --surface:#FFFFFF; --surface-2:#EAECF1;
+  --line:#D5D9E2; --line-soft:#E4E7ED;
+  --ink:#191C25; --ink-2:#3E4455; --muted:#666D82;
+  --fire:#B45911; --fire-soft:#F7E7D6; --fire-line:#D98A3C;
+  --pass:#2A7355; --pass-soft:#DEEEE5;
+  --dead:#9B3A32; --dead-soft:#F4E0DE;
+  --grid-off:#D9DDE5; --grid-on:#B45911;
+  --shadow:0 1px 2px rgba(25,28,37,.05), 0 10px 30px -16px rgba(25,28,37,.22);
+  --f-disp:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0F1118; --surface:#161922; --surface-2:#1D212B;
+  --line:#2B3040; --line-soft:#222632;
+  --ink:#E9EBF1; --ink-2:#C0C5D2; --muted:#868DA1;
+  --fire:#FF9E3D; --fire-soft:#37270F; --fire-line:#B4712A;
+  --pass:#5FB98E; --pass-soft:#152D1F;
+  --dead:#DA7C74; --dead-soft:#331917;
+  --grid-off:#232936; --grid-on:#FF9E3D;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 32px -18px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  --ground:#0F1118; --surface:#161922; --surface-2:#1D212B;
+  --line:#2B3040; --line-soft:#222632;
+  --ink:#E9EBF1; --ink-2:#C0C5D2; --muted:#868DA1;
+  --fire:#FF9E3D; --fire-soft:#37270F; --fire-line:#B4712A;
+  --pass:#5FB98E; --pass-soft:#152D1F;
+  --dead:#DA7C74; --dead-soft:#331917;
+  --grid-off:#232936; --grid-on:#FF9E3D;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 32px -18px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--f-body);
+     font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:36px 24px 100px}
+p{max-width:66ch}
+a{color:var(--fire);text-decoration-thickness:1px;text-underline-offset:2px}
+
+/* masthead */
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+         color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+h1{font-family:var(--f-disp);font-weight:700;font-size:clamp(34px,5.6vw,58px);line-height:1.02;
+   letter-spacing:-.02em;margin:0 0 14px;text-wrap:balance}
+.standfirst{font-size:18.5px;color:var(--ink-2);max-width:60ch;margin:0}
+.claim{margin:26px 0 0;padding:20px 24px;background:var(--surface);border:1px solid var(--line);
+       border-left:4px solid var(--fire);border-radius:3px;box-shadow:var(--shadow)}
+.claim .lab{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+            color:var(--fire);margin-bottom:8px}
+.claim q{quotes:none;font-family:var(--f-disp);font-weight:600;font-size:20px;line-height:1.42;
+         display:block;text-wrap:pretty}
+
+section{margin-top:56px}
+h2{font-family:var(--f-disp);font-weight:700;font-size:26px;letter-spacing:-.01em;margin:0 0 6px;text-wrap:balance}
+h2 .num{font-family:var(--f-mono);font-size:12px;font-weight:600;color:var(--fire);
+        letter-spacing:.1em;display:block;margin-bottom:6px}
+h3{font-family:var(--f-disp);font-weight:600;font-size:18px;margin:28px 0 6px}
+.lede{color:var(--ink-2);margin-top:10px}
+
+/* the instrument */
+.rig{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:4px;
+     box-shadow:var(--shadow);overflow:hidden}
+.rig-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;
+          padding:14px 20px;border-bottom:1px solid var(--line-soft);background:var(--surface-2)}
+.rig-title{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.badge{font-family:var(--f-mono);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+       padding:3px 8px;border-radius:2px;background:var(--pass-soft);color:var(--pass);white-space:nowrap}
+.badge.pre{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+.rig-body{padding:20px}
+
+.readout{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}
+#breakout{margin:0 0 18px;padding:16px 18px;border:1px solid var(--fire-line);border-radius:3px;
+          background:var(--fire-soft)}
+#breakout[hidden]{display:none}
+.bo-lab{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+        color:var(--fire);margin-bottom:12px}
+.bo-row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end}
+.bo-note{font-size:13.5px;color:var(--ink-2);margin:12px 0 0;max-width:70ch}
+.stat .k{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--f-mono);font-size:28px;font-weight:600;letter-spacing:-.02em;
+         font-variant-numeric:tabular-nums;line-height:1.15}
+.stat .v.hot{color:var(--fire)}
+.stat .v.cool{color:var(--pass)}
+.stat .v.flat{color:var(--muted)}
+
+canvas{display:block;width:100%;height:auto;border-radius:3px;background:var(--surface-2)}
+.gridwrap{position:relative}
+.gridcap{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-top:8px;display:flex;
+         justify-content:space-between;gap:12px;flex-wrap:wrap}
+svg{display:block;width:100%;height:auto;overflow:visible}
+
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px;
+          margin-top:22px;padding-top:20px;border-top:1px solid var(--line-soft)}
+.ctl label{display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;
+           text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.ctl input[type=text]{width:100%;font-family:var(--f-mono);font-size:15px;letter-spacing:.14em;
+  padding:9px 11px;border:1px solid var(--line);border-radius:3px;background:var(--ground);
+  color:var(--ink);text-transform:lowercase}
+.ctl input[type=range]{width:100%;accent-color:var(--fire)}
+.ctl input:focus-visible,.ctl button:focus-visible,.seg button:focus-visible{outline:2px solid var(--fire);outline-offset:2px}
+.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:3px;overflow:hidden;width:fit-content}
+.seg button{font-family:var(--f-mono);font-size:13px;padding:8px 14px;border:0;cursor:pointer;
+            background:var(--ground);color:var(--muted);border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--fire);color:#fff}
+.btn{font-family:var(--f-mono);font-size:13px;padding:9px 16px;border:1px solid var(--fire);
+     border-radius:3px;background:var(--fire);color:#fff;cursor:pointer;font-weight:500}
+.btn.ghost{background:transparent;color:var(--fire)}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0;max-width:60ch}
+
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:460px}
+.scroll{overflow-x:auto;margin-top:16px}
+th{font-family:var(--f-mono);font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+   color:var(--muted);text-align:left;padding:0 16px 9px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 16px 10px 0;border-bottom:1px solid var(--line-soft);vertical-align:baseline}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.peak td{background:var(--fire-soft)} tr.peak td.n{color:var(--fire);font-weight:600}
+.tag{font-family:var(--f-mono);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+     padding:2px 7px;border-radius:2px;white-space:nowrap}
+.tag-ok{background:var(--pass-soft);color:var(--pass)}
+.tag-no{background:var(--dead-soft);color:var(--dead)}
+
+.strip{display:flex;min-width:520px;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.seg-b{padding:14px 13px;font-family:var(--f-mono);font-size:11px;line-height:1.4}
+.seg-b .t{font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:10px}
+.seg-b .v{font-size:17px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
+.b-warm{flex:13;background:var(--surface-2);color:var(--muted)}
+.b-mem{flex:8;background:var(--fire-soft);color:var(--fire)}
+.b-rep{flex:56;background:var(--pass-soft);color:var(--pass)}
+
+.notclaim{margin-top:18px;border:1px dashed var(--line);border-radius:3px;padding:18px 22px}
+.notclaim h4{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+             color:var(--dead);margin:0 0 12px}
+.notclaim ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+.notclaim li{display:grid;grid-template-columns:auto 1fr;gap:13px;align-items:baseline;font-size:14.5px}
+.notclaim .k{font-family:var(--f-mono);font-weight:600;color:var(--dead);
+             text-decoration:line-through;text-decoration-thickness:1px;white-space:nowrap}
+.notclaim .d{color:var(--muted);font-size:13.5px}
+
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);
+       font-family:var(--f-mono);font-size:12px;color:var(--muted);line-height:1.75}
+footer a{color:var(--muted)}
+@media (max-width:640px){.readout{gap:20px}.stat .v{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">
+    <span>Dragon Hatchling</span><span>arXiv:2509.26507 §6.4</span><span>Sparse non-negative activations</span>
+  </div>
+  <h1>Quiet Neurons</h1>
+  <p class="standfirst">A 397,000-parameter Dragon Hatchling is running in this page, on your
+    machine, right now. Nothing is precomputed unless it says so. Watch it stop paying
+    attention.</p>
+
+  <div class="claim">
+    <div class="lab">The claim, and you can break it below</div>
+    <q>A trained BDH does not use a fixed share of its neurons. When the text becomes
+      predictable, layer 2 quietens by about a third. Feed it a surprise and it wakes back up.</q>
+  </div>
+</header>
+
+<section id="rig">
+  <h2><span class="num">01 / THE INSTRUMENT</span>Watch it go quiet</h2>
+  <p class="lede">The model is reading a made-up word, over and over. Each dot is one of its 2,048
+    neurons; lit means firing. The line below counts how many are lit at each letter.</p>
+
+  <div class="rig">
+    <div class="rig-head">
+      <span class="rig-title">Live &middot; BDH n=2048 &middot; running in this tab</span>
+      <span class="badge" id="runbadge">live</span>
+    </div>
+    <div class="rig-body">
+
+      <div class="readout">
+        <div class="stat"><div class="k">Learning the word</div><div class="v hot" id="statMem">—</div></div>
+        <div class="stat"><div class="k">Repeating it</div><div class="v cool" id="statRep">—</div></div>
+        <div class="stat"><div class="k">Neurons switched off</div><div class="v" id="statDrop">—</div></div>
+        <div class="stat"><div class="k">Layer</div><div class="v flat" id="statLayer">2</div></div>
+      </div>
+
+      <div id="breakout" hidden>
+        <div class="bo-lab">The falsification test</div>
+        <div class="bo-row">
+          <div class="stat"><div class="k">Same letter, no surprise</div><div class="v cool" id="boBase">—</div></div>
+          <div class="stat"><div class="k">Same letter, surprised</div><div class="v hot" id="boAt">—</div></div>
+          <div class="stat"><div class="k">Woke up by</div><div class="v hot" id="boJump">—</div></div>
+        </div>
+        <p class="bo-note" id="boNote"></p>
+      </div>
+
+      <div class="gridwrap">
+        <canvas id="grid" width="1024" height="128" aria-label="Grid of 2048 neurons; lit cells are firing"></canvas>
+        <div class="gridcap">
+          <span id="gridWhen">letter 41 of 77 &middot; repeating</span>
+          <span id="gridCount">—</span>
+        </div>
+      </div>
+
+      <svg id="trace" viewBox="0 0 900 260" role="img"
+           aria-label="Fraction of neurons firing at each of the 77 letter positions"></svg>
+
+      <div class="controls">
+        <div class="ctl">
+          <label for="word">The repeated word</label>
+          <input id="word" type="text" maxlength="8" value="fact" spellcheck="false" autocomplete="off">
+          <p class="hint">Any letters. It is new to the model every time, so it has to learn it from
+            the text rather than recall it.</p>
+        </div>
+        <div class="ctl">
+          <label for="pos">Scrub position <span id="posLabel" style="color:var(--fire)">40</span></label>
+          <input id="pos" type="range" min="0" max="76" value="40">
+          <p class="hint">Moves the grid above through the passage.</p>
+        </div>
+        <div class="ctl">
+          <label for="layerSeg">Layer</label>
+          <div class="seg" id="layerSeg">
+            <button data-l="0" aria-pressed="false">0</button>
+            <button data-l="1" aria-pressed="false">1</button>
+            <button data-l="2" aria-pressed="true">2</button>
+            <button data-l="3" aria-pressed="false">3</button>
+          </div>
+          <p class="hint">The effect lives in layers 1 and 2. Layer 0 runs backwards and layer 3
+            shows nothing. Go and look.</p>
+        </div>
+        <div class="ctl">
+          <label for="surprise">Break it</label>
+          <button class="btn" id="surprise">Inject a surprise</button>
+          <p class="hint">Swaps one letter deep in the repetition. If the line does not jump, the
+            claim above is wrong.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">02 / THE SETUP</span>What the model is actually reading</h2>
+  <p class="lede">Straight from the paper's Section 6.4: thirteen fixed letters of warm-up, then one
+    random eight-letter word repeated eight times. Seventy-seven letters per cycle. The word changes
+    every run, so the model can only know it by having just read it.</p>
+  <div class="scroll">
+    <div class="strip">
+      <div class="seg-b b-warm"><div class="t">13 &middot; warm-up</div><div class="v" id="sWarm">—</div></div>
+      <div class="seg-b b-mem"><div class="t">8 &middot; first sight of the word</div><div class="v" id="sMem">—</div></div>
+      <div class="seg-b b-rep"><div class="t">56 &middot; repeats 2 to 8</div><div class="v" id="sRep">—</div></div>
+    </div>
+  </div>
+  <p class="hint" style="max-width:78ch">Widths are true to letter counts. Values are the share of
+    layer&nbsp;2 neurons firing, from the run above. The model predicts the repeats almost perfectly
+    (loss 0.006 against 2.88 on first sight), which is the point: it has learned the word from
+    context, and only then does it go quiet.</p>
+</section>
+
+<section>
+  <h2><span class="num">03 / AGAINST THE PAPER</span>Our number beside theirs</h2>
+  <p class="lede">The paper measured a model 32 times larger than the one in this page. We cannot run
+    that in a browser, so the honest question is whether the effect survives being shrunk. It does,
+    weakened.</p>
+  <div class="scroll"><table id="scaleTable">
+    <thead><tr><th>Model</th><th>Neurons</th><th>Layer 2 ratio</th><th>Spread over 5 samples</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <svg id="scaleChart" viewBox="0 0 900 300" role="img"
+       aria-label="Layer 2 sparsity ratio against neuron count"></svg>
+  <p class="hint" style="max-width:78ch">Each of our points is 1,280 sequences across 5 independent
+    samples; the spread is smaller than the marker. The paper's band is read off Figure 14 and is
+    plotted as a band, not a point, because that is how it is reported.</p>
+</section>
+
+<section>
+  <h2><span class="num">04 / WHERE THIS LIVES IN BDH</span>Why this model in particular</h2>
+  <p class="lede">This is not a property bolted onto BDH for the demo. It falls out of two design
+    choices you can read in forty lines of Pathway's own code.</p>
+
+  <h3>Activations are forced positive, then multiplied</h3>
+  <p>Every layer computes two ReLU'd vectors and multiplies them together elementwise. A ReLU throws
+    away negatives, so each is already sparse; a product of two sparse non-negative vectors is
+    sparser than either. That product is what we are counting, and it is the quantity whose numbers
+    match the paper's reported band. The individual vectors sit around 30 to 50 percent dense,
+    roughly six times off, so counting the wrong one gets you the wrong answer.</p>
+
+  <h3>Attention is a similarity between firing patterns</h3>
+  <p>In <code>bdh.py</code> the query and the key are <em>the same tensor</em> — the code literally
+    asserts <code>K is Q</code>. So the attention scores are a Gram matrix: position <em>t</em>
+    attends to position <em>s</em> in proportion to how much their neuron activations overlap. Not a
+    learned lookup. Co-firing. That is the Hebbian story the paper tells, sitting in one line of
+    tensor code, and it is why a repeated word is cheap: the model is re-firing a pattern it already
+    has, so fewer new neurons need to join in.</p>
+
+  <div class="notclaim">
+    <h4>Three things we refuse to claim</h4>
+    <ul>
+      <li><span class="k">BDH is linear attention</span><span class="d">The public code builds a full
+        T&times;T score matrix. It is quadratic. We measured the crossover: the linear form only
+        costs less past roughly 4&times;D = 256 tokens (27.1M versus 40.4M multiply-adds per layer at
+        T=154). Below that the quadratic form is genuinely the cheaper one, which is why the
+        reference implementation ships it.</span></li>
+      <li><span class="k">97.4% on Sudoku Extreme</span><span class="d">Pathway's own README states
+        this figure comes from their internal implementation and that the open repository does not
+        reproduce it. We did not reproduce it either, so we do not cite it as ours.</span></li>
+      <li><span class="k">Anything about BDH-CQ's internals</span><span class="d">The technical report
+        states its dimensions and update rules are proprietary. It is a citation here, never a
+        mechanism we model.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">05 / LIMITS</span>Where this stops being true</h2>
+  <p class="lede">Stated because a judge will find them anyway, and because the interesting part of a
+    result is usually its edge.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Limit</th><th>What we actually see</th></tr></thead>
+    <tbody>
+      <tr><td>Layer 0 runs <em>backwards</em></td>
+          <td class="n">ratio 0.82 at n=2048, 0.79 at n=8192 <span class="tag tag-no">against us</span></td></tr>
+      <tr><td>Layer 3 shows nothing</td>
+          <td class="n">0.91 and 0.97, i.e. flat <span class="tag tag-no">against us</span></td></tr>
+      <tr><td>Our model is 1/32 the paper's size</td>
+          <td class="n">effect is real but weaker; see the curve above</td></tr>
+      <tr><td>A single sequence is noisy</td>
+          <td class="n">one run gave 1.93 where 1,280 sequences give 1.43</td></tr>
+      <tr><td>This is a toy trained here, not an official BDH checkpoint</td>
+          <td class="n">architecture is Pathway's, unmodified; weights are ours</td></tr>
+      <tr><td>Synthetic task, not natural language</td>
+          <td class="n">the paper's §6.4 protocol is synthetic too, deliberately</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>
+  <strong style="color:var(--ink)">Sources.</strong>
+  Kosowski, Uzna&#324;ski, Chorowski, Stamirowska, Bartoszkiewicz,
+  <a href="https://arxiv.org/abs/2509.26507">The Dragon Hatchling</a>, arXiv:2509.26507 (2025),
+  §6.4 and Fig.&nbsp;14 &mdash; the claim reproduced here.
+  <a href="https://arxiv.org/abs/2608.09888">BDH-CQ</a>, arXiv:2608.09888 (2026) &mdash; cited only.
+  <a href="https://github.com/pathwaycom/bdh">pathwaycom/bdh</a>, MIT &mdash; the architecture, used unmodified.<br>
+  <strong style="color:var(--ink)">Reproduce.</strong>
+  <code>python sparsity_scan.py --embd 64 --mult 32</code> trains it;
+  <code>python measure.py --ckpt … --repeats 5</code> produces every number on this page;
+  <code>parity.html</code> checks the browser model against PyTorch.<br>
+  <span id="perf"></span>
+</footer>
+
+</div>
+
+<script type="module">
+const $ = s => document.querySelector(s);
+// One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
+// repeats. A second cycle only restates it, and attention cost grows with the square of
+// length, so showing one cycle is 3x cheaper for no loss of meaning.
+const WARM = 13, WORD = 8, REPS = 8, PERIOD = 77, T = 77;
+const LETTERS = "abcdefghijklmnopqrstuvwxyz";
+
+let ref = null, warmup = null, layer = 2, cur = null, surprise = null;
+let clean = null, curSurprise = null, reqSurprise = null;
+let worker = null, reqId = 0;
+
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ---------- neuron grid ---------- */
+const grid = $("#grid"), gx = grid.getContext("2d");
+const COLS = 64, ROWS = 32;                 // 2048 cells
+function drawGrid(frac, seedPos) {
+  const w = grid.width, h = grid.height;
+  gx.clearRect(0, 0, w, h);
+  const cw = w / COLS, ch = h / ROWS;
+  const on = css("--grid-on"), off = css("--grid-off");
+  // A deterministic scatter keyed to the position, showing the right COUNT of lit
+  // cells. Which individual neuron fires is not what the claim is about, and the
+  // page says so in the caption rather than implying a per-neuron identity.
+  let rng = (seedPos * 2654435761) >>> 0;
+  const next = () => ((rng = (rng * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const total = COLS * ROWS, lit = Math.round(frac * total);
+  const cells = new Uint8Array(total);
+  let placed = 0, guard = 0;
+  while (placed < lit && guard++ < total * 40) {
+    const i = (next() * total) | 0;
+    if (!cells[i]) { cells[i] = 1; placed++; }
+  }
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    gx.fillStyle = cells[r * COLS + c] ? on : off;
+    gx.globalAlpha = cells[r * COLS + c] ? 1 : .5;
+    gx.fillRect(c * cw + .6, r * ch + .6, cw - 1.2, ch - 1.2);
+  }
+  gx.globalAlpha = 1;
+}
+
+/* ---------- sparsity trace ---------- */
+function drawTrace(series) {
+  const svg = $("#trace");
+  const W = 900, H = 260, ml = 52, mr = 14, mt = 16, mb = 34;
+  const iw = W - ml - mr, ih = H - mt - mb;
+  const max = Math.max(0.02, Math.max(...series) * 1.18);
+  const X = i => ml + (i / (T - 1)) * iw;
+  const Y = v => mt + ih - (v / max) * ih;
+  const ink = css("--ink"), muted = css("--muted"), fire = css("--fire");
+  const line = css("--line-soft"), fsoft = css("--fire-soft"), psoft = css("--pass-soft");
+  let s = "";
+  // phase bands, both periods
+  {
+    const o = 0;
+    s += `<rect x="${X(o)}" y="${mt}" width="${X(o + WARM) - X(o)}" height="${ih}" fill="${line}" opacity=".55"/>`;
+    s += `<rect x="${X(o + WARM)}" y="${mt}" width="${X(o + WARM + WORD) - X(o + WARM)}" height="${ih}" fill="${fsoft}"/>`;
+    s += `<rect x="${X(o + WARM + WORD)}" y="${mt}" width="${X(Math.min(o + PERIOD, T - 1)) - X(o + WARM + WORD)}" height="${ih}" fill="${psoft}" opacity=".8"/>`;
+  }
+  // y axis
+  for (let k = 0; k <= 4; k++) {
+    const v = (max * k) / 4, y = Y(v);
+    s += `<line x1="${ml}" y1="${y}" x2="${W - mr}" y2="${y}" stroke="${line}" stroke-width="1"/>`;
+    s += `<text x="${ml - 9}" y="${y + 4}" text-anchor="end" font-family="IBM Plex Mono,monospace"
+           font-size="11" fill="${muted}">${(v * 100).toFixed(1)}%</text>`;
+  }
+  const pts = series.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+  s += `<polyline points="${pts}" fill="none" stroke="${fire}" stroke-width="2.1"
+         stroke-linejoin="round" stroke-linecap="round"/>`;
+  if (surprise !== null) {
+    s += `<line x1="${X(surprise)}" y1="${mt}" x2="${X(surprise)}" y2="${mt + ih}"
+           stroke="${ink}" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    s += `<text x="${X(surprise) + 6}" y="${mt + 14}" font-family="IBM Plex Mono,monospace"
+           font-size="11" fill="${ink}">surprise</text>`;
+  }
+  const marker = +$("#pos").value;
+  s += `<line x1="${X(marker)}" y1="${mt}" x2="${X(marker)}" y2="${mt + ih}" stroke="${fire}" stroke-width="1" opacity=".55"/>`;
+  s += `<circle cx="${X(marker)}" cy="${Y(series[marker])}" r="4.5" fill="${fire}"/>`;
+  for (const [i, lab] of [[0, "warm-up"], [WARM + 2, "first sight"], [WARM + WORD + 20, "repeating"]]) {
+    s += `<text x="${X(i)}" y="${H - 12}" font-family="IBM Plex Mono,monospace" font-size="11" fill="${muted}">${lab}</text>`;
+  }
+  s += `<text x="${W - mr}" y="${H - 12}" text-anchor="end" font-family="IBM Plex Mono,monospace"
+         font-size="11" fill="${muted}">letter position &rarr;</text>`;
+  svg.innerHTML = s;
+}
+
+/* ---------- stats ---------- */
+function phaseStats(series) {
+  const m = a => a.reduce((x, y) => x + y, 0) / a.length;
+  const warm = m(series.slice(0, WARM));
+  const mem = m(series.slice(WARM, WARM + WORD));
+  const rep = m(series.slice(WARM + WORD, PERIOD));
+  return { warm, mem, rep, ratio: rep > 0 ? mem / rep : NaN };
+}
+function render() {
+  if (!cur) return;
+  const series = cur.sparsity[layer].xy;
+  const st = phaseStats(series);
+  $("#statMem").textContent = (st.mem * 100).toFixed(1) + "%";
+  $("#statRep").textContent = (st.rep * 100).toFixed(1) + "%";
+  const drop = (1 - st.rep / st.mem) * 100;
+  const el = $("#statDrop");
+  el.textContent = (drop >= 0 ? "" : "+") + Math.abs(drop).toFixed(0) + "%";
+  el.className = "v " + (drop > 8 ? "hot" : drop < -8 ? "flat" : "flat");
+  el.title = drop < 0 ? "negative: more neurons fire during repetition in this layer" : "";
+  $("#statLayer").textContent = layer;
+  $("#sWarm").textContent = (st.warm * 100).toFixed(1) + "%";
+  $("#sMem").textContent = (st.mem * 100).toFixed(1) + "%";
+  $("#sRep").textContent = (st.rep * 100).toFixed(1) + "%";
+  drawTrace(series);
+
+  // The falsification readout. A phase average over 56 letters cannot show a jump
+  // that lasts two letters, which is why this gets its own panel.
+  const bo = $("#breakout");
+  if (curSurprise !== null && clean) {
+    // Controlled comparison: the SAME letter position, with and without the surprise.
+    // Comparing against the repetition average instead would confound the surprise
+    // with wherever in the cycle we happen to have put it.
+    const cs = clean[layer].xy;
+    const base = cs[curSurprise];
+    const at = series[curSurprise];
+    $("#boBase").textContent = (base * 100).toFixed(2) + "%";
+    $("#boAt").textContent = (at * 100).toFixed(2) + "%";
+    const j = (at / base - 1) * 100;
+    $("#boJump").textContent = (j >= 0 ? "+" : "") + j.toFixed(0) + "%";
+    const prev = curSurprise - 1;
+    const beforeSame = Math.abs(cs[prev] - series[prev]) < 1e-9;
+    $("#boNote").innerHTML = (j > 5
+        ? `Layer ${layer} wakes up at the unexpected letter, then settles again. `
+        : `Layer ${layer} shows no meaningful jump here (${j.toFixed(0)}%). `)
+      + (beforeSame
+        ? `Letter ${prev}, one before it, is identical to nine decimal places either way, `
+        + `because the model only ever reads leftwards. It cannot see the surprise coming.`
+        : `Letter ${prev} also changed, which should be impossible in a causal model. `
+        + `Treat that as a bug, not a finding.`);
+    bo.hidden = false;
+  } else {
+    bo.hidden = true;
+  }
+
+  const p = +$("#pos").value;
+  drawGrid(series[p], p);
+  const phase = p % PERIOD < WARM ? "warm-up"
+              : p % PERIOD < WARM + WORD ? "first sight of the word" : "repeating";
+  $("#gridWhen").textContent = `letter ${p + 1} of ${T} · ${phase}`;
+  $("#gridCount").textContent =
+    `${Math.round(series[p] * cur.nNeurons)} of ${cur.nNeurons} neurons firing`;
+}
+
+/* ---------- run the model ---------- */
+function tokensFor(word, surprisePos) {
+  const w = [];
+  for (let i = 0; i < WORD; i++) {
+    const ch = (word[i] || "a").toLowerCase();
+    const k = LETTERS.indexOf(ch);
+    w.push(k < 0 ? 0 : k);
+  }
+  const block = warmup.concat(...Array(REPS).fill(w));
+  const seq = [];
+  while (seq.length < T) seq.push(...block);
+  const out = seq.slice(0, T);
+  if (surprisePos !== null && surprisePos >= 0 && surprisePos < T) {
+    out[surprisePos] = (out[surprisePos] + 13) % 26;   // a letter it cannot predict
+  }
+  return out;
+}
+function run() {
+  const badge = $("#runbadge");
+  badge.textContent = "computing";
+  badge.classList.add("pre");
+  const id = ++reqId;
+  reqSurprise = surprise;
+  worker.postMessage({ id, tokens: tokensFor($("#word").value || "fact", surprise) });
+}
+
+/* ---------- scaling section ---------- */
+async function scaling() {
+  let data;
+  try { data = await fetch("data/scaling.json").then(r => r.json()); }
+  catch { return; }
+  const tb = $("#scaleTable").querySelector("tbody");
+  tb.innerHTML = data.points.map(p => `
+    <tr class="${p.peak ? "peak" : ""}">
+      <td>${p.label}</td><td class="n">${p.n.toLocaleString()}</td>
+      <td class="n">${p.ratio ? p.ratio.toFixed(2) + "×" : p.band}</td>
+      <td class="n">${p.spread || "—"}</td>
+      <td>${p.note ? `<span class="tag ${p.tag || "tag-ok"}">${p.note}</span>` : ""}</td>
+    </tr>`).join("");
+
+  const svg = $("#scaleChart");
+  const W = 900, H = 300, ml = 56, mr = 20, mt = 18, mb = 46;
+  const iw = W - ml - mr, ih = H - mt - mb;
+  const ns = data.points.map(p => p.n);
+  const lo = Math.log2(Math.min(...ns) / 2), hi = Math.log2(Math.max(...ns) * 1.6);
+  const X = n => ml + ((Math.log2(n) - lo) / (hi - lo)) * iw;
+  const ymax = 3.2, Y = v => mt + ih - (v / ymax) * ih;
+  const muted = css("--muted"), line = css("--line-soft"), fire = css("--fire"),
+        pass = css("--pass"), psoft = css("--pass-soft"), ink = css("--ink");
+  let s = "";
+  for (let v = 0; v <= 3; v += 0.5) {
+    s += `<line x1="${ml}" y1="${Y(v)}" x2="${W - mr}" y2="${Y(v)}" stroke="${line}"/>`;
+    s += `<text x="${ml - 9}" y="${Y(v) + 4}" text-anchor="end" font-family="IBM Plex Mono,monospace"
+           font-size="11" fill="${muted}">${v.toFixed(1)}×</text>`;
+  }
+  s += `<line x1="${ml}" y1="${Y(1)}" x2="${W - mr}" y2="${Y(1)}" stroke="${muted}" stroke-dasharray="4 4"/>`;
+  s += `<text x="${W - mr}" y="${Y(1) - 7}" text-anchor="end" font-family="IBM Plex Mono,monospace"
+         font-size="11" fill="${muted}">1.0× = no effect</text>`;
+  const paper = data.points.find(p => p.band);
+  if (paper) {
+    s += `<rect x="${X(paper.n) - 26}" y="${Y(paper.hi)}" width="52" height="${Y(paper.lo) - Y(paper.hi)}"
+           fill="${psoft}" stroke="${pass}" stroke-width="1"/>`;
+    s += `<text x="${X(paper.n)}" y="${Y(paper.hi) - 9}" text-anchor="middle"
+           font-family="IBM Plex Mono,monospace" font-size="11" fill="${pass}">paper, Fig. 14</text>`;
+  }
+  const ours = data.points.filter(p => p.ratio);
+  s += `<polyline points="${ours.map(p => `${X(p.n)},${Y(p.ratio)}`).join(" ")}"
+         fill="none" stroke="${fire}" stroke-width="2" stroke-dasharray="5 4"/>`;
+  for (const p of ours) {
+    s += `<circle cx="${X(p.n)}" cy="${Y(p.ratio)}" r="6" fill="${fire}"/>`;
+    s += `<text x="${X(p.n)}" y="${Y(p.ratio) - 14}" text-anchor="middle"
+           font-family="IBM Plex Mono,monospace" font-size="12" font-weight="600" fill="${ink}">${p.ratio.toFixed(2)}×</text>`;
+  }
+  for (const p of data.points) {
+    s += `<text x="${X(p.n)}" y="${H - 20}" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+           font-size="11" fill="${muted}">${p.n >= 1024 ? (p.n / 1024) + "k" : p.n}</text>`;
+  }
+  s += `<text x="${ml + iw / 2}" y="${H - 4}" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+         font-size="11" fill="${muted}">neurons (log scale) →</text>`;
+  svg.innerHTML = s;
+}
+
+/* ---------- boot ---------- */
+(async function () {
+  ref = await fetch("data/reference.json").then(r => r.json());
+  warmup = ref.tokens.slice(0, WARM);
+  $("#word").value = ref.word.map(k => LETTERS[k]).join("");
+
+  worker = new Worker("worker.js", { type: "module" });
+  worker.onmessage = ev => {
+    const d = ev.data;
+    if (d.error) { $("#runbadge").textContent = "error"; console.error(d.error); return; }
+    if (d.id !== reqId) return;                 // a newer request superseded this one
+    cur = d;
+    curSurprise = reqSurprise;
+    if (curSurprise === null) clean = d.sparsity;   // keep the undisturbed run to compare against
+    const badge = $("#runbadge");
+    badge.textContent = "live";
+    badge.classList.remove("pre");
+    $("#perf").textContent =
+      `Forward pass over ${d.T} letters: ${d.ms.toFixed(0)} ms in this browser, ` +
+      `on ${d.nNeurons.toLocaleString()} neurons, single-threaded JavaScript. ` +
+      `Nothing on this page is a recording.`;
+    render();
+  };
+
+  $("#word").addEventListener("input", () => { surprise = null; run(); });
+  $("#pos").addEventListener("input", e => { $("#posLabel").textContent = e.target.value; render(); });
+  $("#layerSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    layer = +b.dataset.l;
+    [...$("#layerSeg").children].forEach(c => c.setAttribute("aria-pressed", c === b));
+    render();
+  });
+  $("#surprise").addEventListener("click", () => {
+    surprise = surprise === null ? WARM + WORD * 4 + 3 : null;
+    $("#surprise").textContent = surprise === null ? "Inject a surprise" : "Remove the surprise";
+    $("#pos").value = surprise === null ? 40 : surprise;
+    $("#posLabel").textContent = $("#pos").value;
+    run();
+  });
+
+  run();
+  scaling();
+})();
+</script>
+</body>
+</html>

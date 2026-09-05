@@ -1,0 +1,18 @@
+<title>profile</title><body style="font:13px ui-monospace;background:#111;color:#eee;padding:24px">
+<pre id="o">running…</pre>
+<script type="module">
+import { loadBDH } from "./bdh.js";
+const m = await loadBDH("data");
+const ref = await fetch("data/reference.json").then(r=>r.json());
+const out=[];
+for (const T of [154, 77]) {
+  const toks = ref.tokens.slice(0, T);
+  m.forward(toks);                       // warm up JIT
+  const prof = {}; const t0=performance.now();
+  m.forward(toks, prof); const total=performance.now()-t0;
+  const rows = Object.entries(prof).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`  ${k.padEnd(8)} ${v.toFixed(0).padStart(6)} ms  ${(100*v/total).toFixed(1).padStart(5)}%`);
+  out.push(`T=${T}  total ${total.toFixed(0)} ms\n${rows.join("\n")}`);
+}
+document.getElementById("o").textContent = out.join("\n\n");
+</script></body>

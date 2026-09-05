@@ -63,8 +63,10 @@ export class BDH {
 
   /* Returns {logits, sparsity} where sparsity[layer] = {x,y,xy} arrays of
      length T giving the fraction of neurons active at each position. */
-  forward(tokens) {
+  forward(tokens, profile = null) {
+    const P = profile ? (k, t0) => { profile[k] = (profile[k] || 0) + performance.now() - t0; } : null;
     const { D, N, n_head: nh, n_layer: L, vocab_size: V } = this.m;
+    if (D % 4 !== 0) throw new Error("the unrolled loops below assume D is a multiple of 4");
     const T = tokens.length;
     const { embed, encoder, encoder_v, decoder, lm_head } = this.w;
     this._rope(T);
@@ -81,27 +83,35 @@ export class BDH {
     const xs = new Float32Array(nh * T * N);   // x_sparse
     const qr = new Float32Array(nh * T * N);   // QR (K is Q, so KR === QR)
     const ys = new Float32Array(nh * T * N);   // y_sparse
+    const nzIdx = new Int32Array(nh * T * N);  // live neuron indices per (head, position)
+    const nzLen = new Int32Array(nh * T);
     const ykv = new Float32Array(nh * T * D);
     const ymlp = new Float32Array(T * D);
     const sparsity = [];
 
     for (let l = 0; l < L; l++) {
       // x_sparse = relu(x @ self.encoder)
+      let _t = P && performance.now();
       xs.fill(0);
       for (let h = 0; h < nh; h++) {
         const eBase = h * D * N, oBase = h * T * N;
         for (let t = 0; t < T; t++) {
           const xo = t * D, so = oBase + t * N;
-          for (let d = 0; d < D; d++) {
-            const xv = x[xo + d];
-            if (xv === 0) continue;
-            const eo = eBase + d * N;
-            for (let n = 0; n < N; n++) xs[so + n] += xv * encoder[eo + n];
+          // 4-way unroll over D: the accumulator is touched D times per position
+          // otherwise, and that memory traffic, not the multiplies, is the cost.
+          for (let d = 0; d < D; d += 4) {
+            const v0 = x[xo + d], v1 = x[xo + d + 1], v2 = x[xo + d + 2], v3 = x[xo + d + 3];
+            const e0 = eBase + d * N, e1 = e0 + N, e2 = e1 + N, e3 = e2 + N;
+            for (let n = 0; n < N; n++) {
+              xs[so + n] += v0 * encoder[e0 + n] + v1 * encoder[e1 + n]
+                          + v2 * encoder[e2 + n] + v3 * encoder[e3 + n];
+            }
           }
           for (let n = 0; n < N; n++) if (xs[so + n] < 0) xs[so + n] = 0;
         }
       }
 
+      if (P) { P('xs', _t); _t = performance.now(); }
       // QR = rope(r_phases, Q) with v_rot[2k] = -v[2k+1], v_rot[2k+1] = v[2k]
       for (let h = 0; h < nh; h++) {
         const b = h * T * N;
@@ -115,22 +125,43 @@ export class BDH {
         }
       }
 
+      if (P) { P('rope', _t); _t = performance.now(); }
+      // QR inherits x_sparse's sparsity: rope maps a zero pair to a zero pair, and
+      // roughly 60-70% of neurons are off. Indexing the live entries of row t turns
+      // each dot product from O(N) into O(nnz), which is exact because every term we
+      // skip is multiplied by a literal zero.
+      for (let h = 0; h < nh; h++) {
+        const b = h * T * N;
+        for (let t = 0; t < T; t++) {
+          const o = b + t * N;
+          let c = 0;
+          for (let n = 0; n < N; n++) if (qr[o + n] !== 0) nzIdx[o + c++] = n;
+          nzLen[h * T + t] = c;
+        }
+      }
+
+      if (P) { P('nzscan', _t); _t = performance.now(); }
       // scores = (QR @ KR.mT).tril(diagonal=-1) ; yKV = scores @ V, V = x
       ykv.fill(0);
       for (let h = 0; h < nh; h++) {
-        const qb = h * T * N, kb = h * T * D;
+        const qb = h * T * N, kb = h * T * D, lb = h * T;
         for (let t = 1; t < T; t++) {           // row 0 is all-zero after tril(-1)
-          const qo = qb + t * N, yo = kb + t * D;
+          const qo = qb + t * N, yo = kb + t * D, len = nzLen[lb + t];
+          if (len === 0) continue;
           for (let s = 0; s < t; s++) {         // strictly lower triangular
             const so = qb + s * N;
             let dot = 0;
-            for (let n = 0; n < N; n++) dot += qr[qo + n] * qr[so + n];
+            for (let k = 0; k < len; k++) {
+              const n = nzIdx[qo + k];
+              dot += qr[qo + n] * qr[so + n];
+            }
             if (dot === 0) continue;
             const xo = s * D;
             for (let d = 0; d < D; d++) ykv[yo + d] += dot * x[xo + d];
           }
         }
       }
+      if (P) { P('scores', _t); _t = performance.now(); }
       layerNorm(ykv, nh * T, D);                // yKV = self.ln(yKV)
 
       // y_sparse = relu(yKV @ self.encoder_v) ; xy_sparse = x_sparse * y_sparse
@@ -139,16 +170,20 @@ export class BDH {
         const eBase = h * D * N, oBase = h * T * N, kb = h * T * D;
         for (let t = 0; t < T; t++) {
           const yo = kb + t * D, so = oBase + t * N;
-          for (let d = 0; d < D; d++) {
-            const yv = ykv[yo + d];
-            if (yv === 0) continue;
-            const eo = eBase + d * N;
-            for (let n = 0; n < N; n++) ys[so + n] += yv * encoder_v[eo + n];
+          for (let d = 0; d < D; d += 4) {
+            const v0 = ykv[yo + d], v1 = ykv[yo + d + 1],
+                  v2 = ykv[yo + d + 2], v3 = ykv[yo + d + 3];
+            const e0 = eBase + d * N, e1 = e0 + N, e2 = e1 + N, e3 = e2 + N;
+            for (let n = 0; n < N; n++) {
+              ys[so + n] += v0 * encoder_v[e0 + n] + v1 * encoder_v[e1 + n]
+                          + v2 * encoder_v[e2 + n] + v3 * encoder_v[e3 + n];
+            }
           }
           for (let n = 0; n < N; n++) ys[so + n] = ys[so + n] > 0 ? ys[so + n] : 0;
         }
       }
 
+      if (P) { P('ys', _t); _t = performance.now(); }
       // record what the page draws, before xy is consumed
       const sx = new Float32Array(T), sy = new Float32Array(T), sxy = new Float32Array(T);
       for (let t = 0; t < T; t++) {
@@ -166,6 +201,7 @@ export class BDH {
       }
       sparsity.push({ layer: l, x: sx, y: sy, xy: sxy });
 
+      if (P) { P('count', _t); _t = performance.now(); }
       // yMLP = xy_sparse.transpose(1,2).reshape(B,1,T,N*nh) @ self.decoder
       // head-major: decoder row index is h*N + n
       ymlp.fill(0);
@@ -181,6 +217,7 @@ export class BDH {
           }
         }
       }
+      if (P) { P('ymlp', _t); }
       layerNorm(ymlp, T, D);                    // y = self.ln(yMLP)
       for (let i = 0; i < T * D; i++) x[i] += ymlp[i];
       layerNorm(x, T, D);                       // x = self.ln(x + y)

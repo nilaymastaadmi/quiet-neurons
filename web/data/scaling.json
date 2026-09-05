@@ -1,0 +1,37 @@
+{
+  "layer": 2,
+  "tensor": "xy",
+  "points": [
+    {
+      "label": "ours, 397,312 params",
+      "n": 2048,
+      "ratio": 1.4318,
+      "spread": "1.430 to 1.433",
+      "peak": false,
+      "note": "1280 sequences",
+      "tag": "tag-ok"
+    },
+    {
+      "label": "ours, 3,153,920 params",
+      "n": 8192,
+      "ratio": 1.9731,
+      "spread": "1.970 to 1.980",
+      "peak": false,
+      "note": "1280 sequences",
+      "tag": "tag-ok"
+    },
+    {
+      "label": "Pathway, paper Fig. 14",
+      "n": 65536,
+      "ratio": null,
+      "band": "1.6\u00d7 to 3.0\u00d7",
+      "lo": 1.6,
+      "hi": 3.0,
+      "spread": "reported as a range",
+      "peak": true,
+      "note": "not reproduced here",
+      "tag": "tag-ok"
+    }
+  ],
+  "note": "Layer 2, xy product tensor. Ours are measured on models trained here; the paper's is read off Figure 14 of arXiv:2509.26507 and is not reproduced."
+}
