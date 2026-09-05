@@ -312,6 +312,16 @@ footer a{color:var(--muted)}
             shows nothing. Go and look.</p>
         </div>
         <div class="ctl">
+          <label for="sizeSeg">Compare a bigger model</label>
+          <div class="seg" id="sizeSeg">
+            <button data-n="2048" aria-pressed="true">2k live</button>
+            <button data-n="8192" aria-pressed="false">8k</button>
+            <button data-n="16384" aria-pressed="false">16k</button>
+          </div>
+          <p class="hint">Only the 2k model can run in a browser. The larger ones are drawn
+            from their real measured curves, 1,280 sequences each, and say so.</p>
+        </div>
+        <div class="ctl">
           <label for="surprise">Break it</label>
           <button class="btn" id="surprise">Inject a surprise</button>
           <p class="hint">Swaps one letter deep in the repetition. If the line does not jump, the
@@ -469,7 +479,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "8";
+const BUILD = "9";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
@@ -479,6 +489,7 @@ const LETTERS = "abcdefghijklmnopqrstuvwxyz";
 
 let ref = null, warmup = null, layer = 2, cur = null, surprise = null;
 let clean = null, curSurprise = null, reqSurprise = null;
+let overlays = {}, overlayN = null;      // measured curves for models too big to run here
 let worker = null, reqId = 0;
 
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -623,6 +634,17 @@ function drawTrace(series) {
     s += `<text x="${X(surprise) + 6}" y="${mt + 14}" font-family="IBM Plex Mono,monospace"
            font-size="11" fill="${ink}">surprise</text>`;
   }
+  // A measured curve from a larger model, drawn on the same axes. Dashed and labelled,
+  // because it is not running here and must never be mistaken for the live line.
+  if (overlayN && overlays[overlayN] && overlays[overlayN].layers[layer]) {
+    const o = overlays[overlayN].layers[layer];
+    const op = o.slice(0, T).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+    s += `<polyline points="${op}" fill="none" stroke="${css("--pass")}" stroke-width="2"
+           stroke-dasharray="6 4" opacity=".95"/>`;
+    s += `<text x="${W - mr}" y="${mt + 14}" text-anchor="end" font-family="IBM Plex Mono,monospace"
+           font-size="11" fill="${css("--pass")}">n=${overlayN}, measured, not live</text>`;
+  }
+
   const marker = +$("#pos").value;
   s += `<line x1="${X(marker)}" y1="${mt}" x2="${X(marker)}" y2="${mt + ih}" stroke="${fire}" stroke-width="1" opacity=".55"/>`;
   s += `<circle cx="${X(marker)}" cy="${Y(series[marker])}" r="4.5" fill="${fire}"/>`;
@@ -888,6 +910,18 @@ function initTour() {
     render();
     run();          // the attention matrix is captured for one layer at a time
   });
+  $("#sizeSeg").addEventListener("click", async e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const n = +b.dataset.n;
+    [...$("#sizeSeg").children].forEach(c => c.setAttribute("aria-pressed", c === b));
+    overlayN = n === 2048 ? null : n;
+    if (overlayN && !overlays[overlayN]) {
+      try { overlays[overlayN] = await fetch(`data/traces/n${overlayN}.json`).then(r => r.json()); }
+      catch { overlays[overlayN] = null; b.textContent += " (n/a)"; }
+    }
+    render();
+  });
+
   $("#surprise").addEventListener("click", () => {
     surprise = surprise === null ? WARM + WORD * 4 + 3 : null;
     $("#surprise").textContent = surprise === null ? "Inject a surprise" : "Remove the surprise";

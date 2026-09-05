@@ -38,6 +38,9 @@ ap.add_argument("--repeats", type=int, default=1,
 ap.add_argument("--csv", default="results/scaling_results.csv")
 ap.add_argument("--append", action="store_true", help="append measured rows to --csv")
 ap.add_argument("--out", default="results/measured.csv")
+ap.add_argument("--export-trace", default=None,
+                help="also write the per-letter sparsity curve to this JSON path, so the "
+                     "explainer can overlay models too big to run in a browser")
 a = ap.parse_args()
 
 # --- protocol, identical to sparsity_scan.py -------------------------------
@@ -102,6 +105,7 @@ def one_pass(eval_seed):
             xb, _ = make_batch()
             fwd(model, xb, acts)
     out = {}
+    curves = {}
     for lev in sorted(acts):
         for key in ("x", "y", "xy"):
             v = torch.stack([d[key] for d in acts[lev]]).mean(0)[:PERIOD * NPER] \
@@ -109,9 +113,24 @@ def one_pass(eval_seed):
             out[(lev, key)] = (v[:WARM].mean().item(),
                                v[WARM:WARM + WORD].mean().item(),
                                v[WARM + WORD:].mean().item())
-    return fe, rp, out
+            if key == "xy":
+                curves[lev] = v.tolist()
+    return fe, rp, out, curves
 
 passes = [one_pass(a.eval_seed + i) for i in range(a.repeats)]
+if a.export_trace:
+    import json
+    # The per-letter curve, averaged over the same pinned samples the ratios come from.
+    # The explainer overlays these so a reader can see models that are far too big to
+    # run in a browser, clearly labelled as measured rather than live.
+    layers = sorted(passes[0][3])
+    json.dump({"n": n_neurons, "params": nparams, "period": PERIOD,
+               "warm": WARM, "word": WORD,
+               "eval_sequences": a.repeats * EVAL_BATCHES * B,
+               "layers": {str(l): [round(sum(p[3][l][i] for p in passes) / len(passes), 6)
+                                   for i in range(PERIOD)] for l in layers}},
+              open(a.export_trace, "w"))
+    print(f"wrote per-letter curves to {a.export_trace}")
 first_expo = sum(p[0] for p in passes) / len(passes)
 repeats_loss = sum(p[1] for p in passes) / len(passes)
 learned = bool(repeats_loss < 0.5 * first_expo and repeats_loss < 1.5)
