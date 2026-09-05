@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quiet Neurons — when a model stops paying attention</title>
-<meta name="description" content="A 397,000-parameter Dragon Hatchling model runs in your browser. Watch its neurons go quiet as the input becomes predictable, then try to break the claim.">
+<meta name="description" content="A 397,000-parameter Dragon Hatchling runs in your browser. It quietens on text it just learned, but not on text baked into its weights. Both are perfectly predictable. Come and break the claim.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
@@ -83,6 +83,9 @@ h3{font-family:var(--f-disp);font-weight:600;font-size:18px;margin:28px 0 6px}
 .rig-body{padding:20px}
 
 .readout{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}
+#counter{margin:0 0 18px;padding:16px 18px;border:1px solid var(--line);border-left:4px solid var(--pass);
+         border-radius:3px;background:var(--surface-2)}
+#counter .bo-lab{color:var(--pass)}
 #breakout{margin:0 0 18px;padding:16px 18px;border:1px solid var(--fire-line);border-radius:3px;
           background:var(--fire-soft)}
 #breakout[hidden]{display:none}
@@ -142,6 +145,12 @@ tr.peak td{background:var(--fire-soft)} tr.peak td.n{color:var(--fire);font-weig
 .b-mem{flex:8;background:var(--fire-soft);color:var(--fire)}
 .b-rep{flex:56;background:var(--pass-soft);color:var(--pass)}
 
+.cardrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:18px 20px;
+      box-shadow:var(--shadow)}
+.card h4{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+         color:var(--fire);margin:0 0 9px}
+.card p{margin:0;font-size:14px;color:var(--ink-2);max-width:none}
 .notclaim{margin-top:18px;border:1px dashed var(--line);border-radius:3px;padding:18px 22px}
 .notclaim h4{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
              color:var(--dead);margin:0 0 12px}
@@ -166,15 +175,40 @@ footer a{color:var(--muted)}
   </div>
   <h1>Quiet Neurons</h1>
   <p class="standfirst">A 397,000-parameter Dragon Hatchling is running in this page, on your
-    machine, right now. Nothing is precomputed unless it says so. Watch it stop paying
-    attention.</p>
+    machine, right now. Not a simulation of one. Watch it stop paying attention, then find the
+    place where it refuses to.</p>
 
   <div class="claim">
     <div class="lab">The claim, and you can break it below</div>
-    <q>A trained BDH does not use a fixed share of its neurons. When the text becomes
-      predictable, layer 2 quietens by about a third. Feed it a surprise and it wakes back up.</q>
+    <q>A trained BDH quietens down when it has just learned something from the text in front of
+      it. Not when the text is merely predictable. Those two look identical from the outside,
+      and they are not.</q>
   </div>
 </header>
+
+<section id="who">
+  <h2><span class="num">00 / WHO THIS IS FOR</span>Before you start</h2>
+  <div class="cardrow">
+    <div class="card">
+      <h4>Audience</h4>
+      <p>Anyone who has met a neural network once. Undergraduates, engineers new to
+        post-Transformer architectures, and researchers who would rather have the BDH sparsity
+        result checked than described.</p>
+    </div>
+    <div class="card">
+      <h4>Prerequisites</h4>
+      <p>That a model turns text into numbers and predicts what comes next. Nothing about
+        attention, state space models or Hebbian learning is assumed. Terms are defined where
+        they first appear.</p>
+    </div>
+    <div class="card">
+      <h4>Ten minutes from now you can</h4>
+      <p>Say what a sparse non-negative activation is; explain why a BDH quietens on text it
+        just learned but not on text baked into its weights; name the two layers where the
+        effect is absent; and reproduce all of it with two commands.</p>
+    </div>
+  </div>
+</section>
 
 <section id="rig">
   <h2><span class="num">01 / THE INSTRUMENT</span>Watch it go quiet</h2>
@@ -193,6 +227,23 @@ footer a{color:var(--muted)}
         <div class="stat"><div class="k">Repeating it</div><div class="v cool" id="statRep">—</div></div>
         <div class="stat"><div class="k">Neurons switched off</div><div class="v" id="statDrop">—</div></div>
         <div class="stat"><div class="k">Layer</div><div class="v flat" id="statLayer">2</div></div>
+      </div>
+
+      <div id="counter">
+        <div class="bo-lab">The counterexample &middot; live, from the run below</div>
+        <div class="bo-row">
+          <div class="stat">
+            <div class="k">Warm-up letter <span id="cxA">—</span> &middot; surprise</div>
+            <div class="v flat" id="cxAs">—</div>
+          </div>
+          <div class="stat"><div class="k">neurons firing</div><div class="v hot" id="cxAn">—</div></div>
+          <div class="stat">
+            <div class="k">Repeat letter <span id="cxB">—</span> &middot; surprise</div>
+            <div class="v flat" id="cxBs">—</div>
+          </div>
+          <div class="stat"><div class="k">neurons firing</div><div class="v cool" id="cxBn">—</div></div>
+        </div>
+        <p class="bo-note" id="cxNote"></p>
       </div>
 
       <div id="breakout" hidden>
@@ -473,6 +524,32 @@ function render() {
   $("#sMem").textContent = (st.mem * 100).toFixed(1) + "%";
   $("#sRep").textContent = (st.rep * 100).toFixed(1) + "%";
   drawTrace(series);
+
+  // The counterexample, recomputed from whatever the model just did. Within the
+  // fixed warm-up the model is already perfect (it memorised those letters in its
+  // WEIGHTS during training) yet stays busy. Within the repeats it is equally
+  // perfect (it learned that word from the CONTEXT, seconds ago) and goes quiet.
+  // Same predictability, very different activity. That is the whole point.
+  if (cur.surprise) {
+    const sp = cur.surprise;
+    let a = 1, b = WARM + WORD + 2;
+    for (let i = 1; i < WARM; i++) if (sp[i] < sp[a]) a = i;
+    for (let i = WARM + WORD + 2; i < PERIOD - 1; i++) if (sp[i] < sp[b]) b = i;
+    const nats = v => v.toFixed(3);
+    $("#cxA").textContent = a; $("#cxB").textContent = b;
+    $("#cxAs").textContent = nats(sp[a]); $("#cxBs").textContent = nats(sp[b]);
+    $("#cxAn").textContent = (series[a] * 100).toFixed(2) + "%";
+    $("#cxBn").textContent = (series[b] * 100).toFixed(2) + "%";
+    const factor = series[b] > 0 ? series[a] / series[b] : NaN;
+    $("#cxNote").innerHTML = series[a] > series[b] * 1.3
+      ? `Both letters are predicted almost perfectly, surprise near zero either way. Layer
+         ${layer} still uses <strong>${factor.toFixed(1)}&times; more neurons</strong> on the
+         warm-up. The warm-up lives in the model's trained weights; the repeated word was
+         learned from the text a moment ago. Being predictable is not what quietens it.
+         Having just learned it is.`
+      : `On this run layer ${layer} does not show the gap (${factor.toFixed(1)}&times;).
+         The effect lives in layers 1 and 2; try those.`;
+  }
 
   // The falsification readout. A phase average over 56 letters cannot show a jump
   // that lasts two letters, which is why this gets its own panel.

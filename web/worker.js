@@ -35,18 +35,22 @@ async function drain() {
         x: Array.from(s.x), y: Array.from(s.y), xy: Array.from(s.xy),
       })),
       nNeurons: m.m.n_neurons,
-      // top prediction at each position, so the page can show whether the model
-      // is actually predicting the repeated word correctly
-      argmax: (() => {
-        const V = m.m.vocab_size, out = new Array(T);
-        for (let t = 0; t < T; t++) {
-          let best = 0, bv = -Infinity;
-          for (let v = 0; v < V; v++) {
-            const val = logits[t * V + v];
-            if (val > bv) { bv = val; best = v; }
-          }
-          out[t] = best;
+      // Per-letter surprise: the cross-entropy of the true next letter, in nats.
+      // The page needs this to show that surprise and sparsity are NOT the same
+      // signal. The fixed warm-up is predicted perfectly and still keeps neurons
+      // busy; only context-learned text goes quiet.
+      surprise: (() => {
+        const V = m.m.vocab_size, out = new Array(T).fill(0);
+        for (let t = 0; t < T - 1; t++) {
+          const o = t * V;
+          let mx = -Infinity;
+          for (let v = 0; v < V; v++) if (logits[o + v] > mx) mx = logits[o + v];
+          let sum = 0;
+          for (let v = 0; v < V; v++) sum += Math.exp(logits[o + v] - mx);
+          const target = job.tokens[t + 1];
+          out[t] = -(logits[o + target] - mx - Math.log(sum));   // nats
         }
+        out[T - 1] = NaN;                                        // no next letter to predict
         return out;
       })(),
     });
