@@ -511,7 +511,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "11";
+const BUILD = "12";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
@@ -712,7 +712,7 @@ function render() {
   $("#sMem").textContent = (st.mem * 100).toFixed(1) + "%";
   $("#sRep").textContent = (st.rep * 100).toFixed(1) + "%";
   drawTrace(series);
-  if (cur.scores) { drawGram(cur.scores, cur.T); $("#gramLayer").textContent = layer; }
+  if (cur.scores && cur.scores[layer]) { drawGram(cur.scores[layer], cur.T); $("#gramLayer").textContent = layer; }
 
   // The counterexample, recomputed from whatever the model just did. Within the
   // fixed warm-up the model is already perfect (it memorised those letters in its
@@ -802,7 +802,7 @@ function run() {
   const id = ++reqId;
   reqSurprise = surprise;
   worker.postMessage({ id, tokens: tokensFor($("#word").value || "fact", surprise),
-                       wantScores: layer });
+                       wantScores: true });
 }
 
 /* ---------- scaling section ---------- */
@@ -939,8 +939,8 @@ function initTour() {
     const b = e.target.closest("button"); if (!b) return;
     layer = +b.dataset.l;
     [...$("#layerSeg").children].forEach(c => c.setAttribute("aria-pressed", c === b));
-    render();
-    run();          // the attention matrix is captured for one layer at a time
+    render();       // every layer's attention matrix came back with the last run,
+                    // so switching layers is instant and costs no recompute
   });
   $("#sizeSeg").addEventListener("click", async e => {
     const b = e.target.closest("button"); if (!b) return;

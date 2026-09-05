@@ -26,7 +26,7 @@ async function drain() {
   try {
     const m = await ensure();
     const t0 = performance.now();
-    const { logits, sparsity, scores, T } = m.forward(job.tokens, null, job.wantScores ?? null);
+    const { logits, sparsity, scores, T } = m.forward(job.tokens, null, job.wantScores === true);
     const ms = performance.now() - t0;
     // Float32Arrays transfer by copy through structuredClone; convert the small
     // per-position series to plain arrays and drop the large logits tensor, which
@@ -40,7 +40,7 @@ async function drain() {
         x: Array.from(s.x), y: Array.from(s.y), xy: Array.from(s.xy),
       })),
       nNeurons: m.m.n_neurons,
-      scores: scores ? Array.from(scores) : null,
+      scores: scores ? scores.map(a => Array.from(a)) : null,
       // Per-letter surprise: the cross-entropy of the true next letter, in nats.
       // The page needs this to show that surprise and sparsity are NOT the same
       // signal. The fixed warm-up is predicted perfectly and still keeps neurons
