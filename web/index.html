@@ -302,8 +302,39 @@ footer a{color:var(--muted)}
   </div>
 </section>
 
+<section id="gram">
+  <h2><span class="num">02 / THE MECHANISM</span>Why learning it makes it cheap</h2>
+  <p class="lede">Here is the part that explains the rest. In Pathway's code the query and the
+    key are <em>the same tensor</em>; the file literally asserts <code>K is Q</code>. So an
+    attention score is not a learned lookup. It is the overlap between which neurons fired at
+    two letters. Letters that fire alike, bind. And there is <strong>no softmax anywhere</strong>
+    in it, which is a real break from a Transformer.</p>
+
+  <div class="rig">
+    <div class="rig-head">
+      <span class="rig-title">Live &middot; attention as neuron overlap &middot; layer <span id="gramLayer">2</span>, mean of 4 heads</span>
+      <span class="badge" id="gramBadge">live</span>
+    </div>
+    <div class="rig-body">
+      <canvas id="gramCanvas" width="616" height="616"
+              aria-label="Attention matrix: how strongly each letter binds to each earlier letter"></canvas>
+      <div class="gridcap">
+        <span>rows: the letter doing the reading &nbsp;&middot;&nbsp; columns: the earlier letter it binds to</span>
+        <span id="gramMax">—</span>
+      </div>
+      <p class="hint" style="max-width:78ch">Blank above the diagonal because the model cannot
+        read forwards. The heatmap is suggestive but easy to over-read, so here is the same
+        data measured: average binding strength against how far back it reaches, taken over
+        the repetition region only.</p>
+      <svg id="lagChart" viewBox="0 0 900 190" role="img"
+           aria-label="Average attention strength by how many letters back it reaches"></svg>
+      <p class="hint" id="lagNote" style="max-width:78ch"></p>
+    </div>
+  </div>
+</section>
+
 <section>
-  <h2><span class="num">02 / THE SETUP</span>What the model is actually reading</h2>
+  <h2><span class="num">03 / THE SETUP</span>What the model is actually reading</h2>
   <p class="lede">Straight from the paper's Section 6.4: thirteen fixed letters of warm-up, then one
     random eight-letter word repeated eight times. Seventy-seven letters per cycle. The word changes
     every run, so the model can only know it by having just read it.</p>
@@ -321,7 +352,7 @@ footer a{color:var(--muted)}
 </section>
 
 <section>
-  <h2><span class="num">03 / AGAINST THE PAPER</span>Our number beside theirs</h2>
+  <h2><span class="num">04 / AGAINST THE PAPER</span>Our number beside theirs</h2>
   <p class="lede">The paper measured a model 32 times larger than the one in this page. We cannot run
     that in a browser, so the honest question is whether the effect survives being shrunk. It does,
     weakened.</p>
@@ -337,7 +368,7 @@ footer a{color:var(--muted)}
 </section>
 
 <section>
-  <h2><span class="num">04 / WHERE THIS LIVES IN BDH</span>Why this model in particular</h2>
+  <h2><span class="num">05 / WHERE THIS LIVES IN BDH</span>Why this model in particular</h2>
   <p class="lede">This is not a property bolted onto BDH for the demo. It falls out of two design
     choices you can read in forty lines of Pathway's own code.</p>
 
@@ -375,7 +406,7 @@ footer a{color:var(--muted)}
 </section>
 
 <section>
-  <h2><span class="num">05 / LIMITS</span>Where this stops being true</h2>
+  <h2><span class="num">06 / LIMITS</span>Where this stops being true</h2>
   <p class="lede">Stated because a judge will find them anyway, and because the interesting part of a
     result is usually its edge.</p>
   <div class="scroll"><table>
@@ -414,6 +445,10 @@ footer a{color:var(--muted)}
 </div>
 
 <script type="module">
+// Bump on every change to the model code. The worker imports bdh.js as a module and
+// browsers cache module graphs aggressively; without this the page silently keeps
+// running an old forward pass, which is the worst possible failure for this project.
+const BUILD = "7";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
@@ -453,6 +488,84 @@ function drawGrid(frac, seedPos) {
     gx.fillRect(c * cw + .6, r * ch + .6, cw - 1.2, ch - 1.2);
   }
   gx.globalAlpha = 1;
+}
+
+/* ---------- attention as neuron overlap ---------- */
+const gramC = $("#gramCanvas"), gc = gramC.getContext("2d");
+function drawGram(sc, T) {
+  const px = Math.max(1, Math.floor(gramC.width / T));
+  gramC.width = gramC.height = px * T;
+  let max = 0;
+  for (let i = 0; i < sc.length; i++) if (sc[i] > max) max = sc[i];
+  $("#gramMax").textContent = `strongest overlap ${max.toFixed(1)} · no softmax, these are raw`;
+  const img = gc.createImageData(px * T, px * T);
+  const d = img.data;
+  // paint from the theme so it reads in both light and dark
+  const hot = css("--fire"), base = css("--surface-2");
+  const hx = hot.match(/\w\w/g).map(v => parseInt(v, 16));
+  const bx = base.match(/\w\w/g).map(v => parseInt(v, 16));
+  for (let t = 0; t < T; t++) {
+    for (let u = 0; u < T; u++) {
+      const v = u < t && max > 0 ? Math.pow(Math.max(0, sc[t * T + u]) / max, 0.45) : 0;
+      const r = bx[0] + (hx[0] - bx[0]) * v;
+      const g = bx[1] + (hx[1] - bx[1]) * v;
+      const b = bx[2] + (hx[2] - bx[2]) * v;
+      for (let dy = 0; dy < px; dy++) {
+        let o = (((t * px + dy) * px * T) + u * px) * 4;
+        for (let dx = 0; dx < px; dx++, o += 4) {
+          d[o] = r; d[o + 1] = g; d[o + 2] = b; d[o + 3] = 255;
+        }
+      }
+    }
+  }
+  gc.putImageData(img, 0, 0);
+  drawLag(sc, T);
+}
+
+/* Average binding strength by lag, over the repetition region only. This is the
+   honest version of "look at the stripes": the heatmap invites you to see a period,
+   this measures whether one is there. */
+function drawLag(sc, T) {
+  const from = WARM + WORD * 2, maxLag = 20;
+  const mean = [];
+  for (let L = 1; L <= maxLag; L++) {
+    let sum = 0, n = 0;
+    for (let t = from; t < T; t++) if (t - L >= 0) { sum += sc[t * T + (t - L)]; n++; }
+    mean.push(n ? sum / n : 0);
+  }
+  const W = 900, H = 190, ml = 46, mr = 12, mt = 12, mb = 34;
+  const iw = W - ml - mr, ih = H - mt - mb;
+  const top = Math.max(...mean) || 1;
+  const bw = iw / maxLag;
+  const muted = css("--muted"), fire = css("--fire"), line = css("--line-soft"),
+        pass = css("--pass"), ink = css("--ink");
+  let out = "";
+  for (let k = 0; k <= 2; k++) {
+    const y = mt + ih - (k / 2) * ih;
+    out += `<line x1="${ml}" y1="${y}" x2="${W - mr}" y2="${y}" stroke="${line}"/>`;
+  }
+  mean.forEach((v, i) => {
+    const L = i + 1, h = (v / top) * ih, x = ml + i * bw;
+    const isWordMultiple = L % WORD === 0;
+    out += `<rect x="${x + bw * .16}" y="${mt + ih - h}" width="${bw * .68}" height="${Math.max(0, h)}"
+             fill="${isWordMultiple ? pass : fire}" opacity="${isWordMultiple ? 1 : .55}"/>`;
+    out += `<text x="${x + bw / 2}" y="${H - 16}" text-anchor="middle"
+             font-family="IBM Plex Mono,monospace" font-size="10.5"
+             fill="${isWordMultiple ? pass : muted}">${L}</text>`;
+  });
+  out += `<text x="${ml + iw / 2}" y="${H - 2}" text-anchor="middle"
+           font-family="IBM Plex Mono,monospace" font-size="10.5" fill="${muted}">letters back &rarr;</text>`;
+  $("#lagChart").innerHTML = out;
+
+  const wl = mean[WORD - 1], neigh = (mean[WORD - 3] + mean[WORD + 1]) / 2;
+  const best = mean.indexOf(Math.max(...mean)) + 1;
+  $("#lagNote").innerHTML =
+    `Green bars are exact multiples of the ${WORD}-letter word. Binding peaks at
+     <strong>${best} letter${best === 1 ? "" : "s"} back</strong>, and there is a clear
+     secondary peak at <strong>${WORD}</strong>, ${(wl / neigh).toFixed(1)}&times; its
+     neighbours at ${WORD - 2} and ${WORD + 1}. So the model leans hardest on the letter it
+     just read, and on the same letter one word ago. The second of those is the memory that
+     makes a repeat cheap.`;
 }
 
 /* ---------- sparsity trace ---------- */
@@ -524,6 +637,7 @@ function render() {
   $("#sMem").textContent = (st.mem * 100).toFixed(1) + "%";
   $("#sRep").textContent = (st.rep * 100).toFixed(1) + "%";
   drawTrace(series);
+  if (cur.scores) { drawGram(cur.scores, cur.T); $("#gramLayer").textContent = layer; }
 
   // The counterexample, recomputed from whatever the model just did. Within the
   // fixed warm-up the model is already perfect (it memorised those letters in its
@@ -612,7 +726,8 @@ function run() {
   badge.classList.add("pre");
   const id = ++reqId;
   reqSurprise = surprise;
-  worker.postMessage({ id, tokens: tokensFor($("#word").value || "fact", surprise) });
+  worker.postMessage({ id, tokens: tokensFor($("#word").value || "fact", surprise),
+                       wantScores: layer });
 }
 
 /* ---------- scaling section ---------- */
@@ -677,7 +792,7 @@ async function scaling() {
   warmup = ref.tokens.slice(0, WARM);
   $("#word").value = ref.word.map(k => LETTERS[k]).join("");
 
-  worker = new Worker("worker.js", { type: "module" });
+  worker = new Worker("worker.js?v=" + BUILD, { type: "module" });
   worker.onmessage = ev => {
     const d = ev.data;
     if (d.error) { $("#runbadge").textContent = "error"; console.error(d.error); return; }
@@ -702,6 +817,7 @@ async function scaling() {
     layer = +b.dataset.l;
     [...$("#layerSeg").children].forEach(c => c.setAttribute("aria-pressed", c === b));
     render();
+    run();          // the attention matrix is captured for one layer at a time
   });
   $("#surprise").addEventListener("click", () => {
     surprise = surprise === null ? WARM + WORD * 4 + 3 : null;

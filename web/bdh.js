@@ -63,7 +63,10 @@ export class BDH {
 
   /* Returns {logits, sparsity} where sparsity[layer] = {x,y,xy} arrays of
      length T giving the fraction of neurons active at each position. */
-  forward(tokens, profile = null) {
+  /* wantScores: layer index whose attention matrix to keep, or null. The matrix is
+     the raw Gram matrix of neuron activations, averaged over heads, causally masked.
+     There is no softmax in BDH attention, so these are unnormalised overlaps. */
+  forward(tokens, profile = null, wantScores = null) {
     const P = profile ? (k, t0) => { profile[k] = (profile[k] || 0) + performance.now() - t0; } : null;
     const { D, N, n_head: nh, n_layer: L, vocab_size: V } = this.m;
     if (D % 4 !== 0) throw new Error("the unrolled loops below assume D is a multiple of 4");
@@ -88,6 +91,7 @@ export class BDH {
     const ykv = new Float32Array(nh * T * D);
     const ymlp = new Float32Array(T * D);
     const sparsity = [];
+    let scores = null;
 
     for (let l = 0; l < L; l++) {
       // x_sparse = relu(x @ self.encoder)
@@ -142,6 +146,7 @@ export class BDH {
 
       if (P) { P('nzscan', _t); _t = performance.now(); }
       // scores = (QR @ KR.mT).tril(diagonal=-1) ; yKV = scores @ V, V = x
+      const keep = (wantScores === l) ? new Float32Array(T * T) : null;
       ykv.fill(0);
       for (let h = 0; h < nh; h++) {
         const qb = h * T * N, kb = h * T * D, lb = h * T;
@@ -155,12 +160,14 @@ export class BDH {
               const n = nzIdx[qo + k];
               dot += qr[qo + n] * qr[so + n];
             }
+            if (keep) keep[t * T + s] += dot / nh;   // mean over heads, for display
             if (dot === 0) continue;
             const xo = s * D;
             for (let d = 0; d < D; d++) ykv[yo + d] += dot * x[xo + d];
           }
         }
       }
+      if (keep) scores = keep;
       if (P) { P('scores', _t); _t = performance.now(); }
       layerNorm(ykv, nh * T, D);                // yKV = self.ln(yKV)
 
@@ -234,7 +241,7 @@ export class BDH {
         for (let v = 0; v < V; v++) logits[lo + v] += xv * lm_head[wo + v];
       }
     }
-    return { logits, sparsity, T };
+    return { logits, sparsity, scores, T };
   }
 }
 
