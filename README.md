@@ -5,7 +5,7 @@ learned, but not on text baked into its weights. Both are perfectly predictable.
 
 DataForge 2026, Pathway Track. Approved topic: **Sparse Non-Negative Activations**.
 
-- **Live artifact:** _(published URL goes here)_
+- **Live artifact:** https://nilaymastaadmi.github.io/quiet-neurons/
 - **Reproduce every number:** two commands, see [Reproducing the results](#reproducing-the-results)
 - **Check the browser model against PyTorch:** open `web/parity.html`
 
@@ -19,7 +19,7 @@ DataForge 2026, Pathway Track. Approved topic: **Sparse Non-Negative Activations
 
 This starts from the Dragon Hatchling paper's Section 6.4 and Figure 14, which reports that
 BDH's neuron activity "varies with predictability rather than following a fixed sparsity
-budget". We reproduced that at two model sizes, then found the framing is too loose, and the
+budget". We reproduced that at three model sizes, then found the framing is too loose, and the
 artifact teaches the corrected version.
 
 **The counterexample, measured at n=8192 over 256 sequences:**
@@ -73,7 +73,7 @@ The rubric asks for this explicitly, so it is near the top rather than buried.
 | Neuron grid, sparsity trace, counterexample panel, surprise test | **Live.** All recomputed from that forward pass. |
 | Attention heatmap and binding-by-lag chart | **Live**, from the same run. |
 | Which individual dot lights up in the neuron grid | **Illustrative.** The *count* is real and stated; the scatter is a deterministic layout, because which particular neuron fires is not what the claim is about. The page says so in its caption. |
-| Scaling chart points at n=2048 and n=8192 | **Precomputed** by `experiments/measure.py`, shipped as `web/data/scaling.json`. |
+| Scaling chart points, and the larger-model curves the size switcher overlays | **Precomputed** by `experiments/measure.py`, shipped as `web/data/scaling.json` and `web/data/traces/`. Only n=2048 runs live; n=8192 and n=16384 are 8x and 16x the compute and cannot, and the page labels their curves "measured, not live". |
 | The paper's band at n=65536 | **Not reproduced by us.** Read off Figure 14 of arXiv:2509.26507 and drawn as a band, because that is how it is reported. |
 | Training data | **Synthetic**, exactly the paper's §6.4 protocol. No natural language, deliberately. |
 
@@ -92,7 +92,7 @@ experiments/                     PyTorch: train, measure, export
                                  number quoted anywhere in this project.
   export_weights.py              dumps weights + a PyTorch reference trace for the browser
   make_scaling.py                builds web/data/scaling.json from measured.csv
-  checkpoints/                   trained weights (n=2048, n=8192)
+  checkpoints/                   trained weights (n=2048, n=8192, n=16384)
   results/                       raw run logs and measured.csv
 
 web/
@@ -152,15 +152,27 @@ this experiment was undertrained and would have produced a clean-looking false n
 Layer 2, `xy` product tensor, memorisation over repetition. Each row is 1,280 sequences
 across 5 independent pinned samples.
 
-| n | params | MEM | REP | ratio | spread over 5 samples |
-|---|---|---|---|---|---|
-| 2,048 | 397,312 | 0.0824 | 0.0576 | **1.4318x** | 1.4299 – 1.4334 |
-| 8,192 | 3,153,920 | 0.0718 | 0.0364 | **1.9731x** | 1.9695 – 1.9798 |
-| 65,536 | Pathway's | 4.0–7.5% | ~2.5% | 1.6–3.0x | reported as a range, not reproduced here |
+| n | params | steps | MEM | REP | ratio | spread over 5 samples |
+|---|---|---|---|---|---|---|
+| 2,048 | 397,312 | 1,854 | 0.0824 | 0.0576 | **1.4318x** | 1.4299 – 1.4334 |
+| 8,192 | 3,153,920 | 1,917 | 0.0718 | 0.0364 | **1.9731x** | 1.9695 – 1.9798 |
+| 16,384 | 6,299,648 | 2,309 | 0.0820 | 0.0438 | **1.8742x** | 1.8699 – 1.8782 |
+| 65,536 | Pathway's | — | 4.0–7.5% | ~2.5% | 1.6–3.0x | reported as a range, not reproduced here |
 
-The effect strengthens with size and is already inside the paper's reported band at n=8192,
-which is one eighth of the paper's model. The spread is about ±0.005, so the gap between our
-two points is roughly a hundred times the sampling noise.
+**The scaling is not monotonic, and we published the opposite before the third model
+finished.** n=16384 comes in at 1.87, *below* n=8192's 1.97, and that 0.10 gap is roughly
+twenty times the sampling spread, so it is not noise.
+
+A confound we cannot rule out: all three models share one 4,000-step OneCycle schedule but
+were each stopped by a wall-clock budget on a laptop CPU, at 1,854, 1,917 and 2,309 steps.
+They finished at different points on that schedule. Final losses are close (0.176, 0.175,
+0.172), so they are comparably trained on the task, but that is not a controlled comparison.
+
+The defensible statement is therefore narrower than the one we started with: **the effect is
+far stronger at 8k and 16k than at 2k, and both land inside the range the paper reports for
+a model four to eight times larger again. Whether it grows monotonically, we do not know.**
+Settling it needs three models trained for an identical number of steps, about thirteen hours
+of CPU that did not fit before the deadline.
 
 **A note on why `measure.py` exists.** `sparsity_scan.py` draws its evaluation words *after*
 training has consumed the random number stream, so its sample depends on the entire training
@@ -176,7 +188,8 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 |---|---|
 | Layer 0 runs **backwards** | ratio 0.82 at n=2048, 0.79 at n=8192 |
 | Layer 3 shows **nothing** | 0.91 and 0.96, flat |
-| Our models are 1/32 and 1/8 of the paper's | effect is real but weaker; see the scaling table |
+| Scaling is **not** monotonic | 1.43 → 1.97 → 1.87 at n = 2k, 8k, 16k. We expected monotone growth and said so publicly until the third model landed |
+| The three models are not step-matched | 1,854 / 1,917 / 2,309 steps of one 4,000-step schedule, each cut by wall clock |
 | A single sequence is noisy | one sequence gave 1.93 where 1,280 give 1.43 |
 | Surprise and sparsity do **not** track per letter | layer 2 gives Pearson 0.35 but Spearman −0.05. Inside the first-exposure block surprise is flat at 3.27 while sparsity falls 12.9% → 6.3%. The relationship is between phases, not letters. This killed a stronger claim we wanted to make. |
 | Toy model, not an official BDH checkpoint | architecture is Pathway's and unmodified; the weights are ours |

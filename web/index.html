@@ -171,6 +171,15 @@ tr.peak td{background:var(--fire-soft)} tr.peak td.n{color:var(--fire);font-weig
 footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);
        font-family:var(--f-mono);font-size:12px;color:var(--muted);line-height:1.75}
 footer a{color:var(--muted)}
+@media (max-width:600px){
+  /* The refused-claims list puts a nowrap label in an auto-width grid column. On a
+     phone a label like "Anything about BDH-CQ's internals" is wider than the screen
+     and pushes the whole document sideways, so stack it instead. */
+  .notclaim li{grid-template-columns:1fr;gap:4px}
+  .notclaim .k{white-space:normal}
+  .panel li{grid-template-columns:1fr;gap:3px}
+  .panel .k{white-space:normal}
+}
 @media (max-width:640px){.readout{gap:20px}.stat .v{font-size:23px}}
 </style>
 </head>
@@ -386,13 +395,34 @@ footer a{color:var(--muted)}
   <h2><span class="num">04 / AGAINST THE PAPER</span>Our number beside theirs</h2>
   <p class="lede">The paper measured a model 32 times larger than the one in this page. We cannot run
     that in a browser, so the honest question is whether the effect survives being shrunk. It does,
-    weakened.</p>
+    and it is much stronger at 8k than at 2k. <strong>It does not keep growing.</strong></p>
   <div class="scroll"><table id="scaleTable">
     <thead><tr><th>Model</th><th>Neurons</th><th>Layer 2 ratio</th><th>Spread over 5 samples</th><th></th></tr></thead>
     <tbody></tbody>
   </table></div>
   <svg id="scaleChart" viewBox="0 0 900 300" role="img"
        aria-label="Layer 2 sparsity ratio against neuron count"></svg>
+  <div class="notclaim" style="border-color:var(--dead)">
+    <h4>The result we did not want</h4>
+    <p style="margin:0;font-size:14.5px;color:var(--ink-2);max-width:74ch">
+      We expected the effect to keep strengthening with size, and said so on this page until the
+      third model finished training. It does not. <strong>n=16384 comes in at 1.87, below
+      n=8192's 1.97.</strong> That 0.10 gap is roughly twenty times the sampling spread, so it is
+      not noise.
+      <br><br>
+      There is a confound we cannot rule out. All three models share one 4,000-step schedule but
+      were each stopped by a wall-clock budget on a laptop CPU, at <strong>1,854</strong>,
+      <strong>1,917</strong> and <strong>2,309</strong> steps. They therefore finished at
+      different points on that schedule. Final losses are close (0.176, 0.175, 0.172), so they
+      are comparably trained on the task, but that is not the same as a controlled comparison.
+      <br><br>
+      So the defensible statement is narrower than the one we started with: the effect is far
+      stronger at 8k and 16k than at 2k, and both land inside the range the paper reports for a
+      model four to eight times larger again. Whether it grows monotonically, we do not know, and
+      settling it needs three models trained for an identical number of steps, which is about
+      thirteen hours of CPU we do not have before the deadline.
+    </p>
+  </div>
   <p class="hint" style="max-width:78ch">Each of our points is 1,280 sequences across 5 independent
     samples; the spread is smaller than the marker. The paper's band is read off Figure 14 and is
     plotted as a band, not a point, because that is how it is reported.</p>
@@ -447,8 +477,10 @@ footer a{color:var(--muted)}
           <td class="n">ratio 0.82 at n=2048, 0.79 at n=8192 <span class="tag tag-no">against us</span></td></tr>
       <tr><td>Layer 3 shows nothing</td>
           <td class="n">0.91 and 0.97, i.e. flat <span class="tag tag-no">against us</span></td></tr>
-      <tr><td>Our model is 1/32 the paper's size</td>
-          <td class="n">effect is real but weaker; see the curve above</td></tr>
+      <tr><td>Scaling is <em>not</em> monotonic</td>
+          <td class="n">1.43 → 1.97 → <strong>1.87</strong> at 2k, 8k, 16k <span class="tag tag-no">against us</span></td></tr>
+      <tr><td>The three models are not step-matched</td>
+          <td class="n">1,854 / 1,917 / 2,309 steps of one 4,000-step schedule, cut by wall clock</td></tr>
       <tr><td>A single sequence is noisy</td>
           <td class="n">one run gave 1.93 where 1,280 sequences give 1.43</td></tr>
       <tr><td>This is a toy trained here, not an official BDH checkpoint</td>
@@ -479,7 +511,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "9";
+const BUILD = "11";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of

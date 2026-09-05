@@ -21,6 +21,15 @@
       "tag": "tag-ok"
     },
     {
+      "label": "ours, 6,299,648 params",
+      "n": 16384,
+      "ratio": 1.8742,
+      "spread": "1.870 to 1.878",
+      "peak": false,
+      "note": "1280 sequences",
+      "tag": "tag-ok"
+    },
+    {
       "label": "Pathway, paper Fig. 14",
       "n": 65536,
       "ratio": null,
