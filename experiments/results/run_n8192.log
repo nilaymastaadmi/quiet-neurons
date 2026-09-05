@@ -1,0 +1,48 @@
+C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f629\scratchpad\bdhvenv\Lib\site-packages\torch\_subclasses\functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\utils\tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+n=8192 d=128 L=4 params=3,153,920 T=154 B=16 budget=10800s
+step    50 loss 3.0915 elapsed    371s
+step   100 loss 2.6777 elapsed    730s
+step   150 loss 2.3199 elapsed   1084s
+step   200 loss 1.1983 elapsed   1379s
+step   250 loss 0.8561 elapsed   1741s
+step   300 loss 0.7945 elapsed   2096s
+step   350 loss 0.7053 elapsed   2445s
+step   400 loss 0.6536 elapsed   2787s
+step   450 loss 0.5833 elapsed   3103s
+step   500 loss 0.4946 elapsed   3451s
+step   550 loss 0.4553 elapsed   3826s
+step   600 loss 0.4074 elapsed   4275s
+step   650 loss 0.3695 elapsed   4715s
+step   700 loss 0.3321 elapsed   5154s
+step   750 loss 0.3288 elapsed   5597s
+step   800 loss 0.2926 elapsed   6031s
+step   850 loss 0.2888 elapsed   6471s
+step   900 loss 0.3024 elapsed   6909s
+step   950 loss 0.2678 elapsed   7230s
+step  1000 loss 0.2428 elapsed   7417s
+step  1050 loss 0.2450 elapsed   7607s
+step  1100 loss 0.2170 elapsed   7797s
+step  1150 loss 0.1922 elapsed   7984s
+step  1200 loss 0.1884 elapsed   8174s
+step  1250 loss 0.1829 elapsed   8362s
+step  1300 loss 0.1813 elapsed   8551s
+step  1350 loss 0.1790 elapsed   8736s
+step  1400 loss 0.1767 elapsed   8917s
+step  1450 loss 0.1791 elapsed   9099s
+step  1500 loss 0.1781 elapsed   9281s
+step  1550 loss 0.1776 elapsed   9463s
+step  1600 loss 0.1784 elapsed   9645s
+step  1650 loss 0.1812 elapsed   9827s
+step  1700 loss 0.1804 elapsed  10010s
+step  1750 loss 0.1759 elapsed  10192s
+step  1800 loss 0.1776 elapsed  10374s
+step  1850 loss 0.1738 elapsed  10557s
+step  1900 loss 0.1763 elapsed  10738s
+TRAINED n=8192 steps=1917 final_loss=0.1753
+PRECONDITION first_exposure_loss=2.8752 repetition_loss=0.0047 TASK_LEARNED=True
+  layer 0 xy: MEM 0.2279 REP 0.2882 ratio 0.79
+  layer 1 xy: MEM 0.0841 REP 0.0566 ratio 1.48
+  layer 2 xy: MEM 0.0719 REP 0.0362 ratio 1.98
+  layer 3 xy: MEM 0.0609 REP 0.0633 ratio 0.96
+WROTE scaling_results.csv

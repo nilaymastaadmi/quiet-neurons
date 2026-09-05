@@ -1,0 +1,64 @@
+C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f629\scratchpad\bdhvenv\Lib\site-packages\torch\_subclasses\functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\utils\tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+n=2048  params=397,312  T=154 B=16  random-baseline-loss=3.258
+step    50  loss 3.2900  elapsed     62s
+step   100  loss 3.0405  elapsed    135s
+step   150  loss 2.7644  elapsed    209s
+step   200  loss 2.1094  elapsed    283s
+step   250  loss 1.2441  elapsed    358s
+step   300  loss 0.9540  elapsed    430s
+step   350  loss 0.8105  elapsed    502s
+step   400  loss 0.7461  elapsed    576s
+step   450  loss 0.6944  elapsed    649s
+step   500  loss 0.5925  elapsed    723s
+step   550  loss 0.5264  elapsed    799s
+step   600  loss 0.5052  elapsed    849s
+step   650  loss 0.4800  elapsed    924s
+step   700  loss 0.4175  elapsed    999s
+step   750  loss 0.3523  elapsed   1074s
+step   800  loss 0.2811  elapsed   1148s
+step   850  loss 0.2408  elapsed   1224s
+step   900  loss 0.2169  elapsed   1299s
+step   950  loss 0.2160  elapsed   1374s
+step  1000  loss 0.1944  elapsed   1451s
+step  1050  loss 0.1937  elapsed   1527s
+step  1100  loss 0.1948  elapsed   1603s
+step  1150  loss 0.1897  elapsed   1678s
+step  1200  loss 0.1928  elapsed   1752s
+step  1250  loss 0.1932  elapsed   1827s
+step  1300  loss 0.1831  elapsed   1902s
+step  1350  loss 0.1838  elapsed   1974s
+step  1400  loss 0.1861  elapsed   2047s
+step  1450  loss 0.1837  elapsed   2118s
+step  1500  loss 0.1773  elapsed   2190s
+step  1550  loss 0.1785  elapsed   2263s
+step  1600  loss 0.1752  elapsed   2336s
+step  1650  loss 0.1762  elapsed   2409s
+step  1700  loss 0.1780  elapsed   2482s
+step  1750  loss 0.1774  elapsed   2554s
+step  1800  loss 0.1767  elapsed   2627s
+step  1850  loss 0.1765  elapsed   2695s
+TRAINED steps=1854 final_loss=0.1762
+
+--- PRECONDITION: did the model learn in-context copying? ---
+loss on FIRST exposure to the random word : 2.8726  (should stay high, ~3.26)
+loss on REPETITIONS 2-8 of that word      : 0.0059  (must go LOW if learned)
+TASK_LEARNED = True
+
+=== SPARSITY BY PHASE (fraction of neurons with non-zero activation) ===
+paper @ n=65536, layer 2: 4.0-7.5% during memorization -> ~2.5% during repetition  (ratio ~1.6-3.0x)
+
+layer tensor    warmup       MEM       REP  MEM/REP
+--------------------------------------------------------
+    0      x    0.4007    0.4813    0.4813     1.00
+    0      y    0.4006    0.4345    0.4956     0.88
+    0     xy    0.1277    0.1718    0.2098     0.82
+    1      x    0.4387    0.3530    0.3162     1.12
+    1      y    0.3836    0.4395    0.3530     1.25
+    1     xy    0.1471    0.1616    0.1257     1.29
+    2      x    0.4010    0.3338    0.2922     1.14
+    2      y    0.3806    0.2981    0.2545     1.17
+    2     xy    0.1327    0.0825    0.0576     1.43
+    3      x    0.4265    0.3584    0.3501     1.02
+    3      y    0.3980    0.2893    0.3045     0.95
+    3     xy    0.1554    0.0768    0.0840     0.91

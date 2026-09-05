@@ -1,0 +1,71 @@
+{
+  "n_neurons": 2048,
+  "N": 512,
+  "D": 64,
+  "n_head": 4,
+  "n_layer": 4,
+  "vocab_size": 32,
+  "period": 77,
+  "warm": 13,
+  "word": 8,
+  "reps": 8,
+  "dtype": "float32",
+  "tensors": [
+    {
+      "name": "embed",
+      "shape": [
+        32,
+        64
+      ],
+      "offset": 0,
+      "count": 2048
+    },
+    {
+      "name": "encoder",
+      "shape": [
+        4,
+        64,
+        512
+      ],
+      "offset": 2048,
+      "count": 131072
+    },
+    {
+      "name": "encoder_v",
+      "shape": [
+        4,
+        64,
+        512
+      ],
+      "offset": 133120,
+      "count": 131072
+    },
+    {
+      "name": "decoder",
+      "shape": [
+        2048,
+        64
+      ],
+      "offset": 264192,
+      "count": 131072
+    },
+    {
+      "name": "lm_head",
+      "shape": [
+        64,
+        32
+      ],
+      "offset": 395264,
+      "count": 2048
+    },
+    {
+      "name": "freqs",
+      "shape": [
+        512
+      ],
+      "offset": 397312,
+      "count": 512
+    }
+  ],
+  "source_checkpoint": "bdh_n2048.pt"
+}

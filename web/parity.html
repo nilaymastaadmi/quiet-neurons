@@ -1,0 +1,95 @@
+<title>BDH parity check</title>
+<style>
+  body{font:14px/1.6 ui-monospace,"Cascadia Mono",Consolas,monospace;
+       background:#101219;color:#E9EBF1;margin:0;padding:32px;}
+  h1{font-size:18px;letter-spacing:.04em;margin:0 0 4px}
+  .sub{color:#868DA1;margin:0 0 24px}
+  table{border-collapse:collapse;margin-top:16px}
+  th,td{padding:5px 18px 5px 0;text-align:left;border-bottom:1px solid #2C3140}
+  th{color:#868DA1;font-weight:400;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+  td.n{font-variant-numeric:tabular-nums}
+  .pass{color:#5FB98E}.fail{color:#DA7C74}.warn{color:#FF9E3D}
+  #verdict{font-size:26px;margin:22px 0;letter-spacing:.02em}
+  pre{color:#868DA1;white-space:pre-wrap}
+</style>
+
+<h1>BDH parity check</h1>
+<p class="sub">JavaScript forward pass vs the PyTorch reference in <code>data/reference.json</code>.
+Every number the page shows depends on this passing.</p>
+<div id="verdict">running…</div>
+<div id="out"></div>
+
+<script type="module">
+import { loadBDH } from "./bdh.js";
+
+const out = document.getElementById("out");
+const verdict = document.getElementById("verdict");
+
+function stats(a, b) {
+  let maxAbs = 0, sum = 0, n = Math.min(a.length, b.length);
+  for (let i = 0; i < n; i++) {
+    const d = Math.abs(a[i] - b[i]);
+    if (d > maxAbs) maxAbs = d;
+    sum += d;
+  }
+  return { maxAbs, meanAbs: sum / n, n };
+}
+
+try {
+  const model = await loadBDH("data");
+  const ref = await fetch("data/reference.json").then(r => r.json());
+
+  const t0 = performance.now();
+  const res = model.forward(ref.tokens);
+  const ms = performance.now() - t0;
+
+  const rows = [];
+  const lg = stats(res.logits, ref.logits);
+  rows.push(["logits", `${ref.logits_shape[0]}x${ref.logits_shape[1]}`, lg.maxAbs, lg.meanAbs]);
+
+  for (const layer of ref.sparsity) {
+    for (const key of ["x", "y", "xy"]) {
+      const s = stats(res.sparsity[layer.layer][key], layer[key]);
+      rows.push([`layer ${layer.layer} ${key}`, `${s.n}`, s.maxAbs, s.meanAbs]);
+    }
+  }
+
+  // Thresholds, and why they are what they are:
+  //  - logits accumulate float32 in a different order than PyTorch, so a small
+  //    difference is expected. 5e-3 is generous; observed is ~4e-5.
+  //  - sparsity is a count of active neurons over a fixed denominator. It should
+  //    be exact, EXCEPT where a pre-ReLU value sits at the float32 noise floor
+  //    and the two implementations round to opposite sides of zero. Measured:
+  //    layer 3 has a y_latent of magnitude 1.1e-07. One such neuron-position is
+  //    tolerated; more than one would mean the port is actually wrong.
+  const oneNeuron = 1 / model.m.n_neurons;
+  const sparsityWorst = Math.max(...rows.slice(1).map(r => r[2]));
+  const ties = rows.slice(1).filter(r => r[2] > 0).length;
+  const ok = lg.maxAbs < 5e-3 && sparsityWorst <= oneNeuron * 1.001;
+
+  verdict.innerHTML = ok
+    ? `<span class="pass">PARITY PASS</span>` +
+      (ties ? ` <span class="warn" style="font-size:14px">
+         (${ties} tensor${ties > 1 ? "s differ" : " differs"} by one neuron at the ReLU boundary)</span>` : "")
+    : `<span class="fail">PARITY FAIL</span>`;
+
+  out.innerHTML = `
+    <table>
+      <tr><th>tensor</th><th>elements</th><th>max abs diff</th><th>mean abs diff</th></tr>
+      ${rows.map(r => `<tr><td>${r[0]}</td><td class="n">${r[1]}</td>
+        <td class="n ${r[2] === 0 ? "pass" : r[2] < 5e-3 ? "warn" : "fail"}">${r[2].toExponential(3)}</td>
+        <td class="n">${r[3].toExponential(3)}</td></tr>`).join("")}
+    </table>
+    <pre>
+forward pass over ${res.T} tokens: ${ms.toFixed(0)} ms
+model: n=${model.m.n_neurons} D=${model.m.D} N=${model.m.N} heads=${model.m.n_head} layers=${model.m.n_layer}
+source: ${model.m.source_checkpoint}
+
+Sparsity is a count of active neurons over a fixed denominator, so it must match
+exactly. Logits accumulate float32 in a different order than PyTorch, so a small
+difference there is expected; the threshold is 5e-3.</pre>`;
+} catch (e) {
+  verdict.innerHTML = `<span class="fail">ERROR</span>`;
+  out.innerHTML = `<pre>${e.stack || e}</pre>`;
+}
+</script>
