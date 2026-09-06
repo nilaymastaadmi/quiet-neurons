@@ -95,8 +95,16 @@ def one_pass(eval_seed):
                                   reduction="none").view(B, T).mean(0)
     pl /= EVAL_BATCHES
     p = pl[:PERIOD]
-    fe = p[WARM:WARM + WORD].mean().item()
-    rp = p[WARM + WORD:].mean().item()
+    # pl[t] is the loss of PREDICTING token t+1, so the surprise of READING token t is
+    # pl[t-1]. The sequence is exactly one period long and periodic, so index -1 wraps
+    # to the last position of the previous period, which is the same letter.
+    pv = p.tolist()
+    surprise = [pv[(i - 1) % PERIOD] for i in range(PERIOD)]
+    # Sliced on the aligned curve, the first-exposure block is the eight letters the
+    # model is genuinely seeing for the first time, and lands on the random baseline
+    # (log 26 = 3.258) as it should.
+    fe = sum(surprise[WARM:WARM + WORD]) / WORD
+    rp = sum(surprise[WARM + WORD:PERIOD]) / (PERIOD - WARM - WORD)
 
     torch.manual_seed(eval_seed)          # same words for loss and activations
     acts = {}
@@ -115,9 +123,62 @@ def one_pass(eval_seed):
                                v[WARM + WORD:].mean().item())
             if key == "xy":
                 curves[lev] = v.tolist()
-    return fe, rp, out, curves
+    # p is the per-position loss over one period, in nats. It was already computed
+    # for the precondition; returning it is what makes the correlation below
+    # reproducible instead of a number from a script nobody kept.
+    return fe, rp, out, curves, surprise
+
+def _pearson(xs, ys):
+    n = len(xs)
+    mx, my = sum(xs) / n, sum(ys) / n
+    num = sum((p - mx) * (q - my) for p, q in zip(xs, ys))
+    dx = sum((p - mx) ** 2 for p in xs) ** 0.5
+    dy = sum((q - my) ** 2 for q in ys) ** 0.5
+    return num / (dx * dy) if dx > 0 and dy > 0 else float("nan")
+
+
+def _ranks(v):
+    """Average ranks, so ties do not bias Spearman."""
+    order = sorted(range(len(v)), key=lambda i: v[i])
+    out = [0.0] * len(v)
+    i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and v[order[j + 1]] == v[order[i]]:
+            j += 1
+        avg = (i + j) / 2.0 + 1.0
+        for k in range(i, j + 1):
+            out[order[k]] = avg
+        i = j + 1
+    return out
+
+
+def _spearman(xs, ys):
+    return _pearson(_ranks(xs), _ranks(ys))
+
 
 passes = [one_pass(a.eval_seed + i) for i in range(a.repeats)]
+
+# The claim the artifact teaches is that surprise is NOT the variable. That is a
+# statement about a correlation, so the correlation has to be measured here rather
+# than asserted in prose. Pearson picks up the coarse difference between phases;
+# Spearman asks whether the two actually track position by position.
+surprise_curve = [sum(p[4][i] for p in passes) / len(passes) for i in range(PERIOD)]
+corr = []
+for lev in sorted(passes[0][3]):
+    spars = [sum(p[3][lev][i] for p in passes) / len(passes) for i in range(PERIOD)]
+    fe_loss = surprise_curve[WARM:WARM + WORD]
+    fe_spars = spars[WARM:WARM + WORD]
+    corr.append({
+        "n": n_neurons, "layer": lev, "tensor": "xy",
+        "pearson": round(_pearson(surprise_curve, spars), 4),
+        "spearman": round(_spearman(surprise_curve, spars), 4),
+        "first_expo_loss_min": round(min(fe_loss), 4),
+        "first_expo_loss_max": round(max(fe_loss), 4),
+        "first_expo_sparsity_first": round(fe_spars[0], 5),
+        "first_expo_sparsity_last": round(fe_spars[-1], 5),
+        "positions": PERIOD, "eval_passes": a.repeats,
+    })
 if a.export_trace:
     import json
     # The per-letter curve, averaged over the same pinned samples the ratios come from.
@@ -127,6 +188,12 @@ if a.export_trace:
     json.dump({"n": n_neurons, "params": nparams, "period": PERIOD,
                "warm": WARM, "word": WORD,
                "eval_sequences": a.repeats * EVAL_BATCHES * B,
+               # Surprise of READING the letter at each position, in nats: the
+               # cross-entropy the model paid to predict that letter, aligned to the
+               # same index as the activation curves below. Shipped so the surprise
+               # numbers quoted in the README and the one-page summary are readable
+               # out of a committed file rather than taken on trust.
+               "surprise": [round(v, 6) for v in surprise_curve],
                "layers": {str(l): [round(sum(p[3][l][i] for p in passes) / len(passes), 6)
                                    for i in range(PERIOD)] for l in layers}},
               open(a.export_trace, "w"))
@@ -161,6 +228,26 @@ for r in rows:
         spread = (f"  [{r['ratio_min']} .. {r['ratio_max']}]" if a.repeats > 1 else "")
         print(f"  layer {r['layer']} xy: MEM {r['mem']:.4f} REP {r['rep']:.4f} "
               f"ratio {r['mem_over_rep']}{spread}")
+
+print("\n--- surprise vs sparsity, per position, one period, xy tensor ---")
+print("    Pearson picks up the phase difference; Spearman asks whether they track letter by letter.")
+for c in corr:
+    print(f"  layer {c['layer']}: Pearson {c['pearson']:+.3f}  Spearman {c['spearman']:+.3f}"
+          f"   first sight: surprise {c['first_expo_loss_min']:.2f} to "
+          f"{c['first_expo_loss_max']:.2f} nats, sparsity "
+          f"{c['first_expo_sparsity_first'] * 100:.1f}% to {c['first_expo_sparsity_last'] * 100:.1f}%")
+
+if a.append:
+    cfields = list(corr[0].keys())
+    cpath = "results/correlations.csv"
+    cnew = not os.path.exists(cpath)
+    with open(cpath, "a", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=cfields)
+        if cnew:
+            w.writeheader()
+        for c in corr:
+            w.writerow(c)
+    print(f"appended {len(corr)} rows to {cpath}")
 
 if a.append:
     fields = ["n", "d", "layers", "params", "task_learned", "first_expo_loss",

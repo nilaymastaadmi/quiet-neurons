@@ -46,7 +46,9 @@ async function drain() {
       // signal. The fixed warm-up is predicted perfectly and still keeps neurons
       // busy; only context-learned text goes quiet.
       surprise: (() => {
-        const V = m.m.vocab_size, out = new Array(T).fill(0);
+        const V = m.m.vocab_size;
+        // raw[t] is what the model paid to PREDICT the letter at t+1.
+        const raw = new Array(T).fill(NaN);
         for (let t = 0; t < T - 1; t++) {
           const o = t * V;
           let mx = -Infinity;
@@ -54,9 +56,14 @@ async function drain() {
           let sum = 0;
           for (let v = 0; v < V; v++) sum += Math.exp(logits[o + v] - mx);
           const target = job.tokens[t + 1];
-          out[t] = -(logits[o + target] - mx - Math.log(sum));   // nats
+          raw[t] = -(logits[o + target] - mx - Math.log(sum));   // nats
         }
-        out[T - 1] = NaN;                                        // no next letter to predict
+        // The surprise of READING letter t is raw[t-1], so shift by one. Without this
+        // the page pairs a letter's activation count with the NEXT letter's surprise,
+        // which is the same off-by-one that made the measured first-exposure loss come
+        // out below the random baseline. Position 0 has no predecessor in this buffer.
+        const out = new Array(T).fill(NaN);
+        for (let t = 1; t < T; t++) out[t] = raw[t - 1];
         return out;
       })(),
     });

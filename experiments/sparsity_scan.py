@@ -70,7 +70,14 @@ with torch.no_grad():
                               reduction="none").view(16, T).mean(0)
 pl /= 16
 p = pl[:PERIOD]
-first_expo, repeats = p[WARM:WARM+WORD].mean().item(), p[WARM+WORD:].mean().item()
+# pl[t] is the loss of PREDICTING token t+1, so the surprise of READING token t is pl[t-1].
+# Without this shift the first-exposure slice drops the first genuinely new letter and picks
+# up one the model has already learned, which reports first-sight loss below the random
+# baseline. measure.py, which is the source of every published number, does the same.
+pv = p.tolist()
+surprise = [pv[(i - 1) % PERIOD] for i in range(PERIOD)]
+first_expo = sum(surprise[WARM:WARM+WORD]) / WORD
+repeats = sum(surprise[WARM+WORD:PERIOD]) / (PERIOD - WARM - WORD)
 learned = bool(repeats < 0.5 * first_expo and repeats < 1.5)
 print(f"PRECONDITION first_exposure_loss={first_expo:.4f} repetition_loss={repeats:.4f} "
       f"TASK_LEARNED={learned}", flush=True)
