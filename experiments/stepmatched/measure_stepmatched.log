@@ -1,0 +1,32 @@
+### n=2048 step-matched @2309
+C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f629\scratchpad\bdhvenv\Lib\site-packages\torch\_subclasses\functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\utils\tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+n=2048 params=397,312  TASK_LEARNED=True  first_expo=3.2738 repetition=0.0090  (5 eval passes, 1280 sequences)
+  layer 0 xy: MEM 0.1661 REP 0.2070 ratio 0.8028  [0.8003 .. 0.8044]
+  layer 1 xy: MEM 0.1508 REP 0.1235 ratio 1.2215  [1.2198 .. 1.2226]
+  layer 2 xy: MEM 0.0850 REP 0.0578 ratio 1.4705  [1.4647 .. 1.474]
+  layer 3 xy: MEM 0.0766 REP 0.0793 ratio 0.9654  [0.9603 .. 0.9695]
+
+--- surprise vs sparsity, per position, one period, xy tensor ---
+    Pearson picks up the phase difference; Spearman asks whether they track letter by letter.
+  layer 0: Pearson -0.216  Spearman -0.009   first sight: surprise 3.26 to 3.28 nats, sparsity 15.6% to 17.5%
+  layer 1: Pearson +0.245  Spearman +0.323   first sight: surprise 3.26 to 3.28 nats, sparsity 14.3% to 14.6%
+  layer 2: Pearson +0.100  Spearman +0.042   first sight: surprise 3.26 to 3.28 nats, sparsity 9.9% to 6.9%
+  layer 3: Pearson -0.144  Spearman -0.607   first sight: surprise 3.26 to 3.28 nats, sparsity 9.0% to 6.5%
+
+### n=8192 step-matched @2309
+C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f629\scratchpad\bdhvenv\Lib\site-packages\torch\_subclasses\functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\utils\tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+n=8192 params=3,153,920  TASK_LEARNED=True  first_expo=3.2774 repetition=0.0041  (5 eval passes, 1280 sequences)
+  layer 0 xy: MEM 0.2297 REP 0.2875 ratio 0.799  [0.7981 .. 0.8007]
+  layer 1 xy: MEM 0.0855 REP 0.0609 ratio 1.4052  [1.4027 .. 1.4095]
+  layer 2 xy: MEM 0.0772 REP 0.0364 ratio 2.1201  [2.1139 .. 2.1301]
+  layer 3 xy: MEM 0.0560 REP 0.0587 ratio 0.9531  [0.9519 .. 0.9549]
+
+--- surprise vs sparsity, per position, one period, xy tensor ---
+    Pearson picks up the phase difference; Spearman asks whether they track letter by letter.
+  layer 0: Pearson -0.140  Spearman +0.086   first sight: surprise 3.27 to 3.29 nats, sparsity 20.9% to 24.8%
+  layer 1: Pearson +0.616  Spearman +0.244   first sight: surprise 3.27 to 3.29 nats, sparsity 8.5% to 8.4%
+  layer 2: Pearson +0.304  Spearman -0.047   first sight: surprise 3.27 to 3.29 nats, sparsity 13.3% to 4.5%
+  layer 3: Pearson -0.142  Spearman -0.478   first sight: surprise 3.27 to 3.29 nats, sparsity 7.3% to 4.4%
+### DONE

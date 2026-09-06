@@ -5,19 +5,19 @@
     {
       "label": "ours, 397,312 params",
       "n": 2048,
-      "ratio": 1.4318,
-      "spread": "1.430 to 1.433",
+      "ratio": 1.4705,
+      "spread": "1.465 to 1.474",
       "peak": false,
-      "note": "1280 sequences",
+      "note": "1280 sequences, 2309 steps",
       "tag": "tag-ok"
     },
     {
       "label": "ours, 3,153,920 params",
       "n": 8192,
-      "ratio": 1.9731,
-      "spread": "1.970 to 1.980",
+      "ratio": 2.1201,
+      "spread": "2.114 to 2.130",
       "peak": false,
-      "note": "1280 sequences",
+      "note": "1280 sequences, 2309 steps",
       "tag": "tag-ok"
     },
     {
@@ -26,7 +26,7 @@
       "ratio": 1.8742,
       "spread": "1.870 to 1.878",
       "peak": false,
-      "note": "1280 sequences",
+      "note": "1280 sequences, 2309 steps",
       "tag": "tag-ok"
     },
     {

@@ -32,6 +32,10 @@ ap.add_argument("--eval-seed", type=int, default=20260908,
                 help="pins the evaluation words. sparsity_scan.py draws its eval words "
                      "after training has consumed the RNG stream, so its sample is not "
                      "reproducible from a checkpoint alone; this is.")
+ap.add_argument("--steps-trained", type=int, default=None,
+                help="how many optimiser steps this checkpoint actually saw. Recorded in the "
+                     "CSV so wall-clock-cut and step-matched runs of the same size cannot be "
+                     "confused for each other. Supply it; the checkpoint does not carry it.")
 ap.add_argument("--repeats", type=int, default=1,
                 help="re-measure with eval_seed, eval_seed+1, ... and report the spread. "
                      "This is the error bar on the ratio.")
@@ -170,7 +174,8 @@ for lev in sorted(passes[0][3]):
     fe_loss = surprise_curve[WARM:WARM + WORD]
     fe_spars = spars[WARM:WARM + WORD]
     corr.append({
-        "n": n_neurons, "layer": lev, "tensor": "xy",
+        "n": n_neurons, "steps_trained": a.steps_trained if a.steps_trained is not None else "",
+        "layer": lev, "tensor": "xy",
         "pearson": round(_pearson(surprise_curve, spars), 4),
         "spearman": round(_spearman(surprise_curve, spars), 4),
         "first_expo_loss_min": round(min(fe_loss), 4),
@@ -211,6 +216,7 @@ for key in passes[0][2]:
     ratios = [m / r for m, r in zip(mms, rrs) if r > 0]
     mean = lambda xs: sum(xs) / len(xs)
     rows.append({"n": n_neurons, "d": a.embd, "layers": a.layers, "params": nparams,
+                 "steps_trained": a.steps_trained if a.steps_trained is not None else "",
                  "layer": lev, "tensor": tname,
                  "warmup": round(mean(wms), 5), "mem": round(mean(mms), 5),
                  "rep": round(mean(rrs), 5),
@@ -250,7 +256,7 @@ if a.append:
     print(f"appended {len(corr)} rows to {cpath}")
 
 if a.append:
-    fields = ["n", "d", "layers", "params", "task_learned", "first_expo_loss",
+    fields = ["n", "d", "layers", "params", "steps_trained", "task_learned", "first_expo_loss",
               "repetition_loss", "layer", "tensor", "warmup", "mem", "rep",
               "mem_over_rep", "ratio_min", "ratio_max", "eval_passes"]
     new = not os.path.exists(a.out)

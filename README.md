@@ -43,11 +43,11 @@ committed trace `web/data/traces/n8192.json`. Whole blocks, not hand-picked lett
 
 | what the model is reading | mean surprise | layer-2 neurons firing |
 |---|---|---|
-| the 13-letter warm-up, identical in every sequence, held in the **weights** | 0.0005 nats | **9.10%** |
-| the 56 repeated letters, new every run, learned from the **context** | 0.0079 nats | **3.64%** |
+| the 13-letter warm-up, identical in every sequence, held in the **weights** | 0.0004 nats | **9.65%** |
+| the 56 repeated letters, new every run, learned from the **context** | 0.0041 nats | **3.64%** |
 
-Both blocks are predicted essentially perfectly, and one uses **2.5x** as many neurons. At the
-extremes the gap is wider still: letter 11 runs at 13.60% against letter 40 at 3.49%, 3.9x
+Both blocks are predicted essentially perfectly, and one uses **2.65x** as many neurons. At the
+extremes the gap is wider still: letter 11 runs at 16.10% against letter 40 at 3.52%, 4.6x
 apart, both under 0.003 nats of surprise. So what separates them is not predictability but where the
 knowledge came from: the activation level tracks parametric against in-context memory. We show
 that it tracks, not why it does.
@@ -138,14 +138,18 @@ It runs the JavaScript forward pass on a fixed input and diffs it against PyTorc
 
 | check | result |
 |---|---|
-| logits, 154 x 32 values | max difference **3.998e-5** (threshold 5e-3) |
-| 11 of 12 sparsity series | **exactly zero** difference |
-| layer 3 `y` | one neuron in 2048, at one position |
+| logits, 154 x 32 values | max difference **6.064e-5** (threshold 5e-3) |
+| all 12 sparsity series | **exactly zero** difference |
 
-That last row is not waved through. Layer 3 contains a pre-ReLU value of magnitude
-**1.10e-07**. Float32 carries about seven significant digits, so the two implementations
-round to opposite sides of zero and one neuron flips. The threshold in the test permits
-exactly one such neuron and no more, and the reason is written in the code.
+Sparsity is a count of active neurons over a fixed denominator, so it has to match exactly,
+and on the shipped checkpoint it does, on every layer and both tensors.
+
+The test still tolerates **one** neuron of disagreement, and that allowance is not idle. The
+earlier checkpoint had a layer-3 pre-ReLU value of magnitude 1.10e-07; float32 carries about
+seven significant digits, so PyTorch and JavaScript rounded to opposite sides of zero and one
+neuron in 2,048 flipped. It is a real property of the arithmetic rather than a bug, it can
+recur on any checkpoint, and the threshold permits exactly one such neuron and no more. This
+model happens not to have one.
 
 ---
 
@@ -193,18 +197,29 @@ across 5 independent pinned samples.
 
 | n | params | steps | MEM | REP | ratio | spread over 5 samples |
 |---|---|---|---|---|---|---|
-| 2,048 | 397,312 | 1,854 | 0.0824 | 0.0576 | **1.4318x** | 1.4299 – 1.4334 |
-| 8,192 | 3,153,920 | 1,917 | 0.0718 | 0.0364 | **1.9731x** | 1.9695 – 1.9798 |
+| 2,048 | 397,312 | 2,309 | 0.0850 | 0.0578 | **1.4705x** | 1.4647 – 1.4740 |
+| 8,192 | 3,153,920 | 2,309 | 0.0772 | 0.0364 | **2.1201x** | 2.1139 – 2.1301 |
 | 16,384 | 6,299,648 | 2,309 | 0.0820 | 0.0438 | **1.8742x** | 1.8699 – 1.8782 |
 | 65,536 | Pathway's | — | 4.0–7.5% | ~2.5% | 1.6–3.0x | reported as a range, not reproduced here |
 
 **The scaling is not monotonic, and we published the opposite before the third model
-finished.** n=16384 comes in at 1.87, *below* n=8192's 1.97, and that 0.10 gap is roughly
+finished.** n=16384 comes in at 1.87, *below* n=8192's 2.12, and that 0.25 gap is roughly
 twenty times the sampling spread, so it is not noise.
 
-A confound we cannot rule out: all three models share one 4,000-step OneCycle schedule but
-were each stopped by a wall-clock budget on a laptop CPU, at 1,854, 1,917 and 2,309 steps.
-They finished at different points on that schedule. Final losses are close (0.176, 0.175,
+**We removed the confound rather than disclosing it.** The three models were originally each
+cut by a wall-clock budget at 1,854, 1,917 and 2,309 steps of one 4,000-step OneCycle schedule,
+so each stopped at a different learning rate. We retrained the two short ones to **2,309 steps**,
+the point the largest already reached, leaving the schedule itself untouched: `--stop-at` caps
+the loop without shortening the schedule, which is what step-matching actually requires. Both
+rose. n=2,048 went from 1.4318 to **1.4705**; n=8,192 from 1.9731 to **2.1201**. The wall-clock
+cut had been suppressing the two smaller models, which is exactly what a confound does when you
+take it away.
+
+**The non-monotonicity survives, and sharpens.** Controlled, the sequence reads 1.47, 2.12,
+1.87, and the drop from 8k to 16k is now roughly forty times the sampling spread rather than
+twenty. It is a property of the models, not of where training stopped. Both families are in
+`experiments/results/measured.csv`, told apart by a `steps_trained` column, so the before and
+after are both checkable. Final losses are close (0.174, 0.173,
 0.172), so they are comparably trained on the task, but that is not a controlled comparison.
 
 The defensible statement is therefore narrower than the one we started with: **the effect is
@@ -241,12 +256,12 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 
 | Limit | What we actually measure |
 |---|---|
-| Layer 0 runs **backwards** at every size | ratio 0.82, 0.79, 0.86 at n = 2k, 8k, 16k |
-| Layer 3 is flat at 2k and 8k, weakly positive at 16k | 0.91, 0.96, **1.11**. "No effect" is true of the two smaller models only |
-| Scaling is **not** monotonic | 1.43 → 1.97 → 1.87 at n = 2k, 8k, 16k. We expected monotone growth and said so publicly until the third model landed |
-| The three models are not step-matched | 1,854 / 1,917 / 2,309 steps of one 4,000-step schedule, each cut by wall clock |
-| A single sequence is noisy | one sequence gave 1.93 where 1,280 give 1.43 |
-| Surprise and sparsity do **not** track per letter | at n=8192, layer 2: **Pearson 0.29, Spearman 0.02**. Across the eight letters of first sight, surprise is flat at 3.27 to 3.30 nats while sparsity falls 12.8% to 4.6%. The relationship is between phases, not letters, and a near-zero Spearman is what says so. This killed a stronger claim we wanted to make. Printed by `measure.py`, recorded in `experiments/results/correlations.csv` |
+| Layer 0 runs **backwards** at every size | ratio 0.80, 0.80, 0.86 at n = 2k, 8k, 16k |
+| Layer 3 is flat at 2k and 8k, weakly positive at 16k | 0.97, 0.95, **1.11**. "No effect" is true of the two smaller models only |
+| Scaling is **not** monotonic, and now controlled | 1.47 → 2.12 → 1.87 at n = 2k, 8k, 16k, all trained for the same 2,309 steps. We expected monotone growth and said so publicly until the third model landed |
+| The three models **are** step-matched, as of 2026-09-06 | all three stop at 2,309 steps of the same 4,000-step schedule. The earlier wall-clock-cut numbers are kept in `measured.csv` for comparison |
+| A single sequence is noisy | one sequence gave 1.93 where 1,280 give 1.47 |
+| Surprise and sparsity do **not** track per letter | at n=8192, layer 2: **Pearson 0.30, Spearman −0.05**. Across the eight letters of first sight, surprise is flat at 3.27 to 3.29 nats while sparsity falls 13.3% to 4.5%. The relationship is between phases, not letters, and a near-zero Spearman is what says so. This killed a stronger claim we wanted to make. Printed by `measure.py`, recorded in `experiments/results/correlations.csv` |
 | We show the signature, not its cause | nothing here explains *why* context-held knowledge needs fewer neurons than weight-held knowledge. The measurement separates the two; the mechanism behind that separation is open. An independent reader of the one-page summary raised exactly this, and they were right |
 | Toy model, not an official BDH checkpoint | architecture is Pathway's and unmodified; the weights are ours |
 | Synthetic task, not natural language | so is the paper's §6.4 protocol, deliberately |

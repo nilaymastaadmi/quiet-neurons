@@ -18,11 +18,11 @@
   sizes is evidence, not comparison, so those numbers are inline and the table compares systems.
 -->
 <style>
-  @page { size: A4; margin: 11mm 13mm; }
+  @page { size: A4; margin: 12mm 14mm; }
   html, body { margin: 0; padding: 0; }
   body {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 9.0pt; line-height: 1.20; color: #111;
+    font-size: 9.1pt; line-height: 1.21; color: #111;
   }
   h1 { font-size: 13.5pt; line-height: 1.14; margin: 0 0 2pt; letter-spacing: -.01em; }
   .sub { font-size: 8.2pt; color: #444; margin: 0 0 6pt; }
@@ -31,7 +31,7 @@
     letter-spacing: .07em; color: #000;
   }
   p { margin: 0 0 4pt; text-align: justify; hyphens: auto; }
-  table { border-collapse: collapse; width: 100%; font-size: 7.7pt; margin: 4pt 0 5pt; }
+  table { border-collapse: collapse; width: 100%; font-size: 7.8pt; margin: 4pt 0 5pt; }
   th, td { border: .5pt solid #999; padding: 1.5pt 4pt; text-align: left; vertical-align: top; }
   th { background: #eee; font-weight: bold; }
   .refs { font-size: 7.5pt; color: #333; margin: 5pt 0 0; text-align: left; line-height: 1.22; }
@@ -64,11 +64,10 @@
   every layer multiplies two rectified (ReLU) vectors elementwise, and a product of two sparse
   non-negative vectors is sparser than either. <em>Active</em> here means a strictly non-zero entry
   in that product; a rectifier cannot emit a negative, so an active neuron is a positive amount of
-  something rather than a signed coordinate, which is what lets one be read as a concept at all.
-  Attention is the second change: query and key are the same tensor, the code asserting
-  <em>K is Q</em>, so the score matrix is a causally-masked Gram matrix of neuron activations with
-  <strong>no softmax</strong>. Positions whose neurons fired alike bind to each other: the paper's
-  Hebbian reading, in one line of tensor code.
+  something rather than a signed coordinate, which is what lets it be read as a concept. Attention
+  is the second change: query and key are the same tensor, so the score matrix is a causally-masked
+  Gram matrix of neuron activations with <strong>no softmax</strong>. Positions whose neurons fired
+  alike bind to each other.
 </p>
 
 <h2>The claim, and the correction it needed</h2>
@@ -76,23 +75,23 @@
   Section 6.4 reports that "fewer neurons are active ... for more predictable input signals": at
   layer 2 of a 65,536-neuron model, 4.0&ndash;7.5% active while memorising a new word against about
   2.5% while repeating it, a 1.6&ndash;3.0&times; ratio [1, Fig. 14]. We reproduced that protocol on
-  three models trained here from the public code, and it survives a 32-fold shrink:
-  <strong>1.43&times;, 1.97&times; and 1.87&times;</strong> at 2,048, 8,192 and 16,384 neurons
-  (8.24/5.76%, 7.18/3.64% and 8.20/4.38% memorising against repeating), each averaged over 1,280
-  sequences across five pinned samples, spread near 0.005. <strong>In aggregate the paper is right:
-  predictable text is quieter.</strong> What follows sharpens that rather than contradicting it.
+  three models trained here from the public code, all for the same 2,309 steps, and it survives a
+  32-fold shrink: <strong>1.47&times;, 2.12&times; and 1.87&times;</strong> at 2,048, 8,192 and
+  16,384 neurons, each averaged over 1,280 sequences with spread near 0.005.
+  <strong>In aggregate the paper is right: predictable text is quieter.</strong> What follows
+  sharpens that rather than contradicting it.
 </p>
 <p>
   The same measurement narrows what the result can mean. Two blocks of one sequence are both
-  predicted almost perfectly yet differ two and a half fold in activity: the 13-letter warm-up runs
-  at <strong>9.1%</strong> of layer 2 active at 0.0005 nats of mean surprise (a nat is the
-  natural-log unit of cross-entropy; zero is a perfect prediction), the 56 repeated letters at
-  <strong>3.6%</strong> at 0.008 nats, and 3.9&times; apart at the extremes. The warm-up is identical
-  in every training sequence, so it lives in the <strong>weights</strong>; the repeated word is new
-  each sequence, so it can only come from the <strong>context</strong>. What separates them is not
-  predictability but <strong>where the knowledge came from</strong>. We show that activity tracks
-  that; we do not show why. A learner falsifies it in a minute: inject an unpredictable letter
-  mid-repetition and activity rises there, +10% to +20% by word, while the letter before is unchanged
+  predicted almost perfectly yet differ 2.65-fold in activity: the 13-letter warm-up runs at
+  <strong>9.7%</strong> of layer 2 active at 0.0004 nats of mean surprise (a nat is the natural-log
+  unit of cross-entropy; zero is a perfect prediction), the 56 repeated letters at
+  <strong>3.6%</strong> at 0.004 nats, and 4.6&times; apart at the extremes. The warm-up is
+  identical in every training sequence, so it lives in the <strong>weights</strong>; the repeated
+  word is new each sequence, so it can only come from the <strong>context</strong>. What separates
+  them is not predictability but <strong>where the knowledge came from</strong>. We show that
+  activity tracks that; we do not show why. A learner falsifies it in a minute: inject an
+  unpredictable letter mid-repetition and activity rises there, while the letter before is unchanged
   to nine decimals, because the model reads only leftwards.
 </p>
 
@@ -107,37 +106,36 @@
 <p>
   <span class="lab">Reproduced here:</span> the three ratios, the counterexample, the
   surprise-injection check, and parity of the in-browser model against PyTorch (logit max difference
-  4.1e-5, eleven of twelve sparsity series bit-identical).
+  6.1e-5, all twelve sparsity series bit-identical).
   <span class="lab">Developer-reported, not reproduced:</span> the Figure 14 band; 97.4% on Sudoku
-  Extreme, which Pathway's own repository states comes from their internal implementation and does
-  not reproduce from the open code; 1B-to-600B pretraining-scaling experiments; and BDH-CQ's 29.5%
-  pass@2 on ARC-AGI-1 at $0.0007 per task [2]. <span class="lab">Not modelled:</span> BDH-CQ's
-  internals, whose "dimensions, exact update rules, and implementation details remain proprietary"
-  [2]. <strong>BDH-CQ has no direct role in this concept</strong>; inventing one would be worse than
-  saying so. The strongest external grounding Pathway offers is development on Amazon SageMaker
-  HyperPod, a commercial partnership rather than an independent evaluation; no external reproduction
-  of the headline results has been published. <span class="lab">Where it is likely worse:</span>
-  sparse non-negative activations plausibly cost representational capacity against the dense
-  superposition a Transformer uses, and no published comparison runs past GPT-2 scale.
+  Extreme, which Pathway's own repository says comes from their internal implementation and does not
+  reproduce from the open code; the 1B-to-600B scaling experiments; and BDH-CQ's 29.5% pass@2 on
+  ARC-AGI-1 at $0.0007 per task [2]. <span class="lab">Not modelled:</span> BDH-CQ's internals,
+  "proprietary" by its authors' own statement [2]; <strong>it has no direct role in this
+  concept</strong>, and inventing one would be worse than saying so. The strongest external
+  grounding Pathway offers is development on Amazon SageMaker HyperPod, a commercial partnership
+  rather than an independent evaluation. <span class="lab">Where it is likely worse:</span> sparse
+  non-negative activations plausibly cost capacity against dense superposition, and no published
+  comparison runs past GPT-2 scale.
 </p>
 
 <h2>Limitations, maturity, and what would settle them</h2>
 <p>
-  The effect is not uniform with depth: layer 0 runs <em>backwards</em> at all three sizes (0.82,
-  0.79, 0.86) and layer 3 is flat below 16,384 neurons, weakly positive (1.11&times;) there. Scaling
-  is <strong>not monotonic</strong> &mdash; 16,384 measures below 8,192 by twenty times the sampling
-  spread &mdash; and we published the opposite before the third model finished. One confound stands:
-  a single 4,000-step schedule cut by wall clock at 1,854, 1,917 and 2,309 steps, so close final
-  losses (0.176, 0.175, 0.172) mean comparably trained, not controlled. These are toys, 0.4M to 6.3M
-  parameters on a synthetic task, as the paper's own protocol is. Surprise and sparsity do
-  <em>not</em> track per letter (8,192 neurons, layer 2: Pearson 0.29, Spearman 0.02), which killed a
-  stronger claim. We count the elementwise product, the only quantity in the public code reaching the
-  paper's band, and the paper does not say which tensor it means; that changes the effect's size, not
-  its direction. Most importantly we establish the <em>signature</em>, not its cause: nothing here
-  explains why context-held knowledge needs fewer neurons than weight-held knowledge, and the control
-  that would settle it relocates identical content between weights and context while holding
-  everything else fixed. <span class="lab">Maturity:</span> credible and outsider-checkable for this
-  narrow property; the wider programme is earlier, its headline benchmarks developer-reported.
+  The effect is not uniform with depth: layer 0 runs <em>backwards</em> at all three sizes (0.80,
+  0.80, 0.86) and layer 3 is flat below 16,384 neurons, weakly positive (1.11&times;) there. Scaling
+  is <strong>not monotonic</strong>, and we published the opposite before the third model finished.
+  The obvious confound is gone: the three were originally cut by wall clock at 1,854, 1,917 and
+  2,309 steps of one schedule, so we retrained the short two to 2,309. Both rose, 1.43 to 1.47 and
+  1.97 to 2.12, and the dip at 16,384 survived, now forty times the sampling spread. These are toys,
+  0.4M to 6.3M parameters on a synthetic task, as the paper's protocol is. Surprise and sparsity do
+  <em>not</em> track per letter (8,192 neurons, layer 2: Pearson 0.30, Spearman &minus;0.05), which
+  killed a stronger claim. We count the elementwise product, the only quantity in the public code
+  reaching the paper's band, and the paper does not say which tensor it means; that changes the
+  effect's size, not its direction. Most importantly we establish the <em>signature</em>, not its
+  cause: nothing explains why context-held knowledge needs fewer neurons, and the control that
+  would settle it relocates identical content between weights and context.
+  <span class="lab">Maturity:</span> credible and outsider-checkable for this narrow property; the
+  wider programme is earlier, its headline benchmarks developer-reported.
 </p>
 
 <p class="refs">

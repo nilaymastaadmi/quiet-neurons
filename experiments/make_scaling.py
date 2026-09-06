@@ -13,13 +13,21 @@ import csv, json, os
 SRC = "results/measured.csv"
 OUT = "../web/data/scaling.json"
 LAYER, TENSOR = 2, "xy"
+# measured.csv now holds two families: the original runs cut by a wall-clock budget at
+# 1,854 / 1,917 / 2,309 steps, and the step-matched family in which all three stop at 2,309
+# steps of the same 4,000-step schedule. Only the step-matched family is a controlled
+# comparison, so it is selected explicitly. The old "later rows win" rule silently picked
+# whichever family happened to be appended last, which is exactly the kind of positional
+# assumption that publishes the wrong number without anyone noticing.
+STEPS = 2309
 
 points = []
 if os.path.exists(SRC):
     seen = {}
     for r in csv.DictReader(open(SRC)):
-        if int(r["layer"]) == LAYER and r["tensor"] == TENSOR:
-            seen[int(r["n"])] = r          # later rows win, so a re-measure supersedes
+        if (int(r["layer"]) == LAYER and r["tensor"] == TENSOR
+                and str(r.get("steps_trained", "")).strip() == str(STEPS)):
+            seen[int(r["n"])] = r
     for n in sorted(seen):
         r = seen[n]
         lo, hi = float(r["ratio_min"]), float(r["ratio_max"])
@@ -29,7 +37,7 @@ if os.path.exists(SRC):
             "ratio": round(float(r["mem_over_rep"]), 4),
             "spread": f"{lo:.3f} to {hi:.3f}",
             "peak": False,
-            "note": f"{int(r['eval_passes']) * 256} sequences",
+            "note": f"{int(r['eval_passes']) * 256} sequences, {STEPS} steps",
             "tag": "tag-ok",
         })
 
