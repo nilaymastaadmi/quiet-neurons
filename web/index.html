@@ -652,7 +652,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "13";
+const BUILD = "14";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
@@ -664,6 +664,7 @@ let ref = null, warmup = null, layer = 2, cur = null, surprise = null;
 let clean = null, curSurprise = null, reqSurprise = null;
 let overlays = {}, overlayN = null;      // measured curves for models too big to run here
 let bench = null;                        // the 1,280-sequence measured curve for THIS model
+let liveRuns = 0;                        // the first pass includes JIT warm-up; later ones do not
 let worker = null, reqId = 0;
 
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -1140,9 +1141,14 @@ function initTour() {
     badge.classList.remove("pre");
     $("#gramBadge").textContent = "live";
     $("#gramBadge").classList.remove("pre");
+    // The first pass pays for JIT compilation and is not what a control costs afterwards.
+    // Quoting it as though it were would understate the page by roughly a factor of three.
+    liveRuns += 1;
     $("#perf").textContent =
       `Forward pass over ${d.T} letters: ${d.ms.toFixed(0)} ms in this browser, ` +
-      `on ${d.nNeurons.toLocaleString()} neurons, single-threaded JavaScript. ` +
+      `on ${d.nNeurons.toLocaleString()} neurons, single-threaded JavaScript` +
+      (liveRuns === 1 ? `, and this first pass also pays for one-off compilation. `
+                      : `. `) +
       `Nothing on this page is a recording.`;
     render();
   };

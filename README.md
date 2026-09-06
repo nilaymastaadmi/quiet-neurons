@@ -253,6 +253,20 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 
 ---
 
+## Accessibility and robustness, measured rather than asserted
+
+Text contrast passes **WCAG AA in both themes**; the lowest ratio measured in-page is
+**4.69:1** against a 4.5:1 threshold, and most body text is above 9:1. At a **375 px**
+viewport the document has **zero horizontal overflow** (`scrollWidth == clientWidth`); wide
+tables scroll inside their own container rather than pushing the page sideways. Every control
+is a native input, button or `<details>`, so the whole page is keyboard navigable, and focus
+rings are explicit rather than suppressed. Charts are SVG with `role="img"` and text
+alternatives; the neuron grid and attention canvases carry `aria-label`. Animation respects
+`prefers-reduced-motion`. There is no build step, no framework and no backend: one HTML file,
+one JavaScript module, a worker, and 1.59 MB of weights.
+
+---
+
 ## Three claims we deliberately refuse
 
 1. **"BDH is linear attention."** The public code materialises a full T×T score matrix. It

@@ -35,12 +35,18 @@ async function drain() {
       id: job.id,
       ms,
       T,
+      // These are small (4 layers x 3 series x T) and the page calls .map() on them with a
+      // callback that returns strings, so they have to be real Arrays.
       sparsity: sparsity.map(s => ({
         layer: s.layer,
         x: Array.from(s.x), y: Array.from(s.y), xy: Array.from(s.xy),
       })),
       nNeurons: m.m.n_neurons,
-      scores: scores ? scores.map(a => Array.from(a)) : null,
+      // Four T x T matrices, 23,716 floats at T=77. Array.from boxes every element and then
+      // clones a generic array of doubles: measured at 9.7 ms against 0.46 ms for cloning the
+      // typed arrays directly. Small next to a ~600 ms forward pass, but free to avoid, and
+      // the page only ever indexes into these. Buffers are transferred rather than copied.
+      scores,
       // Per-letter surprise: the cross-entropy of the true next letter, in nats.
       // The page needs this to show that surprise and sparsity are NOT the same
       // signal. The fixed warm-up is predicted perfectly and still keeps neurons
@@ -66,7 +72,7 @@ async function drain() {
         for (let t = 1; t < T; t++) out[t] = raw[t - 1];
         return out;
       })(),
-    });
+    }, scores ? scores.map(a => a.buffer) : []);
   } catch (e) {
     self.postMessage({ id: job.id, error: String(e && e.stack || e) });
   } finally {
