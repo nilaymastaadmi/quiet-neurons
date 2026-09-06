@@ -17,7 +17,10 @@ Public source repository, everything in this zip and more:
 
     https://github.com/nilaymastaadmi/quiet-neurons
 
-The one-page concept summary is  concept-summary.pdf  in this zip.
+The one-page concept summary is  web/concept-summary.pdf  in this zip, and is
+served from the live site too:
+
+    https://nilaymastaadmi.github.io/quiet-neurons/concept-summary.pdf
 
 
 WHAT IS IN THIS ZIP
@@ -26,8 +29,8 @@ WHAT IS IN THIS ZIP
                           prerequisites, learning objectives, architecture, the role
                           of every component, what is live / precomputed / synthetic /
                           illustrative, how to reproduce every number, credits, licences
-  concept-summary.pdf     the required one-page concept summary
-  concept-summary.html    its source, so the PDF can be regenerated
+  concept-summary.html    source of the one-page summary, so the PDF can be regenerated
+  web/concept-summary.pdf the required one-page concept summary (also served live)
   web/                    the artifact itself: static files, no backend, no build step
   experiments/            training, measurement and export scripts, plus the raw
                           results and run logs every published number comes from

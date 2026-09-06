@@ -11,7 +11,7 @@ DataForge 2026, Pathway Track. Approved topic: **Sparse Non-Negative Activations
 |---|---|
 | **Live artifact**, opens without sign-in | https://nilaymastaadmi.github.io/quiet-neurons/ |
 | **Public source repository** | https://github.com/nilaymastaadmi/quiet-neurons |
-| **One-page concept summary (PDF)** | `concept-summary.pdf`, in this package and in the repository |
+| **One-page concept summary (PDF)** | https://nilaymastaadmi.github.io/quiet-neurons/concept-summary.pdf &nbsp;&middot;&nbsp; `web/concept-summary.pdf` in this package |
 | **Parity check**, browser model against PyTorch | https://nilaymastaadmi.github.io/quiet-neurons/parity.html |
 | **Per-phase profiler** | https://nilaymastaadmi.github.io/quiet-neurons/profile.html |
 | **AI assistance disclosure** | `AI_DISCLOSURE.md` |
