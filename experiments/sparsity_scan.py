@@ -15,7 +15,15 @@ ap.add_argument("--mult", type=int, default=32)
 ap.add_argument("--heads", type=int, default=4)
 ap.add_argument("--layers", type=int, default=4)
 ap.add_argument("--budget", type=int, default=2700, help="training seconds")
-ap.add_argument("--steps", type=int, default=4000)
+ap.add_argument("--steps", type=int, default=4000,
+                help="length of the OneCycle schedule. Changing it changes the schedule, so "
+                     "models trained with different values are NOT comparable.")
+ap.add_argument("--stop-at", type=int, default=None,
+                help="stop after this many steps WITHOUT shortening the schedule. This is how "
+                     "you step-match models of different sizes: same --steps, same --stop-at, "
+                     "so every model halts at the identical point on the identical schedule. "
+                     "Cutting by wall clock instead leaves each model at a different learning "
+                     "rate, which is the confound this exists to remove.")
 ap.add_argument("--seed", type=int, default=1337)
 a = ap.parse_args()
 
@@ -44,7 +52,8 @@ print(f"n={n_neurons} d={a.embd} L={a.layers} params={nparams:,} T={T} B={B} "
 opt = torch.optim.AdamW(model.parameters(), lr=3e-3, weight_decay=0.1)
 sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=3e-3, total_steps=a.steps, pct_start=0.1)
 t0, step, losses = time.time(), 0, []
-while time.time() - t0 < a.budget and step < a.steps:
+stop_at = a.stop_at if a.stop_at is not None else a.steps
+while time.time() - t0 < a.budget and step < stop_at:
     x, y = make_batch()
     _, loss = model(x, y)
     loss.backward()
@@ -55,7 +64,8 @@ while time.time() - t0 < a.budget and step < a.steps:
         print(f"step {step:5d} loss {sum(losses[-50:])/50:.4f} "
               f"elapsed {time.time()-t0:6.0f}s", flush=True)
 final_loss = sum(losses[-50:]) / max(1, len(losses[-50:]))
-print(f"TRAINED n={n_neurons} steps={step} final_loss={final_loss:.4f}", flush=True)
+print(f"TRAINED n={n_neurons} steps={step} of a {a.steps}-step schedule "
+      f"(stop_at={stop_at}) final_loss={final_loss:.4f}", flush=True)
 torch.save({"model": model.state_dict(), "warmup": WARMUP_SEQ, "cfg": vars(a)},
            f"bdh_n{n_neurons}.pt")
 
