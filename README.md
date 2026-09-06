@@ -195,6 +195,14 @@ this experiment was undertrained and would have produced a clean-looking false n
 Layer 2, `xy` product tensor, memorisation over repetition. Each row is 1,280 sequences
 across 5 independent pinned samples.
 
+**Which tensor `xy` is, and why that choice is an inference.** The paper writes `y_{t,l}` and
+does not say which tensor in the released code it corresponds to. We count the elementwise
+product `x_sparse * y_sparse` because it is the only quantity in the public code that reaches
+Figure 14's band; `x` and `y` alone sit at 30 to 50 percent, roughly six times off. That is
+magnitude matching, not a sourced fact, and it should be read as an inference. The direction of
+the result does not depend on it: measured on all three tensors at layer 2, n=8,192, the ratios
+are 1.40 (`x`), 1.27 (`y`) and 2.12 (`xy`). The choice changes the effect's size, not its sign.
+
 | n | params | steps | MEM | REP | ratio | spread over 5 samples |
 |---|---|---|---|---|---|---|
 | 2,048 | 397,312 | 2,309 | 0.0850 | 0.0578 | **1.4705x** | 1.4647 – 1.4740 |
