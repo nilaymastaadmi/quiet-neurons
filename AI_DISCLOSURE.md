@@ -39,6 +39,7 @@ What that does and does not mean here:
 | `experiments/sparsity_scan.py`, `measure.py`, `export_weights.py`, `make_scaling.py` | Written for this submission | MIT, see `LICENSE` |
 | `web/bdh.js` | Written for this submission: a port of `bdh.py` to JavaScript, verified against it by `web/parity.html` | MIT, see `LICENSE` |
 | `web/index.html`, `worker.js`, `parity.html`, `profile.html` | Written for this submission | MIT, see `LICENSE` |
+| `concept-summary.html`, and `web/concept-summary.pdf` rendered from it | Written for this submission. Text is ours; the PDF is produced from the HTML by headless Chrome so it can be regenerated | MIT, see `LICENSE` |
 | PyTorch | Dependency, not vendored | BSD-3-Clause |
 
 Nothing in this repository is a fork. `bdh.py` is a vendored dependency, unmodified, and the

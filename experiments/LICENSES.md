@@ -15,6 +15,7 @@ this repository's own licence text is in [`../LICENSE`](../LICENSE) (MIT).
 | `experiments/make_scaling.py` | This repo. Builds `web/data/scaling.json` from `results/measured.csv` | MIT, `../LICENSE` |
 | `web/bdh.js` | This repo. A port of `bdh.py` to JavaScript, verified against it by `web/parity.html` | MIT, `../LICENSE` |
 | `web/index.html`, `web/worker.js`, `web/parity.html`, `web/profile.html` | This repo | MIT, `../LICENSE` |
+| `concept-summary.html` and the `web/concept-summary.pdf` it renders to | This repo. The one-page concept summary; the PDF is generated from the HTML by headless Chrome, so it is reproducible rather than hand-laid | MIT, `../LICENSE` |
 | PyTorch | Dependency, installed by the reader, not vendored here | BSD-3-Clause |
 
 ## Weights and data
