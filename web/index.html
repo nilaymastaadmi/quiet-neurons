@@ -168,6 +168,27 @@ tr.peak td{background:var(--fire-soft)} tr.peak td.n{color:var(--fire);font-weig
              text-decoration:line-through;text-decoration-thickness:1px;white-space:nowrap}
 .notclaim .d{color:var(--muted);font-size:13.5px}
 
+.qa{margin-top:18px;display:flex;flex-direction:column;gap:14px}
+.qa details{background:var(--surface);border:1px solid var(--line);border-radius:3px;
+            padding:15px 18px;box-shadow:var(--shadow)}
+.qa summary{cursor:pointer;font-weight:600;font-size:15.5px;line-height:1.5;
+            list-style:none;display:flex;gap:11px;align-items:baseline}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::before{content:"?";font-family:var(--f-mono);font-size:11px;font-weight:600;
+                    color:var(--fire);border:1px solid var(--fire-line);border-radius:2px;
+                    padding:1px 6px;flex:none}
+.qa details[open] summary::before{content:"\2713";color:var(--pass);border-color:var(--pass)}
+.qa summary:focus-visible{outline:2px solid var(--fire);outline-offset:3px}
+.qa .ans{margin:12px 0 0 30px;font-size:14.5px;color:var(--ink-2);max-width:74ch}
+.qa .ans p{margin:0 0 8px;max-width:none}
+.qa .ans p:last-child{margin-bottom:0}
+.myth{margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.myth .m{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--dead);
+         border-radius:3px;padding:15px 17px}
+.myth .m h4{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+            color:var(--dead);margin:0 0 8px}
+.myth .m .said{font-weight:600;font-size:14.5px;margin:0 0 7px}
+.myth .m p{margin:0;font-size:13.5px;color:var(--ink-2);max-width:none}
 footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);
        font-family:var(--f-mono);font-size:12px;color:var(--muted);line-height:1.75}
 footer a{color:var(--muted)}
@@ -266,12 +287,12 @@ footer a{color:var(--muted)}
         <div class="bo-lab">The counterexample &middot; live, from the run below</div>
         <div class="bo-row">
           <div class="stat">
-            <div class="k">Warm-up letter <span id="cxA">—</span> &middot; surprise</div>
+            <div class="k">Warm-up, 13 letters &middot; mean surprise</div>
             <div class="v flat" id="cxAs">—</div>
           </div>
           <div class="stat"><div class="k">neurons firing</div><div class="v hot" id="cxAn">—</div></div>
           <div class="stat">
-            <div class="k">Repeat letter <span id="cxB">—</span> &middot; surprise</div>
+            <div class="k">Repeats, 56 letters &middot; mean surprise</div>
             <div class="v flat" id="cxBs">—</div>
           </div>
           <div class="stat"><div class="k">neurons firing</div><div class="v cool" id="cxBn">—</div></div>
@@ -397,15 +418,19 @@ footer a{color:var(--muted)}
   </div>
   <p class="hint" style="max-width:78ch">Widths are true to letter counts. Values are the share of
     layer&nbsp;2 neurons firing, from the run above. The model predicts the repeats almost perfectly
-    (loss 0.008 against 2.88 on first sight, on the pinned sample), which is the point: it has learned the word from
+    (loss 0.008 against 3.28 on first sight, on the pinned sample, where 3.26 is the random
+    baseline for 26 letters), which is the point: it has learned the word from
     context, and only then does it go quiet.</p>
 </section>
 
 <section>
-  <h2><span class="num">04 / AGAINST THE PAPER</span>Our number beside theirs</h2>
+  <h2><span class="num">04 / BESIDE THE PAPER</span>Our number next to theirs</h2>
   <p class="lede">The paper measured a model 32 times larger than the one in this page. We cannot run
     that in a browser, so the honest question is whether the effect survives being shrunk. It does,
-    and it is much stronger at 8k than at 2k. <strong>It does not keep growing.</strong></p>
+    and it is much stronger at 8k than at 2k. <strong>It does not keep growing.</strong>
+    Everything here reproduces the paper's result before it sharpens it: in aggregate, predictable
+    text really is quieter. What the counterexample above adds is that predictability is not the
+    variable doing the work.</p>
   <div class="scroll"><table id="scaleTable">
     <thead><tr><th>Model</th><th>Neurons</th><th>Layer 2 ratio</th><th>Spread over 5 samples</th><th></th></tr></thead>
     <tbody></tbody>
@@ -496,8 +521,91 @@ footer a{color:var(--muted)}
   </div>
 </section>
 
+<section id="check">
+  <h2><span class="num">06 / CHECK YOURSELF</span>Say it back before you believe it</h2>
+  <p class="lede">Three questions. Two of them ask you to predict what a control will do
+    <em>before</em> you touch it, which is the only version of understanding that is worth
+    anything here. Open the answer once you have committed to one.</p>
+
+  <div class="qa">
+    <details>
+      <summary>The counterexample panel shows the warm-up using roughly two and a half times
+        the neurons of the repeats, and both are predicted almost perfectly. What does that
+        rule out?</summary>
+      <div class="ans">
+        <p>It rules out predictability as the variable. If activity tracked how predictable
+          the text is, two blocks that are both predicted to within a thousandth of a nat
+          would use about the same number of neurons. They do not.</p>
+        <p>What separates them is where the knowledge came from. The 13 warm-up letters are
+          identical in every training sequence, so the model holds them in its trained
+          <strong>weights</strong>. The repeated word is different every run, so it can only
+          be held in the <strong>context</strong> it just read. The activity level tells those
+          two kinds of memory apart, which is the whole claim.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Before you press it: predict what happens to the ratio when you switch to
+        layer 0, and decide whether that would break the claim.</summary>
+      <div class="ans">
+        <p>It reverses. Layer 0 sits at about 0.82 on this model, meaning <em>more</em> neurons
+          fire while repeating than while first reading the word. Layer 3 is flat. The effect
+          lives in layers 1 and 2 and peaks at layer 2, which is the layer the paper singles
+          out.</p>
+        <p>It does not break the claim, but it does narrow it. "A BDH goes quiet" is too broad
+          a sentence. "Layers 1 and 2 of this BDH go quiet on context-learned text" is what the
+          measurement actually supports, and the difference between those two sentences is the
+          kind of thing worth checking in any result you read.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Inject a surprise. The letter <em>before</em> it is unchanged to nine decimal
+        places. Why must that be so, and what would it mean if it were not?</summary>
+      <div class="ans">
+        <p>Because the model only reads leftwards. The score matrix is built with
+          <code>.tril(diagonal=-1)</code>, strictly below the diagonal, so position <em>t</em>
+          can only bind to positions before it. A letter cannot be affected by one that comes
+          after it.</p>
+        <p>If that earlier letter did move, the causal mask would be broken, the model would be
+          seeing its own future, and every number on this page would be worthless. It is a
+          one-line check that the instrument is wired correctly, which is why the page runs it
+          in front of you rather than asserting it.</p>
+      </div>
+    </details>
+  </div>
+
+  <h3>Three things people get wrong about this</h3>
+  <div class="myth">
+    <div class="m">
+      <h4>Misconception</h4>
+      <p class="said">"BDH is a state-space model, like Mamba."</p>
+      <p>It is not, and the problem statement for this track warns against the framing twice.
+        BDH-GPU is built from ReLU low-rank transformations with linear attention; the graph
+        form is interacting neurons and synapses. Neither is a Mamba-style selective state
+        space.</p>
+    </div>
+    <div class="m">
+      <h4>Misconception</h4>
+      <p class="said">"Sparse activations are a BDH invention."</p>
+      <p>Ordinary Transformers develop activation sparsity on their own during training
+        (<a href="https://arxiv.org/abs/2210.06313">arXiv:2210.06313</a>), and it depends on
+        using a hard rectifier (<a href="https://arxiv.org/abs/2310.04564">arXiv:2310.04564</a>).
+        What is worth arguing about is not that BDH is sparse, but what its sparsity is a
+        function of.</p>
+    </div>
+    <div class="m">
+      <h4>Misconception</h4>
+      <p class="said">"The model on this page is Pathway's."</p>
+      <p>The <em>architecture</em> is Pathway's, used unmodified. The weights are not: they were
+        trained here from scratch on synthetic data, at 397,312 parameters against the paper's
+        65,536-neuron model. No official BDH checkpoint is public, and none is used here.</p>
+    </div>
+  </div>
+</section>
+
 <section>
-  <h2><span class="num">06 / LIMITS</span>Where this stops being true</h2>
+  <h2><span class="num">07 / LIMITS</span>Where this stops being true</h2>
   <p class="lede">Stated because a judge will find them anyway, and because the interesting part of a
     result is usually its edge.</p>
   <div class="scroll"><table>
@@ -544,7 +652,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "12";
+const BUILD = "13";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
@@ -768,24 +876,35 @@ function render() {
   // perfect (it learned that word from the CONTEXT, seconds ago) and goes quiet.
   // Same predictability, very different activity. That is the whole point.
   if (cur.surprise) {
+    // Whole blocks, not two hand-picked letters. Every letter in both blocks is predicted
+    // almost perfectly, so choosing the "least surprising" one of each is a tie-break over
+    // noise. Comparing the blocks uses all 69 letters and is the quantity measure.py
+    // reports, so the page and the repository cannot drift apart.
     const sp = cur.surprise;
-    let a = 1, b = WARM + WORD + 2;
-    for (let i = 1; i < WARM; i++) if (sp[i] < sp[a]) a = i;
-    for (let i = WARM + WORD + 2; i < PERIOD - 1; i++) if (sp[i] < sp[b]) b = i;
-    const nats = v => v.toFixed(3);
-    $("#cxA").textContent = a; $("#cxB").textContent = b;
-    $("#cxAs").textContent = nats(sp[a]); $("#cxBs").textContent = nats(sp[b]);
-    $("#cxAn").textContent = (series[a] * 100).toFixed(2) + "%";
-    $("#cxBn").textContent = (series[b] * 100).toFixed(2) + "%";
-    const factor = series[b] > 0 ? series[a] / series[b] : NaN;
-    $("#cxNote").innerHTML = series[a] > series[b] * 1.3
-      ? `Both letters are predicted almost perfectly, surprise near zero either way. Layer
-         ${layer} still uses <strong>${factor.toFixed(1)}&times; more neurons</strong> on the
-         warm-up. The warm-up lives in the model's trained weights; the repeated word was
-         learned from the text a moment ago. Being predictable is not what quietens it.
-         Having just learned it is.`
-      : `On this run layer ${layer} does not show the gap (${factor.toFixed(1)}&times;).
-         The effect lives in layers 1 and 2; try those.`;
+    const mean = arr => {
+      const v = arr.filter(Number.isFinite);
+      return v.length ? v.reduce((p, q) => p + q, 0) / v.length : NaN;
+    };
+    const warmS = mean(sp.slice(1, WARM));               // index 0 has no predecessor
+    const repS = mean(sp.slice(WARM + WORD, PERIOD));
+    const warmA = st.warm, repA = st.rep;
+    const nats = v => (v < 0.001 ? "< 0.001" : v.toFixed(3));
+    $("#cxAs").textContent = nats(warmS);
+    $("#cxBs").textContent = nats(repS);
+    $("#cxAn").textContent = (warmA * 100).toFixed(2) + "%";
+    $("#cxBn").textContent = (repA * 100).toFixed(2) + "%";
+    const factor = repA > 0 ? warmA / repA : NaN;
+    $("#cxNote").innerHTML = warmA > repA * 1.3
+      ? `Both blocks are predicted almost perfectly &mdash; mean surprise near zero on either
+         side &mdash; and layer ${layer} still uses <strong>${factor.toFixed(1)}&times; more
+         neurons</strong> on the warm-up. Those 13 letters are identical in every training
+         sequence, so they live in the model's trained <strong>weights</strong>. The repeated
+         word is new every run, so it can only have come from the <strong>context</strong>,
+         seconds ago. Being predictable is not what quietens the model. Having just learned
+         it is.`
+      : `On this run layer ${layer} does not show the gap (${factor.toFixed(1)}&times;), which
+         is itself worth seeing: the effect lives in layers 1 and 2. Layer 0 runs backwards
+         and layer 3 is flat at this size. Try them.`;
   }
 
   // The falsification readout. A phase average over 56 letters cannot show a jump
@@ -824,6 +943,33 @@ function render() {
   $("#gridWhen").textContent = `letter ${p + 1} of ${T} · ${phase}`;
   $("#gridCount").textContent =
     `${Math.round(series[p] * cur.nNeurons)} of ${cur.nNeurons} neurons firing`;
+}
+
+/* ---------- first paint, from the reference trace that ships with the page ----------
+   Same shape the worker posts back, so render() cannot tell the difference and there is
+   no second rendering path to keep in sync. Attention scores are not in the trace, so the
+   heatmap waits for the live pass; everything else is on screen immediately. */
+function fromReference(refJson, nNeurons) {
+  const S = refJson.logits_shape[1], L = refJson.logits;
+  const raw = new Array(T).fill(NaN);
+  for (let t = 0; t < T - 1; t++) {
+    const o = t * S;
+    let mx = -Infinity;
+    for (let v = 0; v < S; v++) if (L[o + v] > mx) mx = L[o + v];
+    let sum = 0;
+    for (let v = 0; v < S; v++) sum += Math.exp(L[o + v] - mx);
+    raw[t] = -(L[o + refJson.tokens[t + 1]] - mx - Math.log(sum));
+  }
+  // Same alignment the worker and measure.py use: the surprise of reading letter t is
+  // what the model paid to predict it, which is raw[t-1].
+  const surprise = new Array(T).fill(NaN);
+  for (let t = 1; t < T; t++) surprise[t] = raw[t - 1];
+  return {
+    T, nNeurons, surprise, scores: null,
+    sparsity: refJson.sparsity.map(l => ({
+      layer: l.layer, x: l.x.slice(0, T), y: l.y.slice(0, T), xy: l.xy.slice(0, T),
+    })),
+  };
 }
 
 /* ---------- run the model ---------- */
@@ -959,12 +1105,27 @@ function initTour() {
 
 /* ---------- boot ---------- */
 (async function () {
-  ref = await fetch("data/reference.json").then(r => r.json());
+  const [refJson, manifest] = await Promise.all([
+    fetch("data/reference.json").then(r => r.json()),
+    fetch("data/manifest.json").then(r => r.json()),
+  ]);
+  ref = refJson;
   warmup = ref.tokens.slice(0, WARM);
   $("#word").value = ref.word.map(k => LETTERS[k]).join("");
 
   // the measured 1,280-sequence curve for the model that runs here, for the line under the readout
   bench = await fetch("data/traces/n2048.json").then(r => r.json()).catch(() => null);
+
+  // Paint real numbers now. The page opens on the same word the reference trace was
+  // exported for, so the live pass that follows recomputes exactly these values.
+  cur = fromReference(ref, manifest.n_neurons);
+  $("#runbadge").textContent = "PyTorch reference";
+  $("#gramBadge").textContent = "computing";
+  $("#gramBadge").classList.add("pre");
+  $("#perf").textContent =
+    "Showing the PyTorch reference trace that ships with this page, for the word in the box. " +
+    "Your browser is recomputing it now; the badge flips to live when it agrees.";
+  render();
 
   worker = new Worker("worker.js?v=" + BUILD, { type: "module" });
   worker.onmessage = ev => {
@@ -977,6 +1138,8 @@ function initTour() {
     const badge = $("#runbadge");
     badge.textContent = "live";
     badge.classList.remove("pre");
+    $("#gramBadge").textContent = "live";
+    $("#gramBadge").classList.remove("pre");
     $("#perf").textContent =
       `Forward pass over ${d.T} letters: ${d.ms.toFixed(0)} ms in this browser, ` +
       `on ${d.nNeurons.toLocaleString()} neurons, single-threaded JavaScript. ` +

@@ -38,19 +38,19 @@ In aggregate the paper is right: predictable text is quieter. The counterexample
 that what actually predicts quietness is *where the knowledge came from*, not predictability
 by itself.
 
-**The counterexample.** Layer 2 of the n=8192 model, averaged over **1,280 sequences**, read
-from the committed trace `web/data/traces/n8192.json` at positions 11 and 40. Regenerate it
-with the `--export-trace` command below.
+**The counterexample.** Layer 2 of the n=8192 model over **1,280 sequences**, read from the
+committed trace `web/data/traces/n8192.json`. Whole blocks, not hand-picked letters:
 
-| what the model is reading | surprise (nats) | layer-2 neurons firing |
+| what the model is reading | mean surprise | layer-2 neurons firing |
 |---|---|---|
-| warm-up letter 11, identical in every sequence | 0.000 | **13.59%** |
-| repeated word, letter 40 | 0.003 | **3.50%** |
+| the 13-letter warm-up, identical in every sequence, held in the **weights** | 0.0005 nats | **9.10%** |
+| the 56 repeated letters, new every run, learned from the **context** | 0.0079 nats | **3.64%** |
 
-Both are predicted essentially perfectly. One uses roughly four times as many neurons. The
-warm-up is memorised in the **weights** during training and keeps neurons busy; the repeated
-word is learned from the **context** moments earlier, and that is what goes quiet. So the
-variable is not predictability. It is where the knowledge lives.
+Both blocks are predicted essentially perfectly, and one uses **2.5x** as many neurons. At the
+extremes the gap is wider still: letter 11 runs at 13.60% against letter 40 at 3.49%, 3.9x
+apart, both under 0.003 nats of surprise. So the variable is not predictability. It is where
+the knowledge lives, and the activation signature separates parametric memory from in-context
+memory.
 
 **It is falsifiable, in the artifact, in under a minute.** Inject a letter the model cannot
 predict into the middle of the repetition. If activity does not rise at that letter, the
@@ -88,6 +88,7 @@ The rubric asks for this explicitly, so it is near the top rather than buried.
 
 | Element | Status |
 |---|---|
+| What you see in the first second | **Precomputed, and labelled on screen.** Rather than showing empty dashes while the browser works, the page paints PyTorch's own reference trace for the word it opens on (`web/data/reference.json`). The badge reads "PyTorch reference" until the live pass returns, then flips to "live". The page opens on exactly the word that trace was exported for, so the live run recomputes those same values and you can watch them agree. |
 | The model on the page (n=2048, 397,312 params) | **Live.** Real weights, real forward pass, computed in your browser on every interaction. Not a recording. |
 | Neuron grid, sparsity trace, counterexample panel, surprise test | **Live.** All recomputed from that forward pass. |
 | Attention heatmap and binding-by-lag chart | **Live**, from the same run. |
@@ -212,6 +213,22 @@ a model four to eight times larger again. Whether it grows monotonically, we do 
 Settling it needs three models trained for an identical number of steps, about thirteen hours
 of CPU that did not fit before the deadline.
 
+**A bug our own measurement found.** Until 2026-09-06 the per-position loss was paired with
+the wrong position. `pl[t]` is the cost of *predicting* token `t+1`, so the surprise of
+*reading* letter `t` is `pl[t-1]`. The first-exposure slice therefore dropped the first
+genuinely new letter and pulled in one the model had already learned, and reported first-sight
+loss as **2.88**. The random baseline for 26 letters is 3.258, and a first sight of a random
+word cannot be easier than chance, so that number should have been impossible. Aligned, it
+reads **3.28**, sitting on the baseline exactly as it should. Every sparsity number is
+unaffected: the activation counts never depended on the loss array. The correlations above are
+computed on the aligned curve, and `web/data/traces/*.json` now ship it as `surprise`.
+
+The training logs in `experiments/results/run_*.log` were written **before** this fix and
+still print the unaligned figure of about 2.87. They are kept as the historical record of
+those training runs and cannot be regenerated without retraining. `measure.py` is the source
+of every number quoted in this project, and it is aligned; `sparsity_scan.py` has been
+corrected too, so a fresh training run prints the right value.
+
 **A note on why `measure.py` exists.** `sparsity_scan.py` draws its evaluation words *after*
 training has consumed the random number stream, so its sample depends on the entire training
 history and cannot be regenerated from a checkpoint. Re-measuring n=8192 on a fresh sample
@@ -229,7 +246,8 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 | Scaling is **not** monotonic | 1.43 → 1.97 → 1.87 at n = 2k, 8k, 16k. We expected monotone growth and said so publicly until the third model landed |
 | The three models are not step-matched | 1,854 / 1,917 / 2,309 steps of one 4,000-step schedule, each cut by wall clock |
 | A single sequence is noisy | one sequence gave 1.93 where 1,280 give 1.43 |
-| Surprise and sparsity do **not** track per letter | layer 2 gives Pearson 0.35 but Spearman −0.05. Inside the first-exposure block surprise is flat at 3.27 while sparsity falls 12.9% → 6.3%. The relationship is between phases, not letters. This killed a stronger claim we wanted to make. |
+| Surprise and sparsity do **not** track per letter | at n=8192, layer 2: **Pearson 0.29, Spearman 0.02**. Across the eight letters of first sight, surprise is flat at 3.27 to 3.30 nats while sparsity falls 12.8% to 4.6%. The relationship is between phases, not letters, and a near-zero Spearman is what says so. This killed a stronger claim we wanted to make. Printed by `measure.py`, recorded in `experiments/results/correlations.csv` |
+| We show the signature, not its cause | nothing here explains *why* context-held knowledge needs fewer neurons than weight-held knowledge. The measurement separates the two; the mechanism behind that separation is open. An independent reader of the one-page summary raised exactly this, and they were right |
 | Toy model, not an official BDH checkpoint | architecture is Pathway's and unmodified; the weights are ours |
 | Synthetic task, not natural language | so is the paper's §6.4 protocol, deliberately |
 

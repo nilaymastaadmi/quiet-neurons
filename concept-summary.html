@@ -17,7 +17,7 @@
   html, body { margin: 0; padding: 0; }
   body {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 9.5pt; line-height: 1.26; color: #111;
+    font-size: 9.5pt; line-height: 1.22; color: #111;
   }
   h1 { font-size: 13.5pt; line-height: 1.14; margin: 0 0 2pt; letter-spacing: -.01em; }
   .sub { font-size: 8.2pt; color: #444; margin: 0 0 6pt; }
@@ -69,7 +69,8 @@
   Section 6.4 reports that "fewer neurons are active ... for more predictable input signals": at layer
   2 of a 65,536-neuron model, 4.0&ndash;7.5% active while memorising a new word against about 2.5% while
   repeating it [1, Fig. 14]. We reproduced that protocol on three models trained here from the public
-  code. It survives being shrunk by a factor of 32.
+  code and it holds, surviving a 32-fold shrink. <strong>In aggregate the paper is right: predictable
+  text is quieter.</strong> What follows sharpens that result rather than contradicting it.
 </p>
 <table>
   <tr><th>Model (neurons / parameters)</th><th>Memorising</th><th>Repeating</th><th>Ratio</th><th>Evidence class</th></tr>
@@ -80,16 +81,16 @@
 </table>
 <p>
   Each row is 1,280 sequences over five pinned samples, spread near 0.005. The same measurement then
-  breaks the usual reading of it. Two positions in one sequence are predicted almost perfectly yet
-  differ fourfold in activity: letter 11, inside the fixed warm-up, sits at <strong>13.6%</strong>
-  active at 0.000 nats of surprise; letter 40, deep in the repeated word, at <strong>3.5%</strong> at
-  0.003 nats. The warm-up is identical in every training sequence, so it lives in the
-  <strong>weights</strong>; the repeated word is new each sequence, so it can only come from the
-  <strong>context</strong>. <strong>The variable is where the knowledge lives</strong>, not how
-  predictable the text is, and the activation signature separates parametric from in-context memory. A
-  learner falsifies this in under a minute by injecting an unpredictable letter mid-repetition:
-  activity rises at that letter, +10% to +20% by word, and is unchanged to nine decimals at the letter
-  before it, because the model reads only leftwards.
+  narrows what the result can mean. Two blocks of one sequence are both predicted almost perfectly and
+  differ two and a half fold in activity: the 13-letter warm-up runs at <strong>9.1%</strong> of layer
+  2 active at 0.0005 nats of mean surprise (a nat is the natural-log unit of cross-entropy; zero means
+  perfectly predicted), the 56 repeated letters at <strong>3.6%</strong> at 0.008 nats. At the extremes the gap is 3.9x. The warm-up is identical in every training sequence, so it
+  lives in the <strong>weights</strong>; the repeated word is new each sequence, so it can only come
+  from the <strong>context</strong>. <strong>The variable is where the knowledge lives</strong>, not
+  how predictable the text is, and the activation signature separates parametric from in-context
+  memory. A learner falsifies this in under a minute by injecting an unpredictable letter
+  mid-repetition: activity rises at that letter, +10% to +20% by word, and is unchanged to nine
+  decimals at the letter before it, because the model reads only leftwards.
 </p>
 
 <h2>Evidence, labelled</h2>
@@ -106,21 +107,21 @@
 
 <h2>Limitations, maturity, and what would settle them</h2>
 <p>
-  The effect is not uniform with depth: layer 0 runs <em>backwards</em> at all three sizes (0.82, 0.79,
-  0.86), and layer 3 is flat at the two smaller models and weakly positive (1.11&times;) at the largest.
-  Scaling is <strong>not monotonic</strong> &mdash; 16,384 measures below 8,192 by roughly twenty times
-  the sampling spread &mdash; and we published the opposite before the third model finished. One
-  confound cannot be excluded: a single 4,000-step schedule cut by wall clock at 1,854, 1,917 and 2,309
-  steps, so the three stopped at different points on it. Final losses (0.176, 0.175, 0.172) say
-  comparably trained, not controlled; three step-matched runs would settle it. These are toys, 0.4M to
-  6.3M parameters on a synthetic task, as the paper's own protocol is. Surprise and sparsity do
-  <em>not</em> track per letter (Pearson 0.35, Spearman &minus;0.05), which killed a stronger claim. And we count the elementwise product, the only quantity in the public code whose
-  magnitude reaches the paper's band; the paper does not say which tensor it means, though that choice
-  changes the size of the effect, not its direction, positive on all three candidates.
-  <span class="lab">Maturity:</span> for this narrow property BDH is credible and now outsider-checkable at
-  small scale. The wider programme is earlier &mdash; headline benchmarks
-  are developer-reported, the open repository ships no trained weights, and published comparisons stop
-  at GPT-2 scale. Its interpretability claims are the verifiable ones today, and this is one.
+  The effect is not uniform with depth: layer 0 runs <em>backwards</em> at all three sizes (0.82,
+  0.79, 0.86) and layer 3 is flat below 16,384 neurons, weakly positive (1.11&times;) there. Scaling
+  is <strong>not monotonic</strong> &mdash; 16,384 measures below 8,192 by twenty times the sampling
+  spread &mdash; and we published the opposite before the third model finished. One confound stands:
+  a single 4,000-step schedule cut by wall clock at 1,854, 1,917 and 2,309 steps. Close final losses
+  (0.176, 0.175, 0.172) mean comparably trained, not controlled; three step-matched runs would settle
+  it. These are toys, 0.4M to 6.3M parameters on a synthetic task, as the paper's own protocol is.
+  Surprise and sparsity do <em>not</em> track per letter (8,192 neurons, layer 2: Pearson 0.29,
+  Spearman 0.02), which killed a stronger claim. We count the elementwise product, the only quantity
+  in the public code reaching the paper's band; the paper does not say which tensor it means, though
+  that choice changes the effect's size, not its direction, positive on all three. Most importantly
+  we establish the <em>signature</em>, not its cause: nothing here explains why context-held knowledge
+  needs fewer neurons than weight-held knowledge. <span class="lab">Maturity:</span> for this property
+  BDH is credible and outsider-checkable at small scale; the wider programme is earlier, its headline
+  benchmarks developer-reported and public comparisons stopping at GPT-2 scale.
 </p>
 
 <p class="refs">
