@@ -126,6 +126,26 @@ web/
   data/scaling.json              the measured scaling points
 ```
 
+### What each part of the page does
+
+`index.html` above is one line in a file tree, so here is the artifact itself, in order. Every
+section has one job and the sequence is the guided narrative: watch it, understand it, check it
+is not a trick, compare it to the paper, then test yourself.
+
+| Section | Its one job | Live? |
+|---|---|---|
+| 00 Who this is for | Audience, prerequisites, and the claim in one falsifiable sentence | text |
+| 01 The instrument | The reader watches activity fall as the model learns the word. Opens already running, no Run button | **live** |
+| 02 The mechanism | Why context-learned text should be cheaper. The neuron grid and the non-negativity panel | **live** |
+| 03 The setup | What the model is actually reading, so the reader can tell signal from artefact | **live** |
+| 04 Beside the paper | Our three ratios against Figure 14's band, and the non-monotonicity we did not expect | precomputed |
+| 05 Where this lives in BDH | The BDH module: which tensor, which layer, and why this architecture and not another | text + live readout |
+| 06 Check yourself | Three predict-before-you-touch questions, three misconceptions, and a say-it-back prompt with a marking key | interactive |
+| 07 Limits | Every place the effect is absent, weak, or against us, including one confound we removed | text |
+
+The four-step tour at the top drives the same controls the sandbox does, so the guided path and
+the free exploration are the same instrument, not two modes.
+
 **There is no backend.** The page is static files plus 1.59 MB of weights, and every
 computation happens in the reader's browser. That is deliberate rather than a shortcut: any
 page that depends on a server can stop working between deployment and judging, and this one

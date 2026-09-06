@@ -552,9 +552,11 @@ footer a{color:var(--muted)}
 
 <section id="check">
   <h2><span class="num">06 / CHECK YOURSELF</span>Say it back before you believe it</h2>
-  <p class="lede">Three questions. Two of them ask you to predict what a control will do
-    <em>before</em> you touch it, which is the only version of understanding that is worth
-    anything here. Open the answer once you have committed to one.</p>
+  <p class="lede">Three questions, then one harder one. Two of the three ask you to predict what
+    a control will do <em>before</em> you touch it, which is the only version of understanding
+    that is worth anything here. Open the answer once you have committed to one. The last block
+    asks you to explain the idea in your own words and gives you the key to mark yourself
+    against.</p>
 
   <div class="qa">
     <details>
@@ -631,6 +633,43 @@ footer a{color:var(--muted)}
         65,536-neuron model. No official BDH checkpoint is public, and none is used here.</p>
     </div>
   </div>
+
+  <h3>Now say it back</h3>
+  <p class="lede">Predicting a control is the easy half. The harder test is whether you can
+    hand the idea to someone who has not seen this page. <strong>Explain it in two sentences,
+    out loud or on paper, without using the words sparse, activation or tensor.</strong> Then
+    open the key and mark yourself. Nothing here grades you; the key is the same one we used
+    on two independent readers of the one-page summary, and both of them missed something on
+    the first pass.</p>
+
+  <div class="qa">
+    <details>
+      <summary>The marking key: three things a correct explanation contains, and the two
+        wrong versions that are easiest to land on.</summary>
+      <div class="ans">
+        <p><strong>It should contain all three.</strong></p>
+        <p><strong>1. The distinction.</strong> The model quietens on text it has just picked up
+          from what it is reading, not on text that is merely easy to guess. If your sentence
+          would still be true with "easy to guess" alone, it is the paper's aggregate claim and
+          not the thing this page adds.</p>
+        <p><strong>2. The evidence that separates them.</strong> Two stretches of one sequence
+          are both predicted almost perfectly, and one uses roughly two and a half times the
+          neurons of the other, 9.7% against 3.6%. Predictability cannot explain that gap; where
+          the knowledge came from can. The warm-up is in the weights, the repeated word is only
+          in the context.</p>
+        <p><strong>3. The limit.</strong> This shows the <em>signature</em>, not the cause.
+          Nothing here explains <em>why</em> knowledge held in context should need fewer neurons.
+          An explanation that sounds certain about the mechanism is overclaiming, and we do not
+          know it either.</p>
+        <p><strong>The two wrong versions.</strong> "A BDH goes quiet on predictable text" is
+          the aggregate result, true on average and not what is new here: the warm-up is the most
+          predictable stretch in the sequence and it is the <em>loud</em> one. And "this refutes
+          the paper" is wrong in the other direction. In aggregate the paper is right. This
+          narrows what its result can mean. A reader given only our one-page summary made exactly
+          the first of those two errors, which is why it is listed here rather than invented.</p>
+      </div>
+    </details>
+  </div>
 </section>
 
 <section>
@@ -646,8 +685,11 @@ footer a{color:var(--muted)}
           <td class="n">0.97, 0.95, 1.11 <span class="tag tag-no">against us</span></td></tr>
       <tr><td>Scaling is <em>not</em> monotonic</td>
           <td class="n">1.47 → 2.12 → <strong>1.87</strong> at 2k, 8k, 16k, all at 2,309 steps <span class="tag tag-no">against us</span></td></tr>
-      <tr><td>The three models are not step-matched</td>
-          <td class="n">all three now stop at 2,309 steps of the same schedule; the wall-clock numbers are kept for comparison</td></tr>
+      <tr><td>The three models were not step-matched. <em>This one we fixed.</em></td>
+          <td class="n">they had been cut by wall clock at 1,854, 1,917 and 2,309 steps of one schedule, so
+            each stopped at a different learning rate. We retrained the two short ones to 2,309. Both
+            rose, 1.43 to 1.47 and 1.97 to 2.12, and the dip at 16k survived
+            <span class="tag tag-ok">removed</span></td></tr>
       <tr><td>A single sequence is noisy</td>
           <td class="n">one run gave 1.93 where 1,280 sequences give 1.47</td></tr>
       <tr><td>This is a toy trained here, not an official BDH checkpoint</td>
@@ -681,7 +723,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "17";
+const BUILD = "18";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
