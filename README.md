@@ -5,9 +5,20 @@ learned, but not on text baked into its weights. Both are perfectly predictable.
 
 DataForge 2026, Pathway Track. Approved topic: **Sparse Non-Negative Activations**.
 
-- **Live artifact:** https://nilaymastaadmi.github.io/quiet-neurons/
-- **Reproduce every number:** two commands, see [Reproducing the results](#reproducing-the-results)
-- **Check the browser model against PyTorch:** open `web/parity.html`
+## Every link in this submission
+
+| What | Where |
+|---|---|
+| **Live artifact**, opens without sign-in | https://nilaymastaadmi.github.io/quiet-neurons/ |
+| **Public source repository** | https://github.com/nilaymastaadmi/quiet-neurons |
+| **One-page concept summary (PDF)** | `concept-summary.pdf`, in this package and in the repository |
+| **Parity check**, browser model against PyTorch | https://nilaymastaadmi.github.io/quiet-neurons/parity.html |
+| **Per-phase profiler** | https://nilaymastaadmi.github.io/quiet-neurons/profile.html |
+| **AI assistance disclosure** | `AI_DISCLOSURE.md` |
+| **Source and licence record** | `experiments/LICENSES.md` and `LICENSE` |
+| **Trained checkpoints**, too large for the zip | `experiments/checkpoints/` in the repository above |
+
+Reproduce every number: see [Reproducing the results](#reproducing-the-results).
 
 ---
 
@@ -18,11 +29,18 @@ DataForge 2026, Pathway Track. Approved topic: **Sparse Non-Negative Activations
 > and they are not.
 
 This starts from the Dragon Hatchling paper's Section 6.4 and Figure 14, which reports that
-BDH's neuron activity "varies with predictability rather than following a fixed sparsity
-budget". We reproduced that at three model sizes, then found the framing is too loose, and the
-artifact teaches the corrected version.
+"neuron activity correlates with signal predictability: fewer neurons are active ... for more
+predictable input signals" (arXiv:2509.26507, section 6.4). We reproduced that at three model
+sizes and it holds. Then we found a case it does not cover, and the artifact teaches the
+sharpened version.
 
-**The counterexample, measured at n=8192 over 256 sequences:**
+In aggregate the paper is right: predictable text is quieter. The counterexample below shows
+that what actually predicts quietness is *where the knowledge came from*, not predictability
+by itself.
+
+**The counterexample.** Layer 2 of the n=8192 model, averaged over **1,280 sequences**, read
+from the committed trace `web/data/traces/n8192.json` at positions 11 and 40. Regenerate it
+with the `--export-trace` command below.
 
 | what the model is reading | surprise (nats) | layer-2 neurons firing |
 |---|---|---|
@@ -36,9 +54,10 @@ variable is not predictability. It is where the knowledge lives.
 
 **It is falsifiable, in the artifact, in under a minute.** Inject a letter the model cannot
 predict into the middle of the repetition. If activity does not rise at that letter, the
-claim is wrong. Measured on the shipped model: 5.03% → 5.96% at the same position, +18%.
-The letter *before* the surprise is identical to nine decimal places, because the model only
-reads leftwards.
+claim is wrong. On the page's default word: 5.03% → 5.96% at the same position, **+18%**.
+Other words land roughly between +10% and +20% in layer 2, so quote the range rather than the
+single number. The letter *before* the surprise is identical to nine decimal places, because
+the model only reads leftwards.
 
 ---
 
@@ -72,7 +91,7 @@ The rubric asks for this explicitly, so it is near the top rather than buried.
 | The model on the page (n=2048, 397,312 params) | **Live.** Real weights, real forward pass, computed in your browser on every interaction. Not a recording. |
 | Neuron grid, sparsity trace, counterexample panel, surprise test | **Live.** All recomputed from that forward pass. |
 | Attention heatmap and binding-by-lag chart | **Live**, from the same run. |
-| Which individual dot lights up in the neuron grid | **Illustrative.** The *count* is real and stated; the scatter is a deterministic layout, because which particular neuron fires is not what the claim is about. The page says so in its caption. |
+| Which individual dot lights up in the neuron grid | **Count live, placement illustrative.** The number of lit cells is computed by the forward pass and printed under the grid. Where they sit is a fixed scatter keyed to the letter position, because which particular neuron fires is not what the claim is about. The grid's own caption says exactly this. |
 | Scaling chart points, and the larger-model curves the size switcher overlays | **Precomputed** by `experiments/measure.py`, shipped as `web/data/scaling.json` and `web/data/traces/`. Only n=2048 runs live; n=8192 and n=16384 are 8x and 16x the compute and cannot, and the page labels their curves "measured, not live". |
 | The paper's band at n=65536 | **Not reproduced by us.** Read off Figure 14 of arXiv:2509.26507 and drawn as a band, because that is how it is reported. |
 | Training data | **Synthetic**, exactly the paper's §6.4 protocol. No natural language, deliberately. |
@@ -101,15 +120,15 @@ web/
   worker.js                      runs it off the main thread so typing never freezes
   parity.html                    checks bdh.js against the PyTorch reference trace
   profile.html                   per-phase timings, used to stop guessing about speed
-  data/weights.bin               397,824 float32, 1.55 MB
+  data/weights.bin               397,824 float32, 1,591,296 bytes (1.59 MB)
   data/reference.json            PyTorch's answers for a fixed input; the parity target
   data/scaling.json              the measured scaling points
 ```
 
-**There is no backend.** The page is static files plus 1.55 MB of weights, and every
-computation happens in the reader's browser. This is a deliberate choice: the most visible
-prior BDH explainer currently returns HTTP 502 from its model endpoint while its animation
-keeps playing. A page that cannot reach a server cannot be honest about what it is showing.
+**There is no backend.** The page is static files plus 1.59 MB of weights, and every
+computation happens in the reader's browser. That is deliberate rather than a shortcut: any
+page that depends on a server can stop working between deployment and judging, and this one
+has no server to lose. Everything you see was computed in your own tab.
 
 ### Is the browser model really the same model?
 
@@ -135,12 +154,31 @@ exactly one such neuron and no more, and the reason is written in the code.
 pip install torch                                   # CPU is fine; no GPU used anywhere
 
 cd experiments
-python sparsity_scan.py --embd 64 --mult 32 --budget 2700    # trains n=2048, ~30 min CPU
-python measure.py --ckpt checkpoints/bdh_n2048.pt --embd 64 --mult 32 --repeats 5 --append
-python make_scaling.py                                        # rebuilds web/data/scaling.json
+# the model that runs on the page: about 30 minutes of laptop CPU
+python sparsity_scan.py --embd 64 --mult 32 --budget 2700
+python measure.py --ckpt checkpoints/bdh_n2048.pt --embd 64 --mult 32 --repeats 5 \
+                  --append --export-trace ../web/data/traces/n2048.json
+python make_scaling.py                              # rebuilds web/data/scaling.json
 
-cd ../web && python -m http.server 8123                       # then open localhost:8123
+cd ../web && python -m http.server 8123             # then open localhost:8123
 ```
+
+That reproduces the n=2048 row and every number the live page prints. The other two rows, and
+the counterexample quoted at the top, come from the larger models: the same two commands with
+different sizes and a longer budget.
+
+```bash
+python sparsity_scan.py --embd 128 --mult 64  --budget 10800   # n=8192,  about 3 hours CPU
+python sparsity_scan.py --embd 128 --mult 128 --budget 21600   # n=16384, about 6 hours CPU
+python measure.py --ckpt checkpoints/bdh_n8192.pt  --embd 128 --mult 64  --repeats 5 \
+                  --append --export-trace ../web/data/traces/n8192.json
+python measure.py --ckpt checkpoints/bdh_n16384.pt --embd 128 --mult 128 --repeats 5 \
+                  --append --export-trace ../web/data/traces/n16384.json
+```
+
+The trained checkpoints are in the repository, so `measure.py` on its own re-derives every
+published number without retraining anything. They are left out of the submission zip only
+because they are 37 MB.
 
 `measure.py` prints `TASK_LEARNED` before it prints anything else. If that is `False` the
 model never learned to copy the in-context word, and the sparsity numbers are meaningless
@@ -186,8 +224,8 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 
 | Limit | What we actually measure |
 |---|---|
-| Layer 0 runs **backwards** | ratio 0.82 at n=2048, 0.79 at n=8192 |
-| Layer 3 shows **nothing** | 0.91 and 0.96, flat |
+| Layer 0 runs **backwards** at every size | ratio 0.82, 0.79, 0.86 at n = 2k, 8k, 16k |
+| Layer 3 is flat at 2k and 8k, weakly positive at 16k | 0.91, 0.96, **1.11**. "No effect" is true of the two smaller models only |
 | Scaling is **not** monotonic | 1.43 → 1.97 → 1.87 at n = 2k, 8k, 16k. We expected monotone growth and said so publicly until the third model landed |
 | The three models are not step-matched | 1,854 / 1,917 / 2,309 steps of one 4,000-step schedule, each cut by wall clock |
 | A single sequence is noisy | one sequence gave 1.93 where 1,280 give 1.43 |
@@ -200,9 +238,12 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 ## Three claims we deliberately refuse
 
 1. **"BDH is linear attention."** The public code materialises a full T×T score matrix. It
-   is quadratic. We measured the crossover: the linear form only costs less past roughly
-   4×D = 256 tokens (27.1M versus 40.4M multiply-adds per layer at T=154). Below that the
-   quadratic form is genuinely cheaper, which is presumably why the reference ships it.
+   is quadratic. We *counted operations* rather than timing them: at T=154, N=512, D=64 and
+   4 heads, the shipped quadratic form costs 27.1M multiply-adds per layer against 40.4M for
+   the recurrent form, and the two cross at T = 4ND/(N+D) + 1 ≈ **230 tokens**. Below that
+   the quadratic form is genuinely the cheaper one, which is presumably why the reference
+   ships it. This is an operation count, not a benchmark: no linear implementation was
+   written and nothing was timed.
 2. **97.4% on Sudoku Extreme.** Pathway's own README states this comes from their internal
    implementation and that the open repository does not reproduce it. Neither did we.
 3. **Anything about BDH-CQ's internals.** Its technical report states that its dimensions and
@@ -218,9 +259,22 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 2. B. Engdahl, A. Kosowski, J. Chorowski, Z. Stamirowska, P. Uznański et al.
    *BDH-CQ: In-Context Learning with Recurrent Latent Reasoning.* arXiv:2608.09888 (2026).
    Cited for the in-context-adaptation framing; its internals are proprietary and not modelled.
-3. A. Vaswani et al. *Attention Is All You Need.* arXiv:1706.03762 — the softmax attention
+3. Z. Li, C. You, S. Bhojanapalli et al. *The Lazy Neuron Phenomenon: On Emergence of
+   Activation Sparsity in Transformers.* arXiv:2210.06313 (2022); short version at ICLR 2023.
+   **Activation sparsity is not designed in, it emerges during training**, in ordinary
+   Transformer feed-forward blocks too. This is the control our claim needs: sparsity by
+   itself is not what makes BDH unusual.
+4. I. Mirzadeh, K. Alizadeh, S. Mehta et al. *ReLU Strikes Back: Exploiting Activation
+   Sparsity in Large Language Models.* arXiv:2310.04564 (2023). The choice of ReLU over a
+   smooth activation is what produces exact zeros, and therefore sparsity you can count —
+   the same design decision `bdh.py` makes twice per layer.
+5. Z. Liu, J. Wang, T. Dao et al. *Deja Vu: Contextual Sparsity for Efficient LLMs at
+   Inference Time.* arXiv:2310.17157 (2023); ICML 2023. **Which** units fire depends on the
+   input, not merely how many. That input-dependence is what our counterexample probes one
+   step further, by asking *which property* of the input it depends on.
+6. A. Vaswani et al. *Attention Is All You Need.* arXiv:1706.03762 — the softmax attention
    that BDH's Gram-matrix formulation departs from.
-4. A. Gu, T. Dao. *Mamba: Linear-Time Sequence Modeling with Selective State Spaces.*
+7. A. Gu, T. Dao. *Mamba: Linear-Time Sequence Modeling with Selective State Spaces.*
    arXiv:2312.00752 (2023) — the state-space line BDH is explicitly *not* in, per the
    problem statement's own note.
 
@@ -230,15 +284,18 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 
 **`experiments/bdh.py` is Pathway's reference implementation, used unmodified**, from
 [pathwaycom/bdh](https://github.com/pathwaycom/bdh), MIT, Copyright 2025 Pathway
-Technology, Inc. Full record in [`experiments/LICENSES.md`](experiments/LICENSES.md).
+Technology, Inc. It is the **BDH-GPU** formulation, which is what that repository ships.
+Full record in [`experiments/LICENSES.md`](experiments/LICENSES.md); this repository's own
+code is MIT, see [`LICENSE`](LICENSE).
 
 Everything else in this repository was written for this submission: the training and
 measurement scripts, the JavaScript port, the parity test, and the explainer. The trained
 checkpoints were trained here from scratch on synthetic data; they are not official BDH
 weights and are not presented as such.
 
-**AI assistance.** This project was built with AI assistance (Claude) throughout: code,
-prose and analysis. Every claim, number and line of code was checked by running it. The
+**AI assistance.** Summarised here, recorded in full in
+[`AI_DISCLOSURE.md`](AI_DISCLOSURE.md). This project was built with AI assistance (Claude)
+throughout: code, prose and analysis. Every claim, number and line of code was checked by running it. The
 parity test, the pinned-sample measurement and the per-phase profiler all exist because
 assumptions made during the build turned out to be wrong and needed to be caught by
 measurement rather than by review. Specific corrections that came from running things

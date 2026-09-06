@@ -229,13 +229,14 @@ footer a{color:var(--muted)}
 
 <section id="rig">
   <h2><span class="num">01 / THE INSTRUMENT</span>Watch it go quiet</h2>
-  <p class="lede">The model is reading a made-up word, over and over. Each dot is one of its 2,048
-    neurons; lit means firing. The line below counts how many are lit at each letter.</p>
+  <p class="lede">The model is reading a made-up word, over and over. The grid below holds one cell
+    for each of its 2,048 neurons, and the number lit is how many fired at that letter. The line
+    under it plots that count across the whole passage.</p>
 
   <div class="rig">
     <div class="rig-head">
       <span class="rig-title">Live &middot; BDH n=2048 &middot; running in this tab</span>
-      <span class="badge" id="runbadge">live</span>
+      <span class="badge pre" id="runbadge">loading…</span>
     </div>
     <div class="rig-body">
 
@@ -245,6 +246,8 @@ footer a{color:var(--muted)}
         <div class="stat"><div class="k">Neurons switched off</div><div class="v" id="statDrop">—</div></div>
         <div class="stat"><div class="k">Layer</div><div class="v flat" id="statLayer">2</div></div>
       </div>
+
+      <p class="hint" id="benchNote" style="margin:-6px 0 18px;max-width:80ch"></p>
 
       <div id="tour">
         <div class="tour-head">
@@ -292,6 +295,11 @@ footer a{color:var(--muted)}
           <span id="gridWhen">letter 41 of 77 &middot; repeating</span>
           <span id="gridCount">—</span>
         </div>
+        <p class="hint" style="margin-top:7px;max-width:78ch">The <strong>count</strong> is live:
+          the forward pass produced it and it is printed on the right. The <strong>placement</strong>
+          is illustrative, a fixed scatter keyed to the letter position, because <em>which</em>
+          particular neuron fires is not what this claim is about. Nothing else on this page is
+          laid out rather than measured.</p>
       </div>
 
       <svg id="trace" viewBox="0 0 900 260" role="img"
@@ -317,8 +325,10 @@ footer a{color:var(--muted)}
             <button data-l="2" aria-pressed="true">2</button>
             <button data-l="3" aria-pressed="false">3</button>
           </div>
-          <p class="hint">The effect lives in layers 1 and 2. Layer 0 runs backwards and layer 3
-            shows nothing. Go and look.</p>
+          <p class="hint">The effect lives in layers 1 and 2. Layer 0 runs <em>backwards</em> at
+            all three sizes. Layer 3 is flat at 2k and 8k and weakly positive (1.11&times;) at 16k
+            &mdash; though it does still wake up at an injected surprise, which the phase average
+            hides. Go and look.</p>
         </div>
         <div class="ctl">
           <label for="sizeSeg">Compare a bigger model</label>
@@ -387,7 +397,7 @@ footer a{color:var(--muted)}
   </div>
   <p class="hint" style="max-width:78ch">Widths are true to letter counts. Values are the share of
     layer&nbsp;2 neurons firing, from the run above. The model predicts the repeats almost perfectly
-    (loss 0.006 against 2.88 on first sight), which is the point: it has learned the word from
+    (loss 0.008 against 2.88 on first sight, on the pinned sample), which is the point: it has learned the word from
     context, and only then does it go quiet.</p>
 </section>
 
@@ -431,14 +441,33 @@ footer a{color:var(--muted)}
 <section>
   <h2><span class="num">05 / WHERE THIS LIVES IN BDH</span>Why this model in particular</h2>
   <p class="lede">This is not a property bolted onto BDH for the demo. It falls out of two design
-    choices you can read in forty lines of Pathway's own code.</p>
+    choices you can read in forty lines of Pathway's own code &mdash; specifically the
+    <strong>BDH-GPU</strong> formulation, which is the one the public repository ships. The paper's
+    graph form of BDH is a different presentation of the same architecture.</p>
 
   <h3>Activations are forced positive, then multiplied</h3>
   <p>Every layer computes two ReLU'd vectors and multiplies them together elementwise. A ReLU throws
     away negatives, so each is already sparse; a product of two sparse non-negative vectors is
-    sparser than either. That product is what we are counting, and it is the quantity whose numbers
-    match the paper's reported band. The individual vectors sit around 30 to 50 percent dense,
-    roughly six times off, so counting the wrong one gets you the wrong answer.</p>
+    sparser than either. That product is what we count. It is the <em>only</em> quantity in the
+    public code whose magnitude lands inside the band the paper reports; the individual vectors sit
+    around 30 to 50 percent dense, roughly six times off.</p>
+
+  <p>The paper writes <em>y</em>, and does not say which tensor in the released code that
+    corresponds to, so treat our choice as an inference from matching magnitudes rather than a
+    sourced fact. It is worth knowing that <strong>the direction of the claim does not depend on
+    it</strong>. Measured on all three tensors, layer 2, memorisation over repetition:</p>
+
+  <div class="scroll"><table>
+    <thead><tr><th>tensor counted</th><th>n=2,048</th><th>n=8,192</th><th>n=16,384</th></tr></thead>
+    <tbody>
+      <tr><td><code>x_sparse</code></td><td class="n">1.14&times;</td><td class="n">1.34&times;</td><td class="n">1.43&times;</td></tr>
+      <tr><td><code>y_sparse</code></td><td class="n">1.17&times;</td><td class="n">1.26&times;</td><td class="n">1.21&times;</td></tr>
+      <tr class="peak"><td><code>xy</code>, what we count</td><td class="n">1.43&times;</td><td class="n">1.97&times;</td><td class="n">1.87&times;</td></tr>
+    </tbody>
+  </table></div>
+  <p class="hint" style="max-width:78ch">Every row is above 1.0, so whichever tensor the paper
+    meant, memorisation uses more neurons than repetition. Only the size of the effect depends on
+    the choice. All twelve numbers are in <code>experiments/results/measured.csv</code>.</p>
 
   <h3>Attention is a similarity between firing patterns</h3>
   <p>In <code>bdh.py</code> the query and the key are <em>the same tensor</em> — the code literally
@@ -452,10 +481,11 @@ footer a{color:var(--muted)}
     <h4>Three things we refuse to claim</h4>
     <ul>
       <li><span class="k">BDH is linear attention</span><span class="d">The public code builds a full
-        T&times;T score matrix. It is quadratic. We measured the crossover: the linear form only
-        costs less past roughly 4&times;D = 256 tokens (27.1M versus 40.4M multiply-adds per layer at
-        T=154). Below that the quadratic form is genuinely the cheaper one, which is why the
-        reference implementation ships it.</span></li>
+        T&times;T score matrix. It is quadratic. We <em>counted operations</em> rather than timing
+        them: at T=154 the shipped form costs 27.1M multiply-adds per layer against 40.4M for the
+        recurrent form, and the two cross at T = 4ND/(N+D) + 1 &asymp; 230 tokens. Below that the
+        quadratic form is genuinely the cheaper one, which is why the reference implementation
+        ships it. An operation count, not a benchmark: nothing was timed.</span></li>
       <li><span class="k">97.4% on Sudoku Extreme</span><span class="d">Pathway's own README states
         this figure comes from their internal implementation and that the open repository does not
         reproduce it. We did not reproduce it either, so we do not cite it as ours.</span></li>
@@ -473,10 +503,10 @@ footer a{color:var(--muted)}
   <div class="scroll"><table>
     <thead><tr><th>Limit</th><th>What we actually see</th></tr></thead>
     <tbody>
-      <tr><td>Layer 0 runs <em>backwards</em></td>
-          <td class="n">ratio 0.82 at n=2048, 0.79 at n=8192 <span class="tag tag-no">against us</span></td></tr>
-      <tr><td>Layer 3 shows nothing</td>
-          <td class="n">0.91 and 0.97, i.e. flat <span class="tag tag-no">against us</span></td></tr>
+      <tr><td>Layer 0 runs <em>backwards</em>, at every size</td>
+          <td class="n">0.82, 0.79, 0.86 at 2k, 8k, 16k <span class="tag tag-no">against us</span></td></tr>
+      <tr><td>Layer 3 is flat at 2k and 8k, weakly positive at 16k</td>
+          <td class="n">0.91, 0.96, 1.11 <span class="tag tag-no">against us</span></td></tr>
       <tr><td>Scaling is <em>not</em> monotonic</td>
           <td class="n">1.43 → 1.97 → <strong>1.87</strong> at 2k, 8k, 16k <span class="tag tag-no">against us</span></td></tr>
       <tr><td>The three models are not step-matched</td>
@@ -522,6 +552,7 @@ const LETTERS = "abcdefghijklmnopqrstuvwxyz";
 let ref = null, warmup = null, layer = 2, cur = null, surprise = null;
 let clean = null, curSurprise = null, reqSurprise = null;
 let overlays = {}, overlayN = null;      // measured curves for models too big to run here
+let bench = null;                        // the 1,280-sequence measured curve for THIS model
 let worker = null, reqId = 0;
 
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -708,6 +739,20 @@ function render() {
   el.className = "v " + (drop > 8 ? "hot" : drop < -8 ? "flat" : "flat");
   el.title = drop < 0 ? "negative: more neurons fire during repetition in this layer" : "";
   $("#statLayer").textContent = layer;
+
+  // Truth beside estimate, for the headline itself. Everything above is one word, and one
+  // word is noisy; this is the same model measured over 1,280 of them by measure.py.
+  if (bench && bench.layers && bench.layers[layer]) {
+    const b = bench.layers[layer];
+    const avg = a => a.reduce((x, y) => x + y, 0) / a.length;
+    const bm = avg(b.slice(WARM, WARM + WORD)), br = avg(b.slice(WARM + WORD, PERIOD));
+    $("#benchNote").innerHTML =
+      `The four figures above are <strong>this one word</strong>. Measured over
+       <strong>1,280 words</strong> on the same model, layer ${layer} runs
+       ${(bm * 100).toFixed(1)}% while learning against ${(br * 100).toFixed(1)}% while repeating,
+       a ratio of <strong>${(bm / br).toFixed(2)}&times;</strong>. Single words scatter; the table
+       in section 04 does not.`;
+  }
   $("#sWarm").textContent = (st.warm * 100).toFixed(1) + "%";
   $("#sMem").textContent = (st.mem * 100).toFixed(1) + "%";
   $("#sRep").textContent = (st.rep * 100).toFixed(1) + "%";
@@ -914,6 +959,9 @@ function initTour() {
   ref = await fetch("data/reference.json").then(r => r.json());
   warmup = ref.tokens.slice(0, WARM);
   $("#word").value = ref.word.map(k => LETTERS[k]).join("");
+
+  // the measured 1,280-sequence curve for the model that runs here, for the line under the readout
+  bench = await fetch("data/traces/n2048.json").then(r => r.json()).catch(() => null);
 
   worker = new Worker("worker.js?v=" + BUILD, { type: "module" });
   worker.onmessage = ev => {
