@@ -48,9 +48,9 @@ committed trace `web/data/traces/n8192.json`. Whole blocks, not hand-picked lett
 
 Both blocks are predicted essentially perfectly, and one uses **2.5x** as many neurons. At the
 extremes the gap is wider still: letter 11 runs at 13.60% against letter 40 at 3.49%, 3.9x
-apart, both under 0.003 nats of surprise. So the variable is not predictability. It is where
-the knowledge lives, and the activation signature separates parametric memory from in-context
-memory.
+apart, both under 0.003 nats of surprise. So what separates them is not predictability but where the
+knowledge came from: the activation level tracks parametric against in-context memory. We show
+that it tracks, not why it does.
 
 **It is falsifiable, in the artifact, in under a minute.** Inject a letter the model cannot
 predict into the middle of the repetition. If activity does not rise at that letter, the

@@ -47,8 +47,7 @@
 <h2>The design pressure</h2>
 <p>
   A dense Transformer evaluates every feed-forward unit for every token, hard or not. Activation sparsity is the
-  counter-proposal: fewer active units, cheaper inference, an active set small enough to name. But
-  Transformer sparsity is already <em>emergent</em>, appearing during training
+  counter-proposal. But Transformer sparsity is already <em>emergent</em>, appearing during training
   rather than by design [3]; it needs a hard rectifier, because only that yields exact zeros [4]; and
   <em>which</em> units fire is input-dependent, not merely how many [5]. Sparsity by itself therefore
   distinguishes nothing. What distinguishes an architecture is what its sparsity is a function of.
@@ -57,11 +56,13 @@
 <h2>What BDH changes</h2>
 <p>
   Dragon Hatchling (BDH) [1] makes it structural. In the BDH-GPU formulation Pathway open-sources,
-  every layer computes two ReLU'd vectors and multiplies them elementwise, and a product of two sparse
-  non-negative vectors is sparser than either. Attention is the second change: query and key are the
+  every layer computes two rectified (ReLU) vectors and multiplies them elementwise, and a product of
+  two sparse non-negative vectors is sparser than either. <em>Active</em> throughout means a strictly
+  non-zero entry in that product. Attention is the second change: query and key are the
   same tensor, the code asserting <em>K is Q</em>, so the score matrix is a causally-masked Gram matrix
-  of neuron activations with <strong>no softmax</strong> in it. Attention is co-firing similarity, not
-  a learned lookup &mdash; the paper's Hebbian reading, in one line of tensor code.
+  of neuron activations with <strong>no softmax</strong> in it. Attention is therefore a similarity between firing
+  patterns, positions whose neurons fired alike bind to each other. That is the
+  paper's Hebbian reading, in one line of tensor code.
 </p>
 
 <h2>The claim, and the correction it needed</h2>
@@ -86,16 +87,17 @@
   2 active at 0.0005 nats of mean surprise (a nat is the natural-log unit of cross-entropy; zero means
   perfectly predicted), the 56 repeated letters at <strong>3.6%</strong> at 0.008 nats. At the extremes the gap is 3.9x. The warm-up is identical in every training sequence, so it
   lives in the <strong>weights</strong>; the repeated word is new each sequence, so it can only come
-  from the <strong>context</strong>. <strong>The variable is where the knowledge lives</strong>, not
-  how predictable the text is, and the activation signature separates parametric from in-context
-  memory. A learner falsifies this in under a minute by injecting an unpredictable letter
+  from the <strong>context</strong>. What separates them is not predictability but
+  <strong>where the knowledge came from</strong>: the activation level tracks parametric against
+  in-context memory. We show that it tracks; we do not show why. A learner falsifies this in under a minute by injecting an unpredictable letter
   mid-repetition: activity rises at that letter, +10% to +20% by word, and is unchanged to nine
   decimals at the letter before it, because the model reads only leftwards.
 </p>
 
 <h2>Evidence, labelled</h2>
 <p>
-  <span class="lab">Reproduced here:</span> the three ratios above, the counterexample, and parity of
+  <span class="lab">Reproduced here:</span> the three ratios, the counterexample, the
+  surprise-injection check, and parity of
   the in-browser model against PyTorch (logit max difference 4.1e-5, eleven of twelve sparsity series
   bit-identical). <span class="lab">Developer-reported, not reproduced:</span> the Figure 14 band; 97.4%
   on Sudoku Extreme, which Pathway's own repository states comes from their internal implementation and
@@ -116,12 +118,12 @@
   it. These are toys, 0.4M to 6.3M parameters on a synthetic task, as the paper's own protocol is.
   Surprise and sparsity do <em>not</em> track per letter (8,192 neurons, layer 2: Pearson 0.29,
   Spearman 0.02), which killed a stronger claim. We count the elementwise product, the only quantity
-  in the public code reaching the paper's band; the paper does not say which tensor it means, though
-  that choice changes the effect's size, not its direction, positive on all three. Most importantly
+  in the public code reaching the paper's band; the paper does not say which tensor it means, though that
+  choice changes the effect's size, not its direction. Most importantly
   we establish the <em>signature</em>, not its cause: nothing here explains why context-held knowledge
-  needs fewer neurons than weight-held knowledge. <span class="lab">Maturity:</span> for this property
-  BDH is credible and outsider-checkable at small scale; the wider programme is earlier, its headline
-  benchmarks developer-reported and public comparisons stopping at GPT-2 scale.
+  needs fewer neurons than weight-held knowledge. <span class="lab">Maturity:</span> credible and
+  outsider-checkable for this narrow property; the wider programme is earlier, its headline benchmarks
+  developer-reported and its public comparisons stopping at GPT-2 scale.
 </p>
 
 <p class="refs">
