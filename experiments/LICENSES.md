@@ -26,7 +26,7 @@ this repository's own licence text is in [`../LICENSE`](../LICENSE) (MIT).
 | `web/data/weights.bin`, `manifest.json`, `reference.json` | Exported from `checkpoints/bdh_n2048.pt` by `export_weights.py` | MIT, `../LICENSE` |
 | `web/data/scaling.json`, `web/data/traces/*.json` | Produced by `measure.py` | MIT, `../LICENSE` |
 | `experiments/results/*.csv`, `experiments/results/*.log` | Raw output of the scripts above. `results/measured.csv` is the source of record for every published number | MIT, `../LICENSE` |
-| `experiments/scaling_results.csv`, `experiments/stepmatched/*.log` | Raw append log written by `sparsity_scan.py` at training time, and the logs of the step-matched retrains | MIT, `../LICENSE` |
+| `experiments/stepmatched/*.log` | Logs of the step-matched retrains and the re-measurement. `sparsity_scan.py` also writes a single-sample scaling_results.csv at training time, deliberately **not** shipped, because its unaveraged ratios differ from the 5-sample values in `results/measured.csv` | MIT, `../LICENSE` |
 | All training and evaluation text | **Synthetic**, generated in-process: a fixed random warm-up followed by random eight-letter words. No corpus, no third-party dataset | n/a |
 
 ## Fonts and graphics

@@ -6,6 +6,12 @@ new in-context word, ~2.5% while repeating it (ratio ~1.6-3.0x).
 
 Usage:  python sparsity_scan.py --embd 128 --mult 64 --budget 10800
 Appends one row per (layer, tensor) to scaling_results.csv
+
+scaling_results.csv is a SINGLE-SAMPLE training-time scan and is not shipped. Every
+published number comes from results/measured.csv, which measure.py writes by averaging
+5 independently pinned eval samples. Expect the two to differ in the third decimal
+(1.4729 here against a published 1.4705, for instance); that spread is the error bar,
+and results/measured.csv is the source of record.
 """
 import argparse, csv, os, time, torch, torch.nn.functional as F, bdh
 
