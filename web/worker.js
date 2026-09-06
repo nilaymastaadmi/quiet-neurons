@@ -26,7 +26,8 @@ async function drain() {
   try {
     const m = await ensure();
     const t0 = performance.now();
-    const { logits, sparsity, scores, T } = m.forward(job.tokens, null, job.wantScores === true);
+    const { logits, sparsity, scores, T, minAct, negCount } =
+      m.forward(job.tokens, null, job.wantScores === true);
     const ms = performance.now() - t0;
     // Float32Arrays transfer by copy through structuredClone; convert the small
     // per-position series to plain arrays and drop the large logits tensor, which
@@ -42,6 +43,7 @@ async function drain() {
         x: Array.from(s.x), y: Array.from(s.y), xy: Array.from(s.xy),
       })),
       nNeurons: m.m.n_neurons,
+      minAct, negCount,
       // Four T x T matrices, 23,716 floats at T=77. Array.from boxes every element and then
       // clones a generic array of doubles: measured at 9.7 ms against 0.46 ms for cloning the
       // typed arrays directly. Small next to a ~600 ms forward pass, but free to avoid, and

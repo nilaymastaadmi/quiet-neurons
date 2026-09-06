@@ -95,6 +95,10 @@ export class BDH {
     const ymlp = new Float32Array(T * D);
     const sparsity = [];
     const scores = wantScores ? [] : null;
+    // The other half of "sparse non-negative": a ReLU cannot emit a negative, so these two
+    // must come out 0 and 0. Measured rather than asserted, in the loop that already walks
+    // every unit at every position, so it costs two comparisons per element.
+    let minAct = Infinity, negCount = 0;
 
     for (let l = 0; l < L; l++) {
       // x_sparse = relu(x @ self.encoder)
@@ -201,9 +205,13 @@ export class BDH {
         for (let h = 0; h < nh; h++) {
           const o = h * T * N + t * N;
           for (let n = 0; n < N; n++) {
-            if (xs[o + n] > 0) cx++;
-            if (ys[o + n] > 0) cy++;
-            if (xs[o + n] > 0 && ys[o + n] > 0) cxy++;
+            const a = xs[o + n], b = ys[o + n];
+            if (a < minAct) minAct = a;
+            if (b < minAct) minAct = b;
+            if (a < 0 || b < 0) negCount++;
+            if (a > 0) cx++;
+            if (b > 0) cy++;
+            if (a > 0 && b > 0) cxy++;
           }
         }
         const tot = nh * N;
@@ -244,7 +252,7 @@ export class BDH {
         for (let v = 0; v < V; v++) logits[lo + v] += xv * lm_head[wo + v];
       }
     }
-    return { logits, sparsity, scores, T };
+    return { logits, sparsity, scores, T, minAct, negCount };
   }
 }
 

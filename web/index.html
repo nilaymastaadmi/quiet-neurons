@@ -93,6 +93,9 @@ h3{font-family:var(--f-disp);font-weight:600;font-size:18px;margin:28px 0 6px}
 .tour-act{display:flex;gap:10px;flex-wrap:wrap}
 #counter{margin:0 0 18px;padding:16px 18px;border:1px solid var(--line);border-left:4px solid var(--pass);
          border-radius:3px;background:var(--surface-2)}
+#nonneg{margin:0 0 18px;padding:16px 18px;border:1px solid var(--line);border-left:4px solid var(--pass);
+        border-radius:3px;background:var(--surface-2)}
+#nonneg .bo-lab{color:var(--pass)}
 #counter .bo-lab{color:var(--pass)}
 #breakout{margin:0 0 18px;padding:16px 18px;border:1px solid var(--fire-line);border-radius:3px;
           background:var(--fire-soft)}
@@ -310,6 +313,25 @@ footer a{color:var(--muted)}
         <p class="bo-note" id="boNote"></p>
       </div>
 
+      <div id="nonneg" hidden>
+        <div class="bo-lab">The other half of the topic &middot; live, from the same run</div>
+        <div class="bo-row">
+          <div class="stat">
+            <div class="k">Smallest activation seen</div>
+            <div class="v cool" id="nnMin">&mdash;</div>
+          </div>
+          <div class="stat">
+            <div class="k">Negative values found</div>
+            <div class="v cool" id="nnNeg">&mdash;</div>
+          </div>
+          <div class="stat">
+            <div class="k">Expected, from the code</div>
+            <div class="v flat">0.000 and 0</div>
+          </div>
+        </div>
+        <p class="bo-note" id="nnNote"></p>
+      </div>
+
       <div class="gridwrap">
         <canvas id="grid" width="1024" height="128" aria-label="Grid of 2048 neurons; lit cells are firing"></canvas>
         <div class="gridcap">
@@ -465,6 +487,10 @@ footer a{color:var(--muted)}
 
 <section>
   <h2><span class="num">05 / WHERE THIS LIVES IN BDH</span>Why this model in particular</h2>
+  <p class="hint" style="margin:0 0 10px;font-family:var(--f-mono);font-size:11px;
+     letter-spacing:.09em;text-transform:uppercase;color:var(--fire)">
+    Objective for this section: name the two lines of <code>bdh.py</code> that make the effect
+    possible, and say which of them is a parameter and which is state.</p>
   <p class="lede">This is not a property bolted onto BDH for the demo. It falls out of two design
     choices you can read in forty lines of Pathway's own code &mdash; specifically the
     <strong>BDH-GPU</strong> formulation, which is the one the public repository ships. The paper's
@@ -652,7 +678,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "14";
+const BUILD = "15";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
@@ -935,6 +961,23 @@ function render() {
     bo.hidden = false;
   } else {
     bo.hidden = true;
+  }
+
+  // The topic is "sparse NON-NEGATIVE activations" and every other panel here measures only
+  // the sparse half. A rectifier cannot emit a negative, so these two readouts are a check on
+  // the instrument as much as a fact about the model: if either moved, the page would be wrong.
+  if (typeof cur.minAct === "number") {
+    $("#nonneg").hidden = false;
+    const tot = cur.nNeurons * cur.T * 2;
+    $("#nnMin").textContent = cur.minAct.toFixed(3);
+    $("#nnNeg").textContent = cur.negCount.toLocaleString();
+    $("#nnNote").innerHTML =
+      `Checked across all <strong>${tot.toLocaleString()}</strong> activation values in this run,
+       every neuron at every letter, in both rectified vectors. Nothing is ever below zero, so an
+       active neuron is <em>a positive amount of something</em> rather than a signed coordinate.
+       That is what lets you read one as a concept, and it is why the paper can talk about
+       monosemantic synapses at all. The sparse half is everything else on this page; this is the
+       non-negative half.`;
   }
 
   const p = +$("#pos").value;
