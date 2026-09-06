@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quiet Neurons — one-page concept summary</title>
+<!--
+  Source for concept-summary.pdf. Render with:
+    chrome --headless=new --no-pdf-header-footer --print-to-pdf=concept-summary.pdf concept-summary.html
+  Length was measured before the content was written, by rendering this project's own prose at
+  several sizes and margins and counting pages. At 9.5pt/1.26 with 13mm margins one A4 page holds
+  the 825-word body below plus the table and the reference block, verified by re-rendering and
+  reading the page count out of the PDF. That is inside the problem statement's recommended
+  500-950 words. If you edit this file, re-render and check the page count again.
+-->
+<style>
+  @page { size: A4; margin: 13mm 15mm; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 9.5pt; line-height: 1.26; color: #111;
+  }
+  h1 { font-size: 13.5pt; line-height: 1.14; margin: 0 0 2pt; letter-spacing: -.01em; }
+  .sub { font-size: 8.2pt; color: #444; margin: 0 0 6pt; }
+  h2 {
+    font-size: 9.3pt; margin: 6pt 0 2pt; text-transform: uppercase;
+    letter-spacing: .07em; color: #000;
+  }
+  p { margin: 0 0 4pt; text-align: justify; hyphens: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 8.3pt; margin: 4pt 0 5pt; }
+  th, td { border: .5pt solid #999; padding: 1.5pt 4pt; text-align: left; vertical-align: top; }
+  th { background: #eee; font-weight: bold; }
+  td.n { text-align: right; white-space: nowrap; }
+  .refs { font-size: 7.5pt; color: #333; margin: 5pt 0 0; text-align: left; line-height: 1.22; }
+  .lab { font-variant: small-caps; letter-spacing: .03em; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>Quiet Neurons: a BDH quietens on what it just learned, not on what is merely predictable</h1>
+<p class="sub">
+  DataForge 2026, Pathway track &middot; concept <strong>Sparse Non-Negative Activations</strong> &middot;
+  Nilay Toshniwal, solo &middot;
+  artifact <strong>nilaymastaadmi.github.io/quiet-neurons</strong> &middot;
+  code <strong>github.com/nilaymastaadmi/quiet-neurons</strong>
+</p>
+
+<h2>The design pressure</h2>
+<p>
+  A dense Transformer evaluates every feed-forward unit for every token, hard or not. Activation sparsity is the
+  counter-proposal: fewer active units, cheaper inference, an active set small enough to name. But
+  Transformer sparsity is already <em>emergent</em>, appearing during training
+  rather than by design [3]; it needs a hard rectifier, because only that yields exact zeros [4]; and
+  <em>which</em> units fire is input-dependent, not merely how many [5]. Sparsity by itself therefore
+  distinguishes nothing. What distinguishes an architecture is what its sparsity is a function of.
+</p>
+
+<h2>What BDH changes</h2>
+<p>
+  Dragon Hatchling (BDH) [1] makes it structural. In the BDH-GPU formulation Pathway open-sources,
+  every layer computes two ReLU'd vectors and multiplies them elementwise, and a product of two sparse
+  non-negative vectors is sparser than either. Attention is the second change: query and key are the
+  same tensor, the code asserting <em>K is Q</em>, so the score matrix is a causally-masked Gram matrix
+  of neuron activations with <strong>no softmax</strong> in it. Attention is co-firing similarity, not
+  a learned lookup &mdash; the paper's Hebbian reading, in one line of tensor code.
+</p>
+
+<h2>The claim, and the correction it needed</h2>
+<p>
+  Section 6.4 reports that "fewer neurons are active ... for more predictable input signals": at layer
+  2 of a 65,536-neuron model, 4.0&ndash;7.5% active while memorising a new word against about 2.5% while
+  repeating it [1, Fig. 14]. We reproduced that protocol on three models trained here from the public
+  code. It survives being shrunk by a factor of 32.
+</p>
+<table>
+  <tr><th>Model (neurons / parameters)</th><th>Memorising</th><th>Repeating</th><th>Ratio</th><th>Evidence class</th></tr>
+  <tr><td>ours, 2,048 / 397k</td><td class="n">8.24%</td><td class="n">5.76%</td><td class="n">1.43&times;</td><td>reproduced here</td></tr>
+  <tr><td>ours, 8,192 / 3.15M</td><td class="n">7.18%</td><td class="n">3.64%</td><td class="n">1.97&times;</td><td>reproduced here</td></tr>
+  <tr><td>ours, 16,384 / 6.30M</td><td class="n">8.20%</td><td class="n">4.38%</td><td class="n">1.87&times;</td><td>reproduced here</td></tr>
+  <tr><td>Pathway, 65,536 [1]</td><td class="n">4.0&ndash;7.5%</td><td class="n">~2.5%</td><td class="n">1.6&ndash;3.0&times;</td><td>developer-reported</td></tr>
+</table>
+<p>
+  Each row is 1,280 sequences over five pinned samples, spread near 0.005. The same measurement then
+  breaks the usual reading of it. Two positions in one sequence are predicted almost perfectly yet
+  differ fourfold in activity: letter 11, inside the fixed warm-up, sits at <strong>13.6%</strong>
+  active at 0.000 nats of surprise; letter 40, deep in the repeated word, at <strong>3.5%</strong> at
+  0.003 nats. The warm-up is identical in every training sequence, so it lives in the
+  <strong>weights</strong>; the repeated word is new each sequence, so it can only come from the
+  <strong>context</strong>. <strong>The variable is where the knowledge lives</strong>, not how
+  predictable the text is, and the activation signature separates parametric from in-context memory. A
+  learner falsifies this in under a minute by injecting an unpredictable letter mid-repetition:
+  activity rises at that letter, +10% to +20% by word, and is unchanged to nine decimals at the letter
+  before it, because the model reads only leftwards.
+</p>
+
+<h2>Evidence, labelled</h2>
+<p>
+  <span class="lab">Reproduced here:</span> the three ratios above, the counterexample, and parity of
+  the in-browser model against PyTorch (logit max difference 4.1e-5, eleven of twelve sparsity series
+  bit-identical). <span class="lab">Developer-reported, not reproduced:</span> the Figure 14 band; 97.4%
+  on Sudoku Extreme, which Pathway's own repository states comes from their internal implementation and
+  does not reproduce from the open code; 1B-to-600B pretraining-scaling experiments; and BDH-CQ's 29.5%
+  pass@2 on ARC-AGI-1 at $0.0007 per task [2]. <span class="lab">Not modelled:</span> BDH-CQ's
+  internals, whose "dimensions, exact update rules, and implementation details remain proprietary" [2].
+  <strong>BDH-CQ has no direct role in this concept</strong>; inventing one would be worse than saying so.
+</p>
+
+<h2>Limitations, maturity, and what would settle them</h2>
+<p>
+  The effect is not uniform with depth: layer 0 runs <em>backwards</em> at all three sizes (0.82, 0.79,
+  0.86), and layer 3 is flat at the two smaller models and weakly positive (1.11&times;) at the largest.
+  Scaling is <strong>not monotonic</strong> &mdash; 16,384 measures below 8,192 by roughly twenty times
+  the sampling spread &mdash; and we published the opposite before the third model finished. One
+  confound cannot be excluded: a single 4,000-step schedule cut by wall clock at 1,854, 1,917 and 2,309
+  steps, so the three stopped at different points on it. Final losses (0.176, 0.175, 0.172) say
+  comparably trained, not controlled; three step-matched runs would settle it. These are toys, 0.4M to
+  6.3M parameters on a synthetic task, as the paper's own protocol is. Surprise and sparsity do
+  <em>not</em> track per letter (Pearson 0.35, Spearman &minus;0.05), which killed a stronger claim. And we count the elementwise product, the only quantity in the public code whose
+  magnitude reaches the paper's band; the paper does not say which tensor it means, though that choice
+  changes the size of the effect, not its direction, positive on all three candidates.
+  <span class="lab">Maturity:</span> for this narrow property BDH is credible and now outsider-checkable at
+  small scale. The wider programme is earlier &mdash; headline benchmarks
+  are developer-reported, the open repository ships no trained weights, and published comparisons stop
+  at GPT-2 scale. Its interpretability claims are the verifiable ones today, and this is one.
+</p>
+
+<p class="refs">
+  [1] Kosowski, Uzna&#324;ski, Chorowski, Stamirowska, Bartoszkiewicz, <em>The Dragon Hatchling</em>, arXiv:2509.26507 (2025), §6.4 and Fig. 14.
+  [2] Engdahl, Kosowski, Chorowski et al., <em>BDH-CQ</em>, arXiv:2608.09888 (2026).
+  [3] Li, You, Bhojanapalli et al., <em>The Lazy Neuron Phenomenon</em>, arXiv:2210.06313 (2022), ICLR 2023.
+  [4] Mirzadeh, Alizadeh, Mehta et al., <em>ReLU Strikes Back</em>, arXiv:2310.04564 (2023).
+  [5] Liu, Wang, Dao et al., <em>Deja Vu</em>, arXiv:2310.17157 (2023), ICML 2023.
+  &mdash; Reproduce every number: <strong>python measure.py --ckpt checkpoints/bdh_n2048.pt --embd 64 --mult 32 --repeats 5</strong>. Code and data MIT; <code>bdh.py</code> is Pathway's, unmodified, MIT.
+</p>
+
+</body>
+</html>

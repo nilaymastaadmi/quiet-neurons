@@ -1,0 +1,72 @@
+QUIET NEURONS
+DataForge 2026, Pathway track ("Explain the Frontier")
+Concept: Sparse Non-Negative Activations
+Nilay Toshniwal, solo entry
+
+THE CLAIM
+  A trained BDH quietens down when it has just learned something from the text in
+  front of it. Not when the text is merely predictable. Those two look identical
+  from the outside, and they are not.
+
+
+FASTEST PATH  --  the live artifact, no install, no sign-in, opens in a browser:
+
+    https://nilaymastaadmi.github.io/quiet-neurons/
+
+Public source repository, everything in this zip and more:
+
+    https://github.com/nilaymastaadmi/quiet-neurons
+
+The one-page concept summary is  concept-summary.pdf  in this zip.
+
+
+WHAT IS IN THIS ZIP
+  START_HERE.txt          this file
+  README.md               the complete README: the claim, the intended learner and
+                          prerequisites, learning objectives, architecture, the role
+                          of every component, what is live / precomputed / synthetic /
+                          illustrative, how to reproduce every number, credits, licences
+  concept-summary.pdf     the required one-page concept summary
+  concept-summary.html    its source, so the PDF can be regenerated
+  web/                    the artifact itself: static files, no backend, no build step
+  experiments/            training, measurement and export scripts, plus the raw
+                          results and run logs every published number comes from
+  AI_DISCLOSURE.md        AI assistance, code, data, asset and licence disclosure
+  LICENSE                 MIT, this project's own code
+  experiments/LICENSES.md component-by-component source and licence record
+
+
+RUNNING THE ARTIFACT FROM THIS ZIP
+
+  Double-clicking web/index.html will NOT work, and this is worth knowing before
+  you conclude the page is broken. The page fetches its weights and runs the model
+  inside a module Worker, and browsers block both of those on file:// URLs. Opened
+  that way it renders the text and leaves every number as a dash.
+
+  Serve the folder instead:
+
+      cd web
+      python -m http.server 8123
+
+  then open  http://localhost:8123  in a browser. No dependencies are needed for
+  this; it is plain static hosting.
+
+  Or simply use the live URL at the top of this file. It serves these same files.
+
+
+CHECKING THAT THE MODEL IS REAL
+
+  web/parity.html  runs the browser's JavaScript forward pass against a PyTorch
+  reference trace and prints the difference. It is the first thing a sceptical
+  reader should open. Live copy:
+
+      https://nilaymastaadmi.github.io/quiet-neurons/parity.html
+
+
+NOT IN THIS ZIP
+
+  experiments/checkpoints/*.pt  --  the three trained models, 37 MB together. They
+  are in the GitHub repository linked above. experiments/measure.py re-derives every
+  published number from them without retraining anything, in a couple of minutes of
+  CPU. Training from scratch is also documented in the README, and takes about 30
+  minutes for the model that runs on the page.
