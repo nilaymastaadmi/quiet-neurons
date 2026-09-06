@@ -577,7 +577,7 @@ footer a{color:var(--muted)}
       <summary>Before you press it: predict what happens to the ratio when you switch to
         layer 0, and decide whether that would break the claim.</summary>
       <div class="ans">
-        <p>It reverses. Layer 0 sits at about 0.82 on this model, meaning <em>more</em> neurons
+        <p>It reverses. Layer 0 sits at about 0.80 on this model, meaning <em>more</em> neurons
           fire while repeating than while first reading the word. Layer 3 is flat. The effect
           lives in layers 1 and 2 and peaks at layer 2, which is the layer the paper singles
           out.</p>
@@ -681,7 +681,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "15";
+const BUILD = "16";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of

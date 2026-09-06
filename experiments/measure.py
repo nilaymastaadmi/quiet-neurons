@@ -39,9 +39,8 @@ ap.add_argument("--steps-trained", type=int, default=None,
 ap.add_argument("--repeats", type=int, default=1,
                 help="re-measure with eval_seed, eval_seed+1, ... and report the spread. "
                      "This is the error bar on the ratio.")
-ap.add_argument("--csv", default="results/scaling_results.csv")
-ap.add_argument("--append", action="store_true", help="append measured rows to --csv")
 ap.add_argument("--out", default="results/measured.csv")
+ap.add_argument("--append", action="store_true", help="append measured rows to --out")
 ap.add_argument("--export-trace", default=None,
                 help="also write the per-letter sparsity curve to this JSON path, so the "
                      "explainer can overlay models too big to run in a browser")

@@ -52,7 +52,8 @@ contribution sits alongside it rather than inside it.
 | `experiments/checkpoints/bdh_n2048.pt`, `bdh_n8192.pt`, `bdh_n16384.pt` | **Trained here from scratch** on synthetic data, on a laptop CPU. Not official BDH weights and not presented as such. | MIT, see `LICENSE` |
 | `web/data/weights.bin`, `manifest.json`, `reference.json` | Exported from `bdh_n2048.pt` by `experiments/export_weights.py` | MIT, see `LICENSE` |
 | `web/data/scaling.json`, `web/data/traces/*.json` | Produced by `experiments/measure.py` from the checkpoints above | MIT, see `LICENSE` |
-| `experiments/results/*.csv`, `*.log` | Raw output of the scripts above | MIT, see `LICENSE` |
+| `experiments/results/*.csv`, `experiments/results/*.log` | Raw output of the scripts above. `results/measured.csv` is the source of record for every published number | MIT, see `LICENSE` |
+| `experiments/scaling_results.csv`, `experiments/stepmatched/*.log` | Raw append log written by `sparsity_scan.py` at training time, and the logs of the step-matched retrains | MIT, see `LICENSE` |
 | Training and evaluation text | **Synthetic**, generated in-process by the scripts: a fixed random warm-up sequence followed by random eight-letter words. No corpus, no scraped text, no third-party dataset. | n/a |
 
 ## Assets
