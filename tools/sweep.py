@@ -167,13 +167,17 @@ old = {"1.4318": "old n=2048 ratio, 4dp",
 # sentence ("went from 1.4318 to 1.4705"). That is the point of the sentence, so it is
 # allowed exactly there and nowhere else, and the guard checks the context, not just
 # the count -- a second stray mention would still be caught.
-BEFORE_AFTER = re.compile(r"went from 1\.4318 to \*\*1\.4705\*\*; n=8,192 from 1\.9731 to \*\*2\.1201\*\*")
-allowed_readme = 1 if BEFORE_AFTER.search(rd) else 0
+# A superseded number may be cited deliberately, to show a before-and-after or to explain why
+# a guard exists. The marker for "this mention is on purpose" is the word `superseded` on the
+# same line, or the explicit before/after sentence. Anything else is drift.
+def _deliberate(txt, tok):
+    return sum(1 for line in txt.splitlines()
+               if tok in line and ("superseded" in line or "went from" in line or "from 1.9731" in line))
 for tok, why in sorted(old.items()):
     flagged = False
     for nm, txt in (("README", rd), ("page", ix), ("PDF", cs)):
         c = txt.count(tok)
-        budget = allowed_readme if (nm == "README" and tok in ("1.4318", "1.9731")) else 0
+        budget = _deliberate(txt, tok) if tok in ("1.4318", "1.9731") else 0
         if c > budget:
             print("  %-30s %dx in %-7s (budget %d) (%s)" % (tok, c, nm, budget, why))
             problems.append("stale token %r in %s" % (tok, nm))

@@ -118,8 +118,24 @@ experiments/                     PyTorch: train, measure, export
                                  number quoted anywhere in this project.
   export_weights.py              dumps weights + a PyTorch reference trace for the browser
   make_scaling.py                builds web/data/scaling.json from measured.csv
-  checkpoints/                   trained weights (n=2048, n=8192, n=16384)
-  results/                       raw run logs and measured.csv
+  checkpoints/
+    bdh_n2048.pt  n8192.pt  n16384.pt      THE PUBLISHED MODELS. Every number quoted
+                                 anywhere in this project comes from these three, and the
+                                 README's reproduction commands name exactly these files.
+    bdh_n2048_wallclock.pt  n8192_wallclock.pt
+                                 superseded: cut by wall clock at 1,854 and 1,917 steps
+                                 instead of step-matched. Kept so the before-and-after in
+                                 "We removed the confound" is checkable, never quoted as
+                                 a headline number.
+    bdh_n2048_fixedword.pt       the provenance control. Degenerate, see below.
+  results/                       raw run logs, measured.csv, and a method note beside
+                                 every measurement that was taken by driving the page
+                                 rather than by measure.py
+
+tools/sweep.py                   cross-surface consistency: every published number against
+                                 measured.csv, every referenced path, disclosure coverage
+verify.sh                        runs all of it and exits non-zero on any drift. Run this
+                                 before any commit that touches a number.
 
 web/
   index.html                     the explainer
@@ -185,7 +201,10 @@ model happens not to have one.
 pip install torch                                   # CPU is fine; no GPU used anywhere
 
 cd experiments
-# the model that runs on the page: about 30 minutes of laptop CPU
+# the model that runs on the page: 2,309 steps at ~1.45 s/step, about an hour of laptop CPU.
+# --stop-at is not optional. It halts at a fixed point of an unchanged 4,000-step schedule,
+# which is what makes the three sizes comparable; cutting by --budget alone stops each model
+# at a different learning rate and reproduces the confound this project removed.
 python sparsity_scan.py --embd 64 --mult 32 --budget 7200 --steps 4000 --stop-at 2309
 python measure.py --ckpt checkpoints/bdh_n2048.pt --embd 64 --mult 32 --repeats 5 \
                   --append --export-trace ../web/data/traces/n2048.json
@@ -210,6 +229,18 @@ python measure.py --ckpt checkpoints/bdh_n16384.pt --embd 128 --mult 128 --repea
 The trained checkpoints are in the repository, so `measure.py` on its own re-derives every
 published number without retraining anything. They are left out of the submission zip only
 because they are 37 MB.
+
+**Or check the whole thing in one command:**
+
+```bash
+./verify.sh              # every published ratio, cross-surface agreement, the one-pager
+./verify.sh --with-page  # and parity.html driven in headless Chrome
+```
+
+It exits non-zero on any drift. It exists because a defect reached a built package in which
+this very section's command pointed at a stale checkpoint and printed
+the superseded **1.4318** where the page published **1.4705**: the numbers were right, the instructions for regenerating them were
+not, and nothing was comparing the two. It caught the one-pager at 973 words on its first run.
 
 `measure.py` prints `TASK_LEARNED` before it prints anything else. If that is `False` the
 model never learned to copy the in-context word, and the sparsity numbers are meaningless

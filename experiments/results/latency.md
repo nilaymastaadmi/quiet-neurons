@@ -59,3 +59,30 @@ console.log({ totals: tot, forward: fwd });
 Discard the first sample; it is the warm-up. `render()` runs synchronously on the main thread, so
 the polling loop cannot tick during it, which is what makes this loop measure render time rather
 than miss it.
+
+## Two optimisations that were proposed, checked, and rejected
+
+An external audit proposed getting the median under 800 ms two ways. Both were investigated
+against the code rather than assumed, and neither survives.
+
+**"Cache the RoPE tables across word changes (82 ms)."** Already done. `bdh.js` `_rope(T)` opens
+with `if (this._ropeT === T) return;`, and T is a constant 77 across word changes, so the cos/sin
+tables are built once at first run and reused for the life of the page. The 82 ms the profiler
+bills to `rope` is not table construction; it is *applying* the rotation to `x_sparse`, which is
+different on every pass by definition. There is nothing there to cache.
+
+**"Count sparsity only for the displayed layer while typing."** This would save about 50 ms of
+1,010 ms, roughly 5%, because `count` is ~67 ms spread across four layers. It would also make the
+layer selector, which is currently **instant** because switching layers is a pure re-render of
+already-computed numbers, cost a full ~870 ms recompute. Moving one control from 0 ms to 870 ms in
+order to move another from 1,010 ms to 960 ms is a bad trade on any page, and a worse one on a
+page judged against "controls should respond in under a second".
+
+**What would actually work**, and what we are not doing before the deadline: the forward pass is
+**86% of the interaction** and `xs` + `ys` + `scores` are ~85% of that. Those are dense
+float32 matmuls in scalar JavaScript. Getting materially under 800 ms means WASM or SIMD, which is
+a rewrite of the file that `parity.html` exists to guard, plus a full re-verification of every
+number the page prints. That is the right change and it is the wrong week.
+
+So the honest position stands: **median 1.01 s, which is at the standard rather than under it.**
+The cost is stated at the control, and the reason it is not lower is stated here.

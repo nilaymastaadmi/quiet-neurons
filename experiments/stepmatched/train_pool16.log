@@ -9,3 +9,8 @@ step   200 loss 0.3497 elapsed    968s
 step   250 loss 0.0973 elapsed   1194s
 step   300 loss 0.1190 elapsed   1368s
 step   350 loss 0.0744 elapsed   1571s
+step   400 loss 0.0451 elapsed   1730s
+step   450 loss 0.0242 elapsed   1875s
+step   500 loss 0.0227 elapsed   1985s
+step   550 loss 0.0220 elapsed   2112s
+step   600 loss 0.0216 elapsed   2247s

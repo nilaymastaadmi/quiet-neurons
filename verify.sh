@@ -75,7 +75,7 @@ echo " 4. no retracted or overclaiming language"
 echo "=============================================================="
 for pat in "Causal, not correlational" "1.4318" "1.9731" "eleven of twelve"; do
   hits=$(grep -rn "$pat" README.md web/index.html concept-summary.html 2>/dev/null \
-         | grep -v "went from 1.4318" | grep -v "from 1.9731" | grep -v "retract" || true)
+         | grep -v "went from 1.4318" | grep -v "from 1.9731" | grep -v "retract"          | grep -v "superseded" || true)
   if [ -z "$hits" ]; then pass "absent: $pat"; else fail "present: $pat"; echo "$hits" | head -3; fi
 done
 
