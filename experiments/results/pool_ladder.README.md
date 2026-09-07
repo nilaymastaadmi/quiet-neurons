@@ -133,6 +133,6 @@ same while moving where the word's content lives, and that difficulty alone cann
 **It does not license**: calling the mechanism established, or calling the relationship monotone
 in provenance. One of four points is unexplained and the ordering we predicted did not hold.
 
-Data in `pool_ladder.csv`. Checkpoints `checkpoints/bdh_n2048_pool16.pt` and `_pool256.pt`, each
+Data in `pool_ladder.csv`. Checkpoints `checkpoints/bdh_n2048_pool16.pt` and `checkpoints/bdh_n2048_pool256.pt`, each
 carrying its own word pool so it can only be re-measured in distribution. Reproduce with
 `python tools/ladder.py`.

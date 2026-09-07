@@ -9,6 +9,12 @@
 #   ./verify.sh              numeric checks only (no browser needed)
 #   ./verify.sh --with-page  also drives parity.html in headless Chrome
 #
+# CHAIN IT WITH && , NOT A NEWLINE. On 2026-09-07 this script reported a failure and the
+# commit went out anyway, because it was separated from `git commit` by a newline instead
+# of &&. A gate you can walk past is not a gate:
+#
+#   ./verify.sh && git commit -am "..." && git push
+#
 # Exit code is non-zero if ANY check fails. Intended to be the last thing run before a commit
 # that touches numbers, and the first thing run when picking the project back up.
 
