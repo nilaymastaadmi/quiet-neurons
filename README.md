@@ -54,10 +54,15 @@ that it tracks, not why it does.
 
 **It is falsifiable, in the artifact, in under a minute.** Inject a letter the model cannot
 predict into the middle of the repetition. If activity does not rise at that letter, the
-claim is wrong. On the page's default word: 5.03% → 5.96% at the same position, **+18%**.
-Other words land roughly between +10% and +20% in layer 2, so quote the range rather than the
-single number. The letter *before* the surprise is identical to nine decimal places, because
-the model only reads leftwards.
+claim is wrong. On the page's default word `tmredfpf`: **4.79% → 6.01%** at the same position,
+**+26%** in layer 2.
+
+**Quote the scatter, not the single number.** We drove the shipped page across fifteen words and
+the jump ranges from **−8% to +33%** (`experiments/results/word_scatter.csv`; median +9%, and 5 of
+15 at or above +20%). One word is one sample. A reader who changes the word and lands near zero has
+found the scatter, not a broken claim; the 1,280-sequence table below is what does not scatter.
+The letter *before* the surprise is identical to nine decimal places either way, because the model
+only reads leftwards.
 
 ---
 
@@ -215,13 +220,29 @@ this experiment was undertrained and would have produced a clean-looking false n
 Layer 2, `xy` product tensor, memorisation over repetition. Each row is 1,280 sequences
 across 5 independent pinned samples.
 
-**Which tensor `xy` is, and why that choice is an inference.** The paper writes `y_{t,l}` and
-does not say which tensor in the released code it corresponds to. We count the elementwise
-product `x_sparse * y_sparse` because it is the only quantity in the public code that reaches
-Figure 14's band; `x` and `y` alone sit at 30 to 50 percent, roughly six times off. That is
-magnitude matching, not a sourced fact, and it should be read as an inference. The direction of
-the result does not depend on it: measured on all three tensors at layer 2, n=8,192, the ratios
-are 1.40 (`x`), 1.27 (`y`) and 2.12 (`xy`). The choice changes the effect's size, not its sign.
+**Which tensor `xy` is, and why it is the paper's `y`.** Figure 14 counts "the fraction of
+neurons with non-zero entry `y_{t,l}`", so everything depends on which tensor that is. The paper
+defines it three times and all three agree:
+
+- **Eq. (8)**, the BDH-GPU state-space form: `y_{t,l} := ( D_y LN( ρ_{t−1,l} x_{t,l} ) )_+ ⊙ x_{t,l}`.
+  The `⊙ x_{t,l}` is an elementwise product with `x`. Eq. (4) and Eq. (7) give the same thing in
+  the other two representations.
+- **The Figure 3 caption**: "Vector `y_{t,l} ∈ (R+)^n`, `y_{t,l}` is (typically) sparse in the
+  sense of `‖y_{t,l}‖₀`" — the zero-count of that product is the sparsity measure.
+- **The Appendix E PyTorch listing**: `y = F.relu(self.ln(a_ast) @ self.decoder_y) * x`.
+
+That last line is `xy_sparse` in `bdh.py`, term for term. There is a naming collision worth
+stating plainly, because it is the thing that makes this look ambiguous when it is not: the
+released repository calls the rectified factor `y_sparse`, but **the repository's `y_sparse` is
+the paper's `(...)_+` intermediate, not the paper's `y`.** The paper's `y` is the repository's
+`xy_sparse`. We count `xy_sparse`, which is the paper's `y_{t,l}`.
+
+The magnitudes corroborate it rather than establishing it: `xy` is the only quantity in the public
+code that lands inside Figure 14's 4.0–7.5% band, while `x` and `y_sparse` alone run from 19% to
+59% dense across the step-matched runs. And the direction of the result does not depend on the
+choice at all: measured on all three tensors at layer 2, n=8,192, the ratios are 1.40 (`x`),
+1.27 (`y_sparse`) and 2.12 (`xy`). Every one is above 1.0. Picking a different tensor changes the
+size of the effect, never its sign.
 
 | n | params | steps | MEM | REP | ratio | spread over 5 samples |
 |---|---|---|---|---|---|---|
@@ -231,8 +252,15 @@ are 1.40 (`x`), 1.27 (`y`) and 2.12 (`xy`). The choice changes the effect's size
 | 65,536 | Pathway's | — | 4.0–7.5% | ~2.5% | 1.6–3.0x | reported as a range, not reproduced here |
 
 **The scaling is not monotonic, and we published the opposite before the third model
-finished.** n=16384 comes in at 1.87, *below* n=8192's 2.12, and that 0.25 gap is roughly
-twenty times the sampling spread, so it is not noise.
+finished.** n=16384 comes in at 1.87, *below* n=8192's 2.12. The gap is **0.246**, and it is
+**40×** the sampling spread, so it is not noise.
+
+*"Spread" means one thing throughout this README: the half-width of the five-sample range.* The
+tables quote the same quantity as a full min-to-max, which is twice as large, and mixing the two
+is how this number becomes unreproducible. Explicitly: 8,192 ranges 2.1139–2.1301, half-width
+0.0081; 16,384 ranges 1.8699–1.8782, half-width 0.0042; mean half-width **0.0061**; and
+0.246 ÷ 0.0061 = **40.1**. Against the full widths instead it is 15× and 30×, which is the same
+finding stated on a different denominator.
 
 **We removed the confound rather than disclosing it.** The three models were originally each
 cut by a wall-clock budget at 1,854, 1,917 and 2,309 steps of one 4,000-step OneCycle schedule,
@@ -244,8 +272,8 @@ cut had been suppressing the two smaller models, which is exactly what a confoun
 take it away.
 
 **The non-monotonicity survives, and sharpens.** Controlled, the sequence reads 1.47, 2.12,
-1.87, and the drop from 8k to 16k is now roughly forty times the sampling spread rather than
-twenty. It is a property of the models, not of where training stopped. Both families are in
+1.87, and the drop from 8k to 16k is 40× the mean half-width, as computed above. It is a property
+of the models, not of where training stopped. Both families are in
 `experiments/results/measured.csv`, told apart by a `steps_trained` column, so the before and
 after are both checkable. Final losses are close (0.174, 0.173,
 0.172), so they are comparably trained on the task, but that is not a controlled comparison.
@@ -253,8 +281,12 @@ after are both checkable. Final losses are close (0.174, 0.173,
 The defensible statement is therefore narrower than the one we started with: **the effect is
 far stronger at 8k and 16k than at 2k, and both land inside the range the paper reports for
 a model four to eight times larger again. Whether it grows monotonically, we do not know.**
-Settling it needs three models trained for an identical number of steps, about thirteen hours
-of CPU that did not fit before the deadline.
+What is no longer in doubt is the step count: all three now stop at 2,309 steps of the same
+schedule, so *where training stopped* cannot be what produces the dip. What is still
+uncontrolled is that none of them **finished** that schedule. It is 4,000 steps long and all
+three stop at 2,309, about 58% of the way through, at a learning rate that is still falling.
+Settling monotonicity properly needs three fully-trained models, roughly thirteen hours of CPU
+that did not fit before the deadline.
 
 **A bug our own measurement found.** Until 2026-09-06 the per-position loss was paired with
 the wrong position. `pl[t]` is the cost of *predicting* token `t+1`, so the surprise of
@@ -262,7 +294,9 @@ the wrong position. `pl[t]` is the cost of *predicting* token `t+1`, so the surp
 genuinely new letter and pulled in one the model had already learned, and reported first-sight
 loss as **2.88**. The random baseline for 26 letters is 3.258, and a first sight of a random
 word cannot be easier than chance, so that number should have been impossible. Aligned, it
-reads **3.28**, sitting on the baseline exactly as it should. Every sparsity number is
+reads **3.27** on the shipped step-matched model, sitting on the baseline exactly as it should.
+(It read 3.28 on the wall-clock-cut checkpoint this bug was found on; the step-matched retrain
+moved it by 0.009.) Every sparsity number is
 unaffected: the activation counts never depended on the loss array. The correlations above are
 computed on the aligned curve, and `web/data/traces/*.json` now ship it as `surprise`.
 
@@ -288,7 +322,7 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 | Layer 3 is flat at 2k and 8k, weakly positive at 16k | 0.97, 0.95, **1.11**. "No effect" is true of the two smaller models only |
 | Scaling is **not** monotonic, and now controlled | 1.47 → 2.12 → 1.87 at n = 2k, 8k, 16k, all trained for the same 2,309 steps. We expected monotone growth and said so publicly until the third model landed |
 | The three models **are** step-matched, as of 2026-09-06 | all three stop at 2,309 steps of the same 4,000-step schedule. The earlier wall-clock-cut numbers are kept in `measured.csv` for comparison |
-| A single sequence is noisy | one sequence gave 1.93 where 1,280 give 1.47 |
+| A single sequence is noisy | the surprise-injection jump ranges −8% to +33% across 15 words, median +9%, all in `experiments/results/word_scatter.csv`. The 1,280-sequence ratios do not scatter: every five-sample spread is under 0.02 |
 | Surprise and sparsity do **not** track per letter | at n=8192, layer 2: **Pearson 0.30, Spearman −0.05**. Across the eight letters of first sight, surprise is flat at 3.27 to 3.29 nats while sparsity falls 13.3% to 4.5%. The relationship is between phases, not letters, and a near-zero Spearman is what says so. This killed a stronger claim we wanted to make. Printed by `measure.py`, recorded in `experiments/results/correlations.csv` |
 | We show the signature, not its cause | nothing here explains *why* context-held knowledge needs fewer neurons than weight-held knowledge. The measurement separates the two; the mechanism behind that separation is open. An independent reader of the one-page summary raised exactly this, and they were right |
 | Toy model, not an official BDH checkpoint | architecture is Pathway's and unmodified; the weights are ours |
@@ -298,8 +332,22 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 
 ## Accessibility and robustness, measured rather than asserted
 
-Text contrast passes **WCAG AA in both themes**; the lowest ratio measured in-page is
-**4.69:1** against a 4.5:1 threshold, and most body text is above 9:1. At a **375 px**
+Text contrast passes **WCAG AA in both themes**, measured on 2026-09-07 by walking every
+rendered element on the running page, resolving each one's actual computed foreground against
+its nearest opaque ancestor background, and applying the large-text exemption (3:1 at ≥24 px, or
+≥18.66 px bold) only where it genuinely applies. **305 text elements per theme, zero failures.**
+The floor is **5.12:1** in dark and **4.71:1** in light, against a 4.5:1 threshold.
+
+An earlier version of this section claimed 4.69:1 and was **wrong**. Two things actually failed:
+white text on the orange accent measured **2.06:1** in dark mode, which included the "Inject a
+surprise" button, the most important control on the page; and the small stat labels sitting on
+the accent-tinted panel measured 4.34:1 in dark and 4.26:1 in light. Both are fixed rather than
+re-asserted. Buttons on the accent now use a near-black foreground (9.17:1), the light accent was
+darkened from `#B45911` to `#9A4A0E`, and `--muted` moved in both themes. The reproduction is in
+`experiments/results/contrast.md`, and re-running it is the only thing that should ever be allowed
+to change the numbers in this paragraph.
+
+At a **375 px**
 viewport the document has **zero horizontal overflow** (`scrollWidth == clientWidth`); wide
 tables scroll inside their own container rather than pushing the page sideways. Every control
 is a native input, button or `<details>`, so the whole page is keyboard navigable, and focus

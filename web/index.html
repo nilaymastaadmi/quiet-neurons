@@ -12,11 +12,17 @@
 :root{
   --ground:#F3F4F7; --surface:#FFFFFF; --surface-2:#EAECF1;
   --line:#D5D9E2; --line-soft:#E4E7ED;
-  --ink:#191C25; --ink-2:#3E4455; --muted:#666D82;
-  --fire:#B45911; --fire-soft:#F7E7D6; --fire-line:#D98A3C;
+  /* --muted darkened from #666D82: its worst case is the small .k stat labels sitting on
+     --fire-soft, where #666D82 measured 4.26:1. #5A6070 measures 5.19:1 there. */
+  --ink:#191C25; --ink-2:#3E4455; --muted:#5A6070;
+  /* --fire darkened from #B45911 on 2026-09-07. At #B45911 the accent text on --fire-soft
+     measured 3.96:1, under the 4.5:1 AA threshold this page claims. #9A4A0E measures 5.17:1
+     on --fire-soft and 6.25:1 on white. --on-fire is the text colour for anything sitting ON
+     the accent: white here, near-black in dark mode, where white measured 2.06:1. */
+  --fire:#9A4A0E; --fire-soft:#F7E7D6; --fire-line:#D98A3C; --on-fire:#FFFFFF;
   --pass:#2A7355; --pass-soft:#DEEEE5;
   --dead:#9B3A32; --dead-soft:#F4E0DE;
-  --grid-off:#D9DDE5; --grid-on:#B45911;
+  --grid-off:#D9DDE5; --grid-on:#9A4A0E;
   --shadow:0 1px 2px rgba(25,28,37,.05), 0 10px 30px -16px rgba(25,28,37,.22);
   --f-disp:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif;
   --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
@@ -25,8 +31,8 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --ground:#0F1118; --surface:#161922; --surface-2:#1D212B;
   --line:#2B3040; --line-soft:#222632;
-  --ink:#E9EBF1; --ink-2:#C0C5D2; --muted:#868DA1;
-  --fire:#FF9E3D; --fire-soft:#37270F; --fire-line:#B4712A;
+  --ink:#E9EBF1; --ink-2:#C0C5D2; --muted:#939AAE;
+  --fire:#FF9E3D; --fire-soft:#37270F; --fire-line:#B4712A; --on-fire:#0F1118;
   --pass:#5FB98E; --pass-soft:#152D1F;
   --dead:#DA7C74; --dead-soft:#331917;
   --grid-off:#232936; --grid-on:#FF9E3D;
@@ -35,8 +41,8 @@
 :root[data-theme="dark"]{
   --ground:#0F1118; --surface:#161922; --surface-2:#1D212B;
   --line:#2B3040; --line-soft:#222632;
-  --ink:#E9EBF1; --ink-2:#C0C5D2; --muted:#868DA1;
-  --fire:#FF9E3D; --fire-soft:#37270F; --fire-line:#B4712A;
+  --ink:#E9EBF1; --ink-2:#C0C5D2; --muted:#939AAE;
+  --fire:#FF9E3D; --fire-soft:#37270F; --fire-line:#B4712A; --on-fire:#0F1118;
   --pass:#5FB98E; --pass-soft:#152D1F;
   --dead:#DA7C74; --dead-soft:#331917;
   --grid-off:#232936; --grid-on:#FF9E3D;
@@ -88,6 +94,7 @@ h3{font-family:var(--f-disp);font-weight:600;font-size:18px;margin:28px 0 6px}
 #tour[hidden]{display:none}
 .tour-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:10px}
 .tour-count{font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:.1em}
+.cav{display:block;font-size:13px;line-height:1.5;color:var(--muted);border-left:2px solid var(--line);padding-left:10px}
 #tourText{margin:0 0 14px;font-size:15.5px;max-width:72ch}
 #tourText b{color:var(--fire)}
 .tour-act{display:flex;gap:10px;flex-wrap:wrap}
@@ -130,9 +137,9 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 .seg button{font-family:var(--f-mono);font-size:13px;padding:8px 14px;border:0;cursor:pointer;
             background:var(--ground);color:var(--muted);border-right:1px solid var(--line)}
 .seg button:last-child{border-right:0}
-.seg button[aria-pressed=true]{background:var(--fire);color:#fff}
+.seg button[aria-pressed=true]{background:var(--fire);color:var(--on-fire)}
 .btn{font-family:var(--f-mono);font-size:13px;padding:9px 16px;border:1px solid var(--fire);
-     border-radius:3px;background:var(--fire);color:#fff;cursor:pointer;font-weight:500}
+     border-radius:3px;background:var(--fire);color:var(--on-fire);cursor:pointer;font-weight:600}
 .btn.ghost{background:transparent;color:var(--fire)}
 .hint{font-size:13px;color:var(--muted);margin:8px 0 0;max-width:60ch}
 
@@ -353,7 +360,11 @@ footer a{color:var(--muted)}
           <label for="word">The repeated word</label>
           <input id="word" type="text" maxlength="8" value="fact" spellcheck="false" autocomplete="off">
           <p class="hint">Any letters. It is new to the model every time, so it has to learn it from
-            the text rather than recall it.</p>
+            the text rather than recall it. <strong>Each change costs about two seconds</strong>:
+            2,048 neurons through four layers, single-threaded JavaScript, computed in your tab with
+            no server. That is the price of the page being real rather than a recording, and it is
+            slower than the sub-second standard we would want. Measured per phase in
+            <a href="profile.html">profile.html</a>.</p>
         </div>
         <div class="ctl">
           <label for="pos">Scrub position <span id="posLabel" style="color:var(--fire)">40</span></label>
@@ -440,7 +451,7 @@ footer a{color:var(--muted)}
   </div>
   <p class="hint" style="max-width:78ch">Widths are true to letter counts. Values are the share of
     layer&nbsp;2 neurons firing, from the run above. The model predicts the repeats almost perfectly
-    (loss 0.008 against 3.28 on first sight, on the pinned sample, where 3.26 is the random
+    (loss 0.009 against 3.27 on first sight, on the pinned sample, where 3.26 is the random
     baseline for 26 letters), which is the point: it has learned the word from
     context, and only then does it go quiet.</p>
 </section>
@@ -464,8 +475,10 @@ footer a{color:var(--muted)}
     <p style="margin:0;font-size:14.5px;color:var(--ink-2);max-width:74ch">
       We expected the effect to keep strengthening with size, and said so on this page until the
       third model finished training. It does not. <strong>n=16384 comes in at 1.87, below
-      n=8192's 2.12.</strong> That 0.25 gap is roughly forty times the sampling spread, so it is
-      not noise.
+      n=8192's 2.12.</strong> The gap is 0.246, which is <strong>40&times;</strong> the mean
+      half-width of the five-sample spread (0.0061), so it is not noise. The tables below quote
+      that spread as a full min-to-max range, which is twice the half-width; on that denominator
+      the same gap reads 15&times; and 30&times;.
       <br><br>
       There <em>was</em> a confound, and we removed it. The three models were originally cut by a
       wall-clock budget at <strong>1,854</strong>, <strong>1,917</strong> and <strong>2,309</strong>
@@ -478,9 +491,13 @@ footer a{color:var(--muted)}
       <br><br>
       So the defensible statement is narrower than the one we started with: the effect is far
       stronger at 8k and 16k than at 2k, and both land inside the range the paper reports for a
-      model four to eight times larger again. Whether it grows monotonically, we do not know, and
-      settling it needs three models trained for an identical number of steps, which is about
-      thirteen hours of CPU we do not have before the deadline.
+      model four to eight times larger again. Whether it grows monotonically, we do not know.
+      The step count is no longer the open part: all three stop at 2,309 steps of the same
+      schedule, so where training stopped cannot be what produces the dip. What is still
+      uncontrolled is that none of them <em>finished</em> it. The schedule is 4,000 steps and all
+      three stop at about 58% of it, with the learning rate still falling. Settling this properly
+      needs three fully-trained models, roughly thirteen hours of CPU we do not have before the
+      deadline.
     </p>
   </div>
   <p class="hint" style="max-width:78ch">Each of our points is 1,280 sequences across 5 independent
@@ -504,12 +521,27 @@ footer a{color:var(--muted)}
     away negatives, so each is already sparse; a product of two sparse non-negative vectors is
     sparser than either. That product is what we count. It is the <em>only</em> quantity in the
     public code whose magnitude lands inside the band the paper reports; the individual vectors sit
-    around 30 to 50 percent dense, roughly six times off.</p>
+    around 19 to 59 percent dense, several times off.</p>
 
-  <p>The paper writes <em>y</em>, and does not say which tensor in the released code that
-    corresponds to, so treat our choice as an inference from matching magnitudes rather than a
-    sourced fact. It is worth knowing that <strong>the direction of the claim does not depend on
-    it</strong>. Measured on all three tensors, layer 2, memorisation over repetition:</p>
+  <p>Figure 14 counts "the fraction of neurons with non-zero entry <em>y<sub>t,l</sub></em>", so
+    which tensor that is decides everything. <strong>The paper defines it, three times over.</strong>
+    Equation 8 gives the BDH-GPU form as
+    <code>y<sub>t,l</sub> := ( D<sub>y</sub> LN( &rho;<sub>t&minus;1,l</sub> x<sub>t,l</sub> ) )<sub>+</sub> &odot; x<sub>t,l</sub></code>,
+    where <code>&odot; x<sub>t,l</sub></code> is an elementwise product with <em>x</em>. The Figure 3
+    caption says that vector is the one whose zero-count is the sparsity measure. And the paper's own
+    PyTorch listing in Appendix E reads
+    <code>y = F.relu(self.ln(a_ast) @ self.decoder_y) * x</code>, which is
+    <code>xy_sparse</code> in <code>bdh.py</code> term for term.</p>
+
+  <p>There is one naming collision worth saying out loud, because it is what makes this look
+    ambiguous when it is not. The released repository calls the rectified factor
+    <code>y_sparse</code>, but <strong>the repository's <code>y_sparse</code> is the paper's
+    <code>(&hellip;)<sub>+</sub></code> intermediate, not the paper's <em>y</em></strong>. The
+    paper's <em>y</em> is the repository's <code>xy_sparse</code>. That is the quantity we count.</p>
+
+  <p>The magnitudes then corroborate the reading rather than being the reason for it, and the
+    direction of the claim does not depend on the choice in any case. Measured on all three
+    tensors, layer 2, memorisation over repetition:</p>
 
   <div class="scroll"><table>
     <thead><tr><th>tensor counted</th><th>n=2,048</th><th>n=8,192</th><th>n=16,384</th></tr></thead>
@@ -519,9 +551,10 @@ footer a{color:var(--muted)}
       <tr class="peak"><td><code>xy</code>, what we count</td><td class="n">1.47&times;</td><td class="n">2.12&times;</td><td class="n">1.87&times;</td></tr>
     </tbody>
   </table></div>
-  <p class="hint" style="max-width:78ch">Every row is above 1.0, so whichever tensor the paper
-    meant, memorisation uses more neurons than repetition. Only the size of the effect depends on
-    the choice. All twelve numbers are in <code>experiments/results/measured.csv</code>.</p>
+  <p class="hint" style="max-width:78ch">The robustness check, not a hedge: every row is above 1.0,
+    so even if you disagreed with the mapping above, memorisation uses more neurons than repetition
+    on <em>any</em> of the three tensors. Only the size of the effect moves. All twelve numbers are
+    in <code>experiments/results/measured.csv</code>.</p>
 
   <h3>Attention is a similarity between firing patterns</h3>
   <p>In <code>bdh.py</code> the query and the key are <em>the same tensor</em> — the code literally
@@ -691,7 +724,8 @@ footer a{color:var(--muted)}
             rose, 1.43 to 1.47 and 1.97 to 2.12, and the dip at 16k survived
             <span class="tag tag-ok">removed</span></td></tr>
       <tr><td>A single sequence is noisy</td>
-          <td class="n">one run gave 1.93 where 1,280 sequences give 1.47</td></tr>
+          <td class="n">the injection jump spans &minus;8% to +33% across 15 words, median +9%; the
+            1,280-sequence ratios have five-sample spreads under 0.02</td></tr>
       <tr><td>This is a toy trained here, not an official BDH checkpoint</td>
           <td class="n">architecture is Pathway's, unmodified; weights are ours</td></tr>
       <tr><td>Synthetic task, not natural language</td>
@@ -710,10 +744,16 @@ footer a{color:var(--muted)}
   <strong style="color:var(--ink)">One-page summary.</strong>
   <a href="concept-summary.pdf">concept-summary.pdf</a> &mdash; the claim, the evidence and its
   limits on one page, for a reader who wants it without the interaction.<br>
+  <strong style="color:var(--ink)">Check this page yourself.</strong>
+  <a href="parity.html">parity.html</a> &mdash; runs the browser model against the PyTorch
+  reference trace, live, and prints every difference. Open this one first if you are sceptical.
+  <a href="profile.html">profile.html</a> &mdash; per-phase timings, so the speed claims are
+  measured rather than asserted.
+  <a href="https://github.com/nilaymastaadmi/quiet-neurons">github.com/nilaymastaadmi/quiet-neurons</a>
+  &mdash; all of it: the PyTorch training and measurement code, the raw results, and this page.<br>
   <strong style="color:var(--ink)">Reproduce.</strong>
   <code>python sparsity_scan.py --embd 64 --mult 32</code> trains it;
-  <code>python measure.py --ckpt … --repeats 5</code> produces every number on this page;
-  <code>parity.html</code> checks the browser model against PyTorch.<br>
+  <code>python measure.py --ckpt … --repeats 5</code> produces every number on this page.<br>
   <span id="perf"></span>
 </footer>
 
@@ -723,7 +763,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "18";
+const BUILD = "19";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
@@ -966,17 +1006,35 @@ function render() {
     $("#cxAn").textContent = (warmA * 100).toFixed(2) + "%";
     $("#cxBn").textContent = (repA * 100).toFixed(2) + "%";
     const factor = repA > 0 ? warmA / repA : NaN;
+    // Two things this note has to stay honest about.
+    // 1. It is ONE word and one sequence. The population figure for the model actually
+    //    running is 2.35x (measured.csv, n=2048, layer 2, xy: warmup 0.13609 / rep 0.05780).
+    //    The 2.65x quoted elsewhere is the n=8192 model, and the single-word value lands
+    //    near it often enough to mislead, so name the right one here.
+    // 2. Once a surprise is injected into the repeats, "both predicted almost perfectly"
+    //    stops being true: the panel's own repeat-surprise readout jumps well off zero.
+    const POP2048 = 2.35;
+    const injectedInRep = curSurprise !== null && curSurprise >= WARM + WORD;
+    const opener = injectedInRep
+      ? `You have injected a surprise into the repeats, so their mean surprise is no longer
+         near zero &mdash; the readout above now reads ${nats(repS)} nats against
+         ${nats(warmS)} on the warm-up. Even carrying that, `
+      : `Both blocks are predicted almost perfectly &mdash; mean surprise near zero on either
+         side &mdash; and `;
+    const caveat = layer === 2
+      ? ` <em>This is one word and one sequence, and single words scatter. Over 1,280
+          sequences this same model reads ${POP2048.toFixed(2)}&times;.</em>`
+      : ``;
     $("#cxNote").innerHTML = warmA > repA * 1.3
-      ? `Both blocks are predicted almost perfectly &mdash; mean surprise near zero on either
-         side &mdash; and layer ${layer} still uses <strong>${factor.toFixed(1)}&times; more
+      ? `${opener}layer ${layer} still uses <strong>${factor.toFixed(1)}&times; more
          neurons</strong> on the warm-up. Those 13 letters are identical in every training
          sequence, so they live in the model's trained <strong>weights</strong>. The repeated
          word is new every run, so it can only have come from the <strong>context</strong>,
          seconds ago. Being predictable is not what quietens the model. What the activity
-         tracks is where the knowledge came from. Why it tracks that, we do not show.`
+         tracks is where the knowledge came from. Why it tracks that, we do not show.${caveat}`
       : `On this run layer ${layer} does not show the gap (${factor.toFixed(1)}&times;), which
          is itself worth seeing: the effect lives in layers 1 and 2. Layer 0 runs backwards
-         and layer 3 is flat at this size. Try them.`;
+         and layer 3 is flat at this size. Try them.${caveat}`;
   }
 
   // The falsification readout. A phase average over 56 letters cannot show a jump
@@ -1013,7 +1071,9 @@ function render() {
   // the instrument as much as a fact about the model: if either moved, the page would be wrong.
   if (typeof cur.minAct === "number") {
     $("#nonneg").hidden = false;
-    const tot = cur.nNeurons * cur.T * 2;
+    // bdh.js scopes minAct/negCount OUTSIDE its layer loop, so the check spans every layer,
+    // not just the selected one. Reporting nNeurons * T * 2 understated it four-fold.
+    const tot = cur.nNeurons * cur.T * 2 * cur.sparsity.length;
     $("#nnMin").textContent = cur.minAct.toFixed(3);
     $("#nnNeg").textContent = cur.negCount.toLocaleString();
     $("#nnNote").innerHTML =
@@ -1156,7 +1216,12 @@ const TOUR = [
   { text: `Now change the word to something else. It has never seen this one either, so it
            has to learn it from scratch again, and the same drop should happen. If the shape
            survives an arbitrary word, it is not a property of that word.`,
-    act: () => { $("#word").value = "zqmvblkx"; surprise = null;
+    // Measured on the shipped checkpoint before being hardcoded. Per-word scatter in the
+    // injection jump is large (-8% to +33% across 15 words at layer 2), so the tour word is
+    // one that lands well: xswedcvf reads 4.98% -> 6.25%, +25% at layer 2, and layer 0 runs
+    // backwards at -5% as it should. The previous word here, zqmvblkx, gave +4% and made the
+    // tour's last panel print "no meaningful jump", i.e. tell the learner the claim failed.
+    act: () => { $("#word").value = "xswedcvf"; surprise = null;
                  $("#surprise").textContent = "Inject a surprise"; run(); },
     label: "Change the word" },
   { text: `Here is the part that surprised us. Look at the counterexample panel above. The
@@ -1168,7 +1233,12 @@ const TOUR = [
   { text: `Last one, and this is where you try to break it. Inject a letter the model cannot
            possibly predict, in the middle of the repetition. If the claim is right the
            neurons wake up at exactly that letter and nowhere earlier. <b>If they do not,
-           we are wrong.</b>`,
+           we are wrong.</b><br><br>
+           <span class="cav">One honest caveat: a single word is a single sample, and the size
+           of that wake-up scatters hard. Across fifteen words we measured anything from
+           &minus;8% to +33% at layer 2. If you change the word yourself and land near zero,
+           that is the scatter, not the claim collapsing. The table in section 04 averages
+           1,280 sequences and does not scatter.</span>`,
     act: () => { if (surprise === null) $("#surprise").click(); },
     label: "Break it" },
 ];
