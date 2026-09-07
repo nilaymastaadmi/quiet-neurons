@@ -153,9 +153,9 @@ for label, loss, ratio in pts:
 
 print()
 if verdict_any:
-    print("  READING: at least one intermediate point sits materially above the")
-    print("  difficulty line. Provenance carries signal that difficulty alone does not")
-    print("  explain. State the residual, not just the direction.")
+    print("  READING: at least one intermediate point sits above the line and at least one")
+    print("  below it. The effect is not a monotone function of difficulty. State both")
+    print("  residuals; do not call difficulty ruled out.")
 else:
     print("  READING: the points lie on the difficulty line. Say exactly that:")
     print("  provenance and difficulty are not separable in this design, and we now have")

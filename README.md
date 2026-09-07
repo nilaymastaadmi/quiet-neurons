@@ -24,9 +24,9 @@ Reproduce every number: see [Reproducing the results](#reproducing-the-results).
 
 ## The claim
 
-> A trained BDH quietens down when it has just learned something from the text in front of
-> it. Not when the text is merely predictable. Those two look identical from the outside,
-> and they are not.
+> This model goes quiet on words it has just picked up from the text in front of it. It
+> does not go quiet just because text is easy to guess. From the outside those two look
+> identical, and they are not the same thing.
 
 This starts from the Dragon Hatchling paper's Section 6.4 and Figure 14, which reports that
 "neuron activity correlates with signal predictability: fewer neurons are active ... for more
@@ -53,25 +53,22 @@ scrub control labels them. In `traces/n8192.json` those are array indices 11 and
 knowledge came from: the activation level tracks parametric against in-context memory. We show
 that it tracks, not why it does.
 
-**It is falsifiable, in the artifact, in under a minute.** Inject a letter the model cannot
-predict into the middle of the repetition. If activity does not rise at that letter, the
-claim is wrong. On the page's default word `tmredfpf`: **4.79% → 6.01%** at the same position,
-**+26%** in layer 2.
-
-**Quote the scatter, not the single number.** We drove the shipped page across fifteen words and
-the jump ranges from **−8% to +33%** (`experiments/results/word_scatter.csv`; median +9%, and 5 of
-15 at or above +20%). One word is one sample. A reader who changes the word and lands near zero has
-found the scatter, not a broken claim; the 1,280-sequence table below is what does not scatter.
-The letter *before* the surprise is identical to nine decimal places either way, because the model
-only reads leftwards.
+**Two things a learner can test in the artifact in under a minute.** First, the counterexample:
+change the word. The warm-up should stay far louder than the repeats while both stay near zero
+surprise; any word that makes the repeats as loud as the warm-up, or pushes the warm-up's surprise
+off zero, breaks the claim. The batch control runs eight random words in about ten seconds so no
+single word decides it. Second, the surprise injection: activity should rise at the injected letter
+and the letter before it must be unchanged to nine decimals. The size of the rise scatters by word
+(−8% to +33%, median +9%, 4 of 15 under +5%, `experiments/results/word_scatter.csv`), so a small
+rise is not a refutation. A change in the preceding letter would be.
 
 ---
 
 ## Who this is for
 
-**Audience.** Anyone who has met a neural network once: undergraduates, engineers new to
-post-Transformer architectures, and researchers who would rather have the BDH sparsity
-result checked than described.
+**Audience.** Anyone willing to read the four primer boxes at the top of the page. No
+machine-learning background is assumed; researchers who want the BDH sparsity result checked
+rather than described can skip them.
 
 **Prerequisites.** That a model turns text into numbers and predicts what comes next.
 Nothing about attention, state space models or Hebbian learning is assumed. Terms are
@@ -134,7 +131,12 @@ experiments/                     PyTorch: train, measure, export
 
 tools/sweep.py                   cross-surface consistency: every published number against
                                  measured.csv, every referenced path, disclosure coverage
-verify.sh                        runs all of it and exits non-zero on any drift. Run this
+verify.sh                        re-derives the three headline ratios from the checkpoints
+                                 (needs torch), checks the CSV against scaling.json and the
+                                 page's self-check answer, path existence, disclosure
+                                 coverage, stale tokens and the one-pager length. Prose
+                                 numbers are read and compared by tools/gate_checks.py,
+                                 which carries a negative control. Run both
                                  before any commit that touches a number.
 
 web/
@@ -237,7 +239,11 @@ because they are 37 MB.
 ./verify.sh --with-page  # and parity.html driven in headless Chrome
 ```
 
-It exits non-zero on any drift. It exists because a defect reached a built package in which
+It exits non-zero when any of those checks fails. On 2026-09-07 an examiner planted seven
+wrong numbers and a wrong checkpoint in a copy and this script passed all of them, because it
+compared the CSV against constants in the checker rather than reading the surfaces.
+`tools/gate_checks.py` now reads the numbers off the README, the page and the one-pager, and
+its negative control must fail on a planted error before either script is trusted. It exists because a defect reached a built package in which
 this very section's command pointed at a stale checkpoint and printed
 the superseded **1.4318** where the page published **1.4705**: the numbers were right, the instructions for regenerating them were
 not, and nothing was comparing the two. It caught the one-pager at 973 words on its first run.
@@ -285,7 +291,7 @@ size of the effect, never its sign.
 
 **The scaling is not monotonic, and we published the opposite before the third model
 finished.** n=16384 comes in at 1.87, *below* n=8192's 2.12. The gap is **0.246**, and it is
-**40×** the sampling spread, so it is not noise.
+**40×** the sampling spread, so it is not evaluation-sampling noise. Whether it is training-seed noise we cannot say: each size was trained once, and the spread here is five re-draws of evaluation words on the same weights.
 
 *"Spread" means one thing throughout this README: the half-width of the five-sample range.* The
 tables quote the same quantity as a full min-to-max, which is twice as large, and mixing the two
@@ -438,12 +444,15 @@ Both intermediate models pass that precondition (`TASK_LEARNED=True`) and neithe
 wrong.** Two of the four points are out of order: K=16 falls below K=1, and K=256 rises above the
 base task.
 
-**The discriminating test, which is what the ladder was for, passed decisively.** If difficulty
-were the only driver, all four points would lie on the line joining the two extremes; at K=256's
-loss that line predicts 1.324, and K=256 measures **2.536**, a residual of **+1.212**. Stated
-without the geometry: **K=256 is four and a half times easier than the base task by final loss and
-shows a larger effect.** An easier task producing a bigger effect is the opposite of what the
-difficulty confound predicts, so difficulty cannot be what generates it.
+**The discriminating test, as registered, reads positive at K=256 and negative at K=16.** The
+registration drew a straight line in (final loss, warm/rep) through K=1 and the base task and
+asked whether K=256 sits above it. It does: the line predicts 1.324 at K=256's loss and the model
+measures **2.536**, a residual of +1.212. K=16 sits below the same line: 0.923 against a predicted
+1.175. The linear-in-loss axis was our choice; on a log-loss axis K=256's residual falls to +0.51
+and K=16's grows to −0.95. So the defensible statement is that the effect is **not a monotone
+function of task difficulty**: K=256 is 4.5× easier than the base task by final loss and shows a
+larger effect. Difficulty is not ruled out as a driver, and no argument about the geometry rescues
+K=16.
 
 **K=16 is unexplained.** Every layer sits between 0.90 and 1.01 and at layer 2 warm, mem and rep
 are within 0.013 of each other. Our best guess is that 128 letters is few enough to be served from
@@ -452,7 +461,7 @@ model must use context to identify which word, and the effect returns. **That is
 measurement**, and settling it needs a K sweep we do not have time for.
 
 So: the effect survives an intervention that moves where the word's content lives while keeping
-the task recognisably the same, and difficulty alone cannot generate it. That is not the mechanism,
+the task recognisably the same, and it is not a monotone function of difficulty. That is not the mechanism,
 and the relationship is not monotone in provenance. Full write-up, including the failed prediction
 in the words it was registered in, is in `experiments/results/pool_ladder.README.md`.
 

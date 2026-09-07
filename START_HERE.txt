@@ -4,9 +4,9 @@ Concept: Sparse Non-Negative Activations
 Nilay Toshniwal, solo entry
 
 THE CLAIM
-  A trained BDH quietens down when it has just learned something from the text in
-  front of it. Not when the text is merely predictable. Those two look identical
-  from the outside, and they are not.
+  This model goes quiet on words it has just picked up from the text in front of
+  it. It does not go quiet just because text is easy to guess. From the outside
+  those two look identical, and they are not the same thing.
 
 
 FASTEST PATH  --  the live artifact, no install, no sign-in, opens in a browser:
@@ -71,5 +71,5 @@ NOT IN THIS ZIP
   experiments/checkpoints/*.pt  --  the three trained models, 37 MB together. They
   are in the GitHub repository linked above. experiments/measure.py re-derives every
   published number from them without retraining anything, in a couple of minutes of
-  CPU. Training from scratch is also documented in the README, and takes about 30
-  minutes for the model that runs on the page.
+  CPU. Training from scratch is also documented in the README, and takes about an
+  hour for the model that runs on the page (2,309 steps at roughly 1.45 s per step).

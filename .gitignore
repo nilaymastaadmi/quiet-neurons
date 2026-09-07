@@ -4,3 +4,5 @@ __pycache__/
 node_modules/
 dist/
 experiments/scaling_results.csv
+GATES.md
+.unlazy/

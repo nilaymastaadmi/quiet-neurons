@@ -37,6 +37,7 @@ What that does and does not mean here:
 |---|---|---|
 | `experiments/bdh.py` | [pathwaycom/bdh](https://github.com/pathwaycom/bdh), **used unmodified**. This is the BDH-GPU formulation, the one that repository ships. | MIT, Copyright 2025 Pathway Technology, Inc. |
 | `experiments/sparsity_scan.py`, `measure.py`, `export_weights.py`, `make_scaling.py` | Written for this submission | MIT, see `LICENSE` |
+| `verify.sh`, `tools/sweep.py`, `tools/ladder.py`, `tools/gate_checks.py`, `tools/build_zip.py` | Written for this submission. The checking chain: verify.sh re-derives the headline ratios and runs the rest; sweep.py checks cross-surface consistency; ladder.py applies the pre-registered ladder test; gate_checks.py reads every published number off the README, page and one-pager and ships a negative control that must fail on a planted error; build_zip.py builds the submission zip from a list so no shipped file can be omitted by hand | MIT, see `LICENSE` |
 | `web/bdh.js` | Written for this submission: a port of `bdh.py` to JavaScript, verified against it by `web/parity.html` | MIT, see `LICENSE` |
 | `web/index.html`, `worker.js`, `parity.html`, `profile.html` | Written for this submission | MIT, see `LICENSE` |
 | `concept-summary.html`, and `web/concept-summary.pdf` rendered from it | Written for this submission. Text is ours; the PDF is produced from the HTML by headless Chrome so it can be regenerated | MIT, see `LICENSE` |

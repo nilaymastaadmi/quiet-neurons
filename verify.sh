@@ -78,6 +78,19 @@ if "$PY" tools/sweep.py; then pass "sweep: 0 problems"; else fail "sweep reporte
 
 echo
 echo "=============================================================="
+echo " 2b. every published number read off the surfaces, not off constants"
+echo "=============================================================="
+# sweep.py compares the CSV against values written inside sweep.py, so a wrong number in the
+# README or on the page passes it. gate_checks.py reads the surfaces themselves and ships a
+# negative control that must fail on a planted error.
+if "$PY" tools/gate_checks.py all; then
+  pass "gate_checks: all surfaces trace to data"
+else
+  fail "gate_checks reported problems"
+fi
+
+echo
+echo "=============================================================="
 echo " 3. documented commands are the ones that actually reproduce"
 echo "=============================================================="
 if grep -rn "sparsity_scan.py --embd" README.md web/index.html | grep -qv -- "--stop-at"; then
@@ -139,9 +152,13 @@ if [ "${1:-}" = "--with-page" ]; then
 fi
 
 echo
-if [ "$FAILED" -eq 0 ]; then
-  echo "ALL CHECKS PASSED"
-else
+if [ "$FAILED" -ne 0 ]; then
   echo "SOME CHECKS FAILED -- do not commit numbers until this is green"
+elif [ "${VERIFY_SKIP_MEASURE:-0}" = "1" ]; then
+  # Never let a skipped numeric section read as a clean bill. This script printed
+  # "ALL CHECKS PASSED" with section 1 skipped for most of its life.
+  echo "ALL RUNNABLE CHECKS PASSED (section 1 SKIPPED: no torch; the headline ratios were NOT re-derived)"
+else
+  echo "ALL CHECKS PASSED"
 fi
 exit $FAILED

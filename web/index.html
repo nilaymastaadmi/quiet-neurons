@@ -117,6 +117,11 @@ h3{font-family:var(--f-disp);font-weight:600;font-size:18px;margin:28px 0 6px}
 .bo-row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end}
 .bo-note{font-size:13.5px;color:var(--ink-2);margin:12px 0 0;max-width:70ch}
 .stat .k{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+/* the scope label sits in .readout but outside any .stat, so it needs the same treatment;
+   it exists because the size switch used to relabel the header while these four numbers
+   stayed n=2048, which read as though they had changed with it */
+#statsScope{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:-14px}
 .stat .v{font-family:var(--f-mono);font-size:28px;font-weight:600;letter-spacing:-.02em;
          font-variant-numeric:tabular-nums;line-height:1.15}
 .stat .v.hot{color:var(--fire)}
@@ -268,8 +273,8 @@ footer a{color:var(--muted)}
     <h4><span class="pn">1</span> What is the thing running on this page?</h4>
     <p>A <strong>language model</strong>, and a very small one. It has been shown a lot of text and
       trained to do exactly one job: <em>look at the letters so far and guess the next letter</em>.
-      That is all. ChatGPT does the same job on a vastly larger scale, guessing the next word
-      rather than the next letter.</p>
+      That is all. ChatGPT does the same job on a vastly larger scale, guessing the next token, a word or
+      a piece of one, rather than the next letter.</p>
     <p>Ours is roughly <strong>400,000 numbers</strong> that get adjusted during training until the
       guessing gets good. Those numbers are called the <strong>weights</strong>, and they are the
       model's permanent memory: whatever it learned during training lives there. For scale, the
@@ -283,11 +288,12 @@ footer a{color:var(--muted)}
       word from biology. As each letter goes in, every neuron computes a number. If that number is
       <strong>above zero</strong> the neuron is <em>active</em>, or firing. If it is zero, the
       neuron sits out that letter entirely.</p>
-    <p>Two things make this worth watching. Most neurons are <strong>off</strong> at any moment,
-      typically about 95 of every 100, which is what <strong>sparse</strong> means. And a neuron
-      can never be negative here, only zero or positive, which is what
-      <strong>non-negative</strong> means. So "5% active" means five neurons in a hundred are doing
-      something and the other ninety-five are silent.</p>
+    <p>Two things make this worth watching. Most neurons are <strong>off</strong> at any moment.
+      In the tensor this page counts, at layer 2, about <strong>86 to 94 of every 100</strong> are
+      off; the paper's much larger 65,536-neuron model sits nearer 95. That is what
+      <strong>sparse</strong> means. And a neuron can never be negative here, only zero or positive,
+      which is what <strong>non-negative</strong> means. So "8% active" means eight neurons in a
+      hundred are doing something and the other ninety-two are silent.</p>
     <p><strong>Why anyone cares:</strong> if only a few neurons are on for a given piece of text,
       you can ask <em>which</em> ones, and start reading the model's internals as something closer
       to concepts than to noise. That is the whole appeal of sparsity, and it is why the concept
@@ -360,6 +366,7 @@ footer a{color:var(--muted)}
     <div class="rig-body">
 
       <div class="readout">
+        <div class="k" id="statsScope" style="flex-basis:100%">n=2048, live &middot; this one word</div>
         <div class="stat"><div class="k">Learning the word</div><div class="v hot" id="statMem">—</div></div>
         <div class="stat"><div class="k">Repeating it</div><div class="v cool" id="statRep">—</div></div>
         <div class="stat"><div class="k">Neurons switched off</div><div class="v" id="statDrop">—</div></div>
@@ -488,8 +495,10 @@ footer a{color:var(--muted)}
         <div class="ctl">
           <label for="surprise">Break it</label>
           <button class="btn" id="surprise">Inject a surprise</button>
-          <p class="hint">Swaps one letter deep in the repetition. If the line does not jump, the
-            claim above is wrong.</p>
+          <p class="hint">Swaps one letter deep in the repetition. The neurons should wake up at
+            that letter and nowhere earlier. How much they wake varies by word: &minus;8% to +33%
+            across 15 words, 4 of 15 under +5%. What must never move is the letter before it. If it
+            does, the model is reading its own future and every number here is wrong.</p>
         </div>
       </div>
 
@@ -585,7 +594,7 @@ footer a{color:var(--muted)}
       We expected the effect to keep strengthening with size, and said so on this page until the
       third model finished training. It does not. <strong>n=16384 comes in at 1.87, below
       n=8192's 2.12.</strong> The gap is 0.246, which is <strong>40&times;</strong> the mean
-      half-width of the five-sample spread (0.0061), so it is not noise. The tables below quote
+      half-width of the five-sample spread (0.0061), so it is not evaluation-sampling noise. Whether it is training-seed noise we cannot say: each size was trained once, and the spread here is five re-draws of evaluation words on the same weights. The tables below quote
       that spread as a full min-to-max range, which is twice the half-width; on that denominator
       the same gap reads 15&times; and 30&times;.
       <br><br>
@@ -677,8 +686,9 @@ footer a{color:var(--muted)}
     asserts <code>K is Q</code>. So the attention scores are a Gram matrix: position <em>t</em>
     attends to position <em>s</em> in proportion to how much their neuron activations overlap. Not a
     learned lookup. Co-firing. That is the Hebbian story the paper tells, sitting in one line of
-    tensor code, and it is why a repeated word is cheap: the model is re-firing a pattern it already
-    has, so fewer new neurons need to join in.</p>
+    tensor code, and it is a plausible reason a repeated word could be cheap: the model would be
+    re-firing a pattern it already has, so fewer new neurons need to join in. <strong>The page shows
+    the signature; this paragraph is not a demonstration of the cause.</strong></p>
 
   <div class="notclaim">
     <h4>Three things we refuse to claim</h4>
@@ -864,10 +874,13 @@ footer a{color:var(--muted)}
           <td class="n prose">warm/rep at layer 2: <strong>1.04</strong> (K=1, degenerate),
             <strong>0.92</strong> (K=16), <strong>2.54</strong> (K=256), <strong>2.35</strong>
             (base task). We predicted this would rise monotonically and <strong>it did not</strong>.
-            But the test that matters passed: <strong>K=256 is 4.5&times; easier than the base task
-            by final loss and shows a <em>larger</em> effect</strong>, where difficulty alone
-            predicts 1.32. An easier task producing a bigger effect is the opposite of the confound.
-            K=16 we cannot explain <span class="tag tag-ok">difficulty ruled out</span></td></tr>
+            The pre-registered line test reads positive at K=256 (2.54 measured against 1.32
+            predicted from a line through the two extremes), so an easier task shows a bigger
+            effect. But K=16 sits below the same line (0.92 against 1.18), and drawing the line in
+            log-loss makes K=16 the larger anomaly (&minus;0.95 against +0.51 for K=256). What the
+            four points support is that the effect is <strong>not a monotone function of task
+            difficulty</strong>. They do not rule difficulty out, and K=16 is unexplained
+            <span class="tag tag-ok">not monotone in difficulty</span></td></tr>
       <tr><td>This is a toy trained here, not an official BDH checkpoint</td>
           <td class="n prose">architecture is Pathway's, unmodified; weights are ours</td></tr>
       <tr><td>Synthetic task, not natural language</td>
@@ -1113,7 +1126,7 @@ function render() {
     const bm = avg(b.slice(WARM, WARM + WORD)), br = avg(b.slice(WARM + WORD, PERIOD));
     $("#benchNote").innerHTML =
       `The four figures above are <strong>this one word</strong>. Measured over
-       <strong>1,280 words</strong> on the same model, layer ${layer} runs
+       <strong>1,280 words</strong> on the same n=2048 model, layer ${layer} runs
        ${(bm * 100).toFixed(1)}% while learning against ${(br * 100).toFixed(1)}% while repeating,
        a ratio of <strong>${(bm / br).toFixed(2)}&times;</strong>. Single words scatter; the table
        in section 04 does not.`;
@@ -1197,7 +1210,7 @@ function render() {
     const beforeSame = Math.abs(cs[prev] - series[prev]) < 1e-9;
     $("#boNote").innerHTML = (j > 5
         ? `Layer ${layer} wakes up at the unexpected letter, then settles again. `
-        : `Layer ${layer} shows no meaningful jump here (${j.toFixed(0)}%). `)
+        : `Layer ${layer} shows a small jump here (${j >= 0 ? "+" : ""}${j.toFixed(0)}%), inside the per-word scatter of \u22128% to +33%. The 1,280-sequence table in section 04 is what carries the claim. `)
       + (beforeSame
         ? `Letter ${prev}, one before it, is identical to nine decimal places either way, `
         + `because the model only ever reads leftwards. It cannot see the surprise coming.`
@@ -1357,7 +1370,9 @@ const TOUR = [
     act: null, label: null },
   { text: `Now change the word to something else. It has never seen this one either, so it
            has to learn it from scratch again, and the same drop should happen. If the shape
-           survives an arbitrary word, it is not a property of that word.`,
+           survives an arbitrary word, it is not a property of that word.<br><br>
+           <span class="cav">We chose this word because it shows the jump clearly in the last
+           step; 4 of 15 random words do not, and the last step says why.</span>`,
     // Measured on the shipped checkpoint before being hardcoded. Per-word scatter in the
     // injection jump is large (-8% to +33% across 15 words at layer 2), so the tour word is
     // one that lands well: xswedcvf reads 4.98% -> 6.25%, +25% at layer 2, and layer 0 runs
@@ -1472,6 +1487,9 @@ function initTour() {
     $("#rigTitle").innerHTML = overlayN
       ? `Measured &middot; BDH n=${overlayN} &middot; precomputed, not running here`
       : "Live &middot; BDH n=2048 &middot; running in this tab";
+    $("#statsScope").textContent = overlayN
+      ? `The four figures and the note below stay n=2048, live. Only the curve overlay is n=${overlayN.toLocaleString()}, measured.`
+      : "n=2048, live · this one word";
     if (overlayN && !overlays[overlayN]) {
       try { overlays[overlayN] = await fetch(`data/traces/n${overlayN}.json`).then(r => r.json()); }
       catch { overlays[overlayN] = null; b.textContent += " (n/a)"; }

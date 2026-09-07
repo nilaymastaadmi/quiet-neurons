@@ -94,23 +94,24 @@ We predicted `1.035 < r(16) < r(256) < 2.354`. What we got is `1.035, 0.923, 2.5
 is out of order at both intermediate points. K=16 falls *below* K=1, and K=256 rises *above* the
 base task. **The registered prediction was wrong and we are reporting it as wrong.**
 
-## 2. The discriminating test PASSED, decisively
+## 2. The discriminating test: positive at K=256, negative at K=16, and sensitive to the axis
 
 This is the test the pre-registration said would separate provenance from task difficulty, and it
 is the reason the ladder was run at all.
 
-If difficulty were the only driver, all four points would lie on the line from (0.0004, 1.035) to
-(0.1739, 2.354). At K=256's loss of 0.0384 that line predicts a ratio of **1.324**.
+The registration drew a straight line in (final loss, warm/rep) through K=1 and the base task and
+asked whether K=256 sits above it. It does: the line predicts **1.324** at K=256's loss and the
+model measures **2.536**, a residual of **+1.212**. **K=16 sits below the same line**: 0.923
+against a predicted 1.175.
 
-**K=256 measures 2.536. The residual is +1.212.**
+The linear-in-loss axis was our choice and it matters. On a **log-loss** axis K=256's residual
+falls to **+0.51** and K=16's grows to **−0.95**, which makes K=16 the larger anomaly rather than
+the smaller one. A test whose verdict depends on the axis is not a clean separation.
 
-Put without the geometry: **K=256 is four and a half times easier than the base task by final
-loss (0.038 against 0.174) and shows a *larger* effect (2.54× against 2.35×).** An easier task
-producing a bigger effect is the opposite of what the difficulty confound predicts. That confound
-cannot be what generates the effect.
-
-This is the result the degenerate fixed-word control could not deliver, and it is the strongest
-evidence in this project that provenance rather than difficulty is the operative variable.
+So the defensible statement is that the effect is **not a monotone function of task difficulty**:
+K=256 is 4.5× easier than the base task by final loss and shows a larger effect, which no
+monotone dependence on difficulty produces. **Difficulty is not ruled out as a driver**, and no
+argument about the geometry rescues K=16.
 
 ## 3. K=16 is unexplained, and we are not going to pretend otherwise
 

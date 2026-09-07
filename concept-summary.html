@@ -81,7 +81,9 @@
   from the public code, all for 2,309 steps, and it survives a 32-fold shrink: <strong>1.47&times;, 2.12&times; and 1.87&times;</strong> at 2,048, 8,192 and
   16,384 neurons, each 1,280 sequences over five independently seeded samples, spread &plusmn;0.005 half-width.
   <strong>In aggregate our three models agree with the paper: predictable text is quieter.</strong>
-  What follows sharpens that rather than contradicting it.
+  This model goes quiet on words it has just picked up from the text in front of it; it does not go
+  quiet just because text is easy to guess. From the outside those two look identical, and they are
+  not the same thing.
 </p>
 <p>
   The same measurement narrows what that result can mean. Two blocks of the same sequence are both predicted
@@ -131,9 +133,8 @@
   degenerate and separates nothing. Drawing the word instead from a pool of 256 does separate them,
   letters in the weights and identity still from context: that model is <strong>4.5&times; easier by
   loss (0.038 against 0.174) yet shows a larger effect, 2.54&times; against 2.35&times;</strong>,
-  which is the opposite of what a difficulty confound predicts. We registered in advance that the
-  ratio would rise monotonically with pool size. <strong>It did not</strong>, and K=16 inverts to
-  0.92, unexplained.
+  so the effect is not a monotone function of difficulty; K=16 (0.92) sits on the other side of
+  the same line and is unexplained.
   <span class="lab">Maturity:</span> credible and outsider-checkable for this narrow property; the
   wider programme is earlier, its headline results developer-reported.
 </p>
