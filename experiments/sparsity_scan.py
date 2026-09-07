@@ -24,6 +24,13 @@ ap.add_argument("--budget", type=int, default=2700, help="training seconds")
 ap.add_argument("--steps", type=int, default=4000,
                 help="length of the OneCycle schedule. Changing it changes the schedule, so "
                      "models trained with different values are NOT comparable.")
+ap.add_argument("--word-pool", type=int, default=None,
+                help="draw the 8-letter word each sequence from a fixed pool of K words. K=1 is "
+                     "equivalent to --fixed-word; omit for the base task, where the word is "
+                     "redrawn freely every sequence. Intermediate K keeps the in-context copy "
+                     "task alive (the model must still read the context to know WHICH word) "
+                     "while more of the word's letter content sits in the weights, which is the "
+                     "point: it graduates provenance instead of switching it off.")
 ap.add_argument("--fixed-word", action="store_true",
                 help="provenance control: draw the 8-letter word ONCE and share it across every "
                      "sequence, so it lives in the weights like the warm-up instead of in the "
@@ -54,9 +61,14 @@ WARMUP_SEQ = torch.randint(0, 26, (WARM,))
 FIXED_WORD = torch.randint(0, 26, (WORD,)) if a.fixed_word else None
 if FIXED_WORD is not None:
     print(f"FIXED WORD control: word={FIXED_WORD.tolist()} shared by every sequence", flush=True)
+POOL = torch.randint(0, 26, (a.word_pool, WORD)) if a.word_pool else None
+if POOL is not None:
+    print(f"WORD POOL control: K={a.word_pool} words, {a.word_pool * WORD} letters in the "
+          f"weights; identity still comes from the context", flush=True)
 
 def make_batch(b=B):
-    words = (FIXED_WORD.expand(b, WORD) if FIXED_WORD is not None
+    words = (POOL[torch.randint(0, a.word_pool, (b,))] if POOL is not None
+             else FIXED_WORD.expand(b, WORD) if FIXED_WORD is not None
              else torch.randint(0, 26, (b, WORD)))
     block = torch.cat([WARMUP_SEQ.expand(b, WARM), words.repeat(1, REPS)], dim=1)
     return (lambda s: (s[:, :T].contiguous(), s[:, 1:T+1].contiguous()))(
@@ -91,8 +103,17 @@ print(f"TRAINED n={n_neurons} steps={step} of a {a.steps}-step schedule "
 torch.save({"model": model.state_dict(), "warmup": WARMUP_SEQ, "cfg": vars(a),
             # saved so a --fixed-word control can be re-measured on the word it was
             # actually trained on, without re-deriving it from the RNG stream
-            "fixed_word": (FIXED_WORD.tolist() if FIXED_WORD is not None else None)},
-           f"bdh_n{n_neurons}{'_fixedword' if a.fixed_word else ''}.pt")
+            "fixed_word": (FIXED_WORD.tolist() if FIXED_WORD is not None else None),
+            # the pool a --word-pool model was trained on: measuring it on freshly drawn
+            # random words would be testing it out of distribution
+            "word_pool": (POOL.tolist() if POOL is not None else None),
+            # D10: the ACTUAL step count reached, so a CSV row can never again depend on
+            # the operator remembering to pass --steps-trained by hand
+            "steps_trained": step},
+           f"bdh_n{n_neurons}"
+           f"{'_fixedword' if a.fixed_word else ''}"
+           f"{'_pool%d' % a.word_pool if a.word_pool else ''}"
+           f"{'_full%d' % a.steps if a.stop_at == a.steps else ''}.pt")
 
 model.eval()
 # precondition: per-position loss -> did it learn in-context copying?

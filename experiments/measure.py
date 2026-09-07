@@ -75,12 +75,29 @@ nparams = sum(p.numel() for p in model.parameters())
 
 EVAL_WORD = (torch.tensor([int(v) for v in a.eval_word.split(",")], dtype=torch.long)
              if a.eval_word else None)
+# A --word-pool model must be evaluated on the pool it was TRAINED on. Measuring it on
+# freshly drawn random words tests it out of distribution and makes TASK_LEARNED
+# meaningless, because the copy task it learned was "identify which of K", not "copy
+# anything". The pool travels in the checkpoint so this cannot be forgotten.
+_pool = ck.get("word_pool")
+POOL = torch.tensor(_pool, dtype=torch.long) if _pool else None
+if POOL is not None:
+    print(f"WORD POOL from checkpoint: K={POOL.size(0)}", flush=True)
+# D10: the checkpoint records the step count it actually reached. Trust that over the CLI,
+# which wrote "" whenever the operator forgot the flag, leaving rows nothing could attribute.
+STEPS_TRAINED = (a.steps_trained if a.steps_trained is not None
+                 else ck.get("steps_trained", ""))
+POOL_K = POOL.size(0) if POOL is not None else ""
+if a.steps_trained is not None and ck.get("steps_trained") not in (None, "")         and int(a.steps_trained) != int(ck["steps_trained"]):
+    raise SystemExit(f"--steps-trained {a.steps_trained} contradicts the checkpoint's "
+                     f"{ck['steps_trained']}. One of them is wrong; do not guess.")
 if EVAL_WORD is not None:
     assert EVAL_WORD.numel() == WORD, f"--eval-word needs {WORD} indices"
     print(f"EVAL WORD pinned to {EVAL_WORD.tolist()} in every sequence", flush=True)
 
 def make_batch(b=B):
     words = (EVAL_WORD.expand(b, WORD) if EVAL_WORD is not None
+             else POOL[torch.randint(0, POOL.size(0), (b,))] if POOL is not None
              else torch.randint(0, 26, (b, WORD)))
     block = torch.cat([WARMUP_SEQ.expand(b, WARM), words.repeat(1, REPS)], dim=1)
     seq = block.repeat(1, NPER + 1)
@@ -187,7 +204,7 @@ for lev in sorted(passes[0][3]):
     fe_loss = surprise_curve[WARM:WARM + WORD]
     fe_spars = spars[WARM:WARM + WORD]
     corr.append({
-        "n": n_neurons, "steps_trained": a.steps_trained if a.steps_trained is not None else "",
+        "n": n_neurons, "steps_trained": STEPS_TRAINED,
         "layer": lev, "tensor": "xy",
         "pearson": round(_pearson(surprise_curve, spars), 4),
         "spearman": round(_spearman(surprise_curve, spars), 4),
@@ -229,14 +246,43 @@ for key in passes[0][2]:
     ratios = [m / r for m, r in zip(mms, rrs) if r > 0]
     mean = lambda xs: sum(xs) / len(xs)
     rows.append({"n": n_neurons, "d": a.embd, "layers": a.layers, "params": nparams,
-                 "steps_trained": a.steps_trained if a.steps_trained is not None else "",
-                 "layer": lev, "tensor": tname,
+                 "steps_trained": STEPS_TRAINED,
+                 "layer": lev, "tensor": tname, "word_pool": POOL_K,
                  "warmup": round(mean(wms), 5), "mem": round(mean(mms), 5),
                  "rep": round(mean(rrs), 5),
                  "mem_over_rep": round(mean(ratios), 4) if ratios else "",
                  "ratio_min": round(min(ratios), 4) if ratios else "",
                  "ratio_max": round(max(ratios), 4) if ratios else "",
                  "eval_passes": a.repeats})
+
+# DEGENERACY CHECK. A condition whose activation level is the same everywhere has
+# collapsed to one constant, and every ratio computed from it is a ratio of two numbers
+# that were forced equal by the manipulation rather than by the variable under study.
+# This exists because the --fixed-word control did exactly that and the collapse was
+# argued around instead of detected: its cells sit within ~2% of each other while the
+# real model's spread across the same cells is 15-33%.
+def _cv(vals):
+    m = sum(vals) / len(vals)
+    if m == 0:
+        return 0.0
+    var = sum((v - m) ** 2 for v in vals) / len(vals)
+    return 100.0 * (var ** 0.5) / m
+
+print("DEGENERACY CHECK  (CV across the 4 layers, per tensor, per block)")
+_degenerate = []
+for _t, _ti in (("x", 0), ("y", 1), ("xy", 2)):
+    _cells = {bi: [] for bi in (0, 1, 2)}
+    for _lev in sorted({k[0] for k in passes[0][2]}):
+        for _bi in (0, 1, 2):
+            _cells[_bi].append(sum(pp[2][(_lev, _t)][_bi] for pp in passes) / len(passes))
+    _w, _m, _r = _cv(_cells[0]), _cv(_cells[1]), _cv(_cells[2])
+    _flag = " <-- COLLAPSED" if max(_w, _m, _r) < 5.0 else ""
+    print(f"  {_t:<3} warmup CV {_w:5.2f}%   mem CV {_m:5.2f}%   rep CV {_r:5.2f}%{_flag}")
+    if max(_w, _m, _r) < 5.0:
+        _degenerate.append(_t)
+if _degenerate:
+    print(f"  WARNING: {', '.join(_degenerate)} under 5% -- this condition has collapsed to one")
+    print("  activation level; its ratios carry no information about the manipulated variable.")
 
 print(f"n={n_neurons} params={nparams:,}  TASK_LEARNED={learned}  "
       f"first_expo={first_expo:.4f} repetition={repeats_loss:.4f}  "
@@ -277,7 +323,7 @@ if a.append:
 if a.append:
     fields = ["n", "d", "layers", "params", "steps_trained", "task_learned", "first_expo_loss",
               "repetition_loss", "layer", "tensor", "warmup", "mem", "rep",
-              "mem_over_rep", "ratio_min", "ratio_max", "eval_passes"]
+              "mem_over_rep", "ratio_min", "ratio_max", "eval_passes", "word_pool"]
     new = not os.path.exists(a.out)
     with open(a.out, "a", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fields)
