@@ -60,18 +60,21 @@ def g20():
 
 
 def g21():
-    """Acceptance test: a run against the final PDF, with its findings and their disposition."""
+    """Acceptance test. G21's condition is ZERO major inaccuracies, so checking only that a run
+    was recorded would be a check that cannot fail on the thing the gate is about. The record
+    must contain a run that came back clean against the shipped PDF, and it must still carry the
+    earlier runs' raw output and dispositions, so a clean result cannot be produced by deleting
+    the runs that were not."""
     t = read("experiments/results/onepager_test.md")
-    if "Run 2, 2026-09-08" not in t:
-        fail("G21", "no run dated 2026-09-08 in onepager_test.md")
-        return
-    blk = t.split("Run 2, 2026-09-08", 1)[1]
-    if "Raw output" not in blk:
-        fail("G21", "run 2 does not include the raw output the gate requires")
-    if "What was changed" not in blk:
-        fail("G21", "run 2 does not record what its findings changed")
-    if "Not fixed" not in blk:
-        fail("G21", "run 2 does not record which findings were left unfixed")
+    for want, why in (("Run 2, 2026-09-08", "run 2 is missing"),
+                      ("Run 3, 2026-09-08", "run 3 is missing"),
+                      ("Raw output", "no raw output recorded"),
+                      ("What was changed", "no record of what the findings changed"),
+                      ("Not fixed", "no record of what was left unfixed")):
+        if want not in t:
+            fail("G21", why)
+    if "MAJOR INACCURACIES: NONE" not in t:
+        fail("G21", "no run has come back with zero major inaccuracies against the shipped PDF")
 
 
 def g22():

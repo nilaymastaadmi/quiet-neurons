@@ -61,11 +61,10 @@
   Dragon Hatchling (BDH) [1] makes it structural. In BDH-GPU, which Pathway open-sources,
   every layer multiplies two rectified (ReLU) vectors elementwise, and that product can never be denser
   than either. <em>Active</em> means a strictly non-zero entry there; a rectifier emits no
-  negatives, so an active neuron is a positive amount of
-  something rather than a signed coordinate. That product is the paper's <em>y<sub>t,l</sub></em>: Eq. (8) defines it as
+  negatives, so an active neuron is a positive amount of something. That product is the paper's <em>y<sub>t,l</sub></em>: Eq. (8) defines it as
   <em>(D<sub>y</sub>LN(&rho;x))<sub>+</sub></em>&nbsp;&odot;&nbsp;<em>x</em>, Appendix E reads <code>relu(self.ln(a) @ decoder_y) * x</code>, and Fig. 14 counts its non-zeros. Naming collision: the code's <code>y_sparse</code> is the paper's rectified <em>intermediate</em>; the paper's
   <em>y</em> is the code's <code>xy_sparse</code>. Attention is the second change: query and key are one tensor, so the score matrix is a causally-masked Gram matrix of activations with
-  <strong>no softmax</strong>. Positions whose neurons fired alike bind.
+  <strong>no softmax</strong>.
 </p>
 
 <h2>The claim, and the correction it needed</h2>
@@ -75,7 +74,7 @@
   2.5% while repeating it, a 1.6&ndash;3.0&times; ratio [1, Fig. 14]. We reproduced that protocol on three models trained here
   from the public code, all for 2,309 steps; it survives a 32-fold shrink: <strong>1.47&times;, 2.12&times; and 1.87&times;</strong> at 2,048, 8,192 and
   16,384 neurons, each 1,280 sequences over five independently seeded samples, &plusmn;0.005 half-width.
-  <strong>In aggregate our three models agree with the paper: predictable text is quieter.</strong>
+  <strong>On the paper's own protocol our three models reproduce its result.</strong>
   This model goes quiet on words it has just picked up from the text in front of it; it does not go
   quiet just because text is easy to guess. From the outside those two look identical, and they are
   not the same thing.
@@ -86,8 +85,8 @@
   of layer 2 active at 0.0004 nats of mean surprise, the 56 repeated letters at <strong>3.64%</strong> at 0.004 nats. The warm-up is identical in every training sequence, so it lives in the
   <strong>weights</strong>; the repeated word is new each time, so it can only come from
   <strong>context</strong>. What <em>covaries</em> with the difference is not predictability but <strong>where the knowledge
-  came from</strong> &mdash; a correlation, not an established cause. A reader tests this in a minute: inject an unpredictable letter mid-repetition and activity
-  rises there, while the letter before is unchanged to nine decimals.
+  came from</strong> &mdash; a correlation, not an established cause. Predictability does move activity within a block: inject an unpredictable letter
+  mid-repetition and activity rises there. That is the paper's effect, not this one.
 </p>
 
 <table>
@@ -100,7 +99,7 @@
 
 <h2>Evidence, labelled</h2>
 <p>
-  <span class="lab">Reproduced here:</span> the three ratios, the counterexample, the
+  <span class="lab">Measured here:</span> the three ratios, the counterexample, the
   surprise-injection check, browser-against-PyTorch parity (logit max difference 6.1e-5, twelve of twelve sparsity series bit-identical) &mdash; an implementation check, not architectural evidence.
   <span class="lab">Developer-reported, not reproduced:</span> the Fig. 14 band; 97.4% on Sudoku
   Extreme, which Pathway says does not reproduce from the open code; the 1B-to-600B scaling runs; BDH-CQ's ARC-AGI-1 result [2]. <span class="lab">Not modelled:</span> BDH-CQ's internals, "proprietary" by its authors' own
@@ -114,15 +113,14 @@
   0.86): <em>more</em> neurons fire while repeating; layer 1 is positive at every size (1.22,
   1.41, 1.33) and layer 3 is flat below 16,384. Scaling is
   <strong>not monotonic</strong> and we published the opposite before the third model finished. The
-  wall-clock confound is gone, the short two retrained to 2,309 steps, the dip surviving at <strong>40&times;</strong> its half-width; none of the three published models finished the
+  wall-clock confound is gone, the short two retrained to 2,309 steps, the dip surviving at <strong>40&times;</strong> the mean of the two half-widths; none of the three published models finished the
   4,000-step schedule, though separate runs that did finish move layer 2 only 1.4705 to 1.4620 at
-  n=2,048, and 2.1201 to 2.2000 at n=8,192, a rise of 0.0799 against that run's own
-  &plusmn;0.0086 spread. These are toys, 0.4M to
-  6.3M parameters on a synthetic task, as the paper's is. Surprise and sparsity do <em>not</em> track per letter (Pearson 0.30 across phases, Spearman &minus;0.05 letter by letter: the relation is between blocks, not letters),
+  n=2,048, but 2.1201 to 2.2000 at n=8,192, a rise of 0.0799 against that run's own
+  &plusmn;0.0086 spread. These are toys, 0.4M to 6.3M parameters on a synthetic task. Surprise and sparsity do <em>not</em> track per letter (Pearson 0.30 across phases, Spearman &minus;0.05 letter by letter: the relation is between blocks, not letters),
   killing a stronger claim. Most importantly: signature, not cause. We
   intervened twice. Fixing the word collapses n=2,048's 2.35&times; warm-up-to-repeat gap to 1.04&times;, but that control is
-  degenerate and separates nothing. A 256-word pool does separate them, letters still in the weights, identity from context: that model is <strong>4.5&times; easier by loss (0.038
-  against 0.174) yet shows a larger effect, 2.54&times; against 2.35&times;</strong>, so the effect
+  degenerate and separates nothing. A 256-word pool does separate them, letters still in the weights, identity from context: that model is <strong>4.5&times; easier by loss (0.0384
+  against 0.1739) yet shows a larger effect, 2.54&times; against 2.35&times;</strong>, so the effect
   is not a monotone function of difficulty; K=16 (0.92) falls on the other side of the same line,
   unexplained.
   <span class="lab">Maturity:</span> credible and outsider-checkable for this narrow property; the

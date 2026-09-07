@@ -225,3 +225,67 @@ a rewritten difficulty passage, the canonical claim, and the n=8,192 result. Run
 about a document that no longer exists. Run 2 tested what ships, found nine real errors, and two of
 them were less than eight hours old. A no-context reader catching in four minutes what four
 surfaces of self-checking did not is the argument for keeping this gate.
+
+---
+
+# Run 3, 2026-09-08 05:5x, on the PDF corrected after run 2
+
+Same conditions. The prompt was tightened to separate **major inaccuracies** — contradictions,
+arithmetic that does not check out, claims stated as established that the evidence does not
+support, or wording a careful reader takes away as a false fact — from mere terseness, so the
+result could not be inflated by a long list of undefined terms.
+
+**It found six major items.** Run 2's fixes had not made the document clean; two of the six were
+introduced by run 2's own fixes, hours old. This is the second time in one night that editing this
+file created a new error while removing an old one.
+
+## The six, and what happened to each
+
+**1. "In aggregate our three models agree with the paper: predictable text is quieter."** Bolded,
+two lines above the counterexample that refutes exactly that proposition, and above numbers from
+the same n=8,192 model showing the *more* predictable block is 2.65 times *louder*. The reviewer:
+"'Predictable text is quieter' is exactly the proposition the document exists to refute."
+**Fixed** to "On the paper's own protocol our three models reproduce its result", which is what we
+actually did and does not endorse the gloss.
+
+**2. "the dip surviving at 40x its half-width" does not check out.** The dip is 2.1201 to 1.8742,
+0.2459. Against the n=8,192 half-width, 0.00810, that is 30x; against n=16,384's 0.00415 it is
+59x; neither is 40. **The number was right and my edit broke it.** It read "the mean half-width"
+until run 2's fixes changed it to "its half-width" while addressing a complaint that "the mean
+half-width" was undefined. 0.2459 / mean(0.00810, 0.00415) = **40.1**. Now stated as "40x the mean
+of the two half-widths", which names the denominator instead of removing it.
+
+**3. "only" governing a nine-half-width move.** "move layer 2 only 1.4705 to 1.4620 at n=2,048, and
+2.1201 to 2.2000 at n=8,192" let one "only" cover a 1.8-half-width move and a 9.3-half-width one.
+**Fixed**: "and" to "but". One word.
+
+**4. The title again.** Same finding as run 2, independently. Recorded, not fixed, for the reasons
+in run 2's section.
+
+**5. The injection check cannot come out any other way, and does not discriminate.** Causal masking
+already guarantees the preceding letter is untouched, so quoting nine decimals of it "dresses a
+structural guarantee as a measurement"; and activity rising at an *unpredictable* letter is what
+the predictability account predicts, so the check never separated the two hypotheses it sat
+beneath. **Fixed** by saying what it actually shows: "Predictability does move activity within a
+block ... That is the paper's effect, not this one."
+
+**6. "Reproduced here:" listed the counterexample**, which the same document calls something "no
+paper states". Nothing unstated can be reproduced. **Fixed**: the label is now "Measured here:".
+
+Also fixed from the minor list, because it was arithmetic loose in our own favour: the ladder
+losses now print as 0.0384 and 0.1739 rather than 0.038 and 0.174, so the stated 4.5x divides out
+(4.53) instead of reading as 4.58.
+
+## A finding about the artifact, not the document
+
+The corrected file rendered to **two pages at 949 body words** where 948 had fitted on one. The
+one-pager sits on a page boundary, and word count alone does not protect it: `onepager_length`
+checks page count for exactly this reason, and caught it. Trimmed to **934 words**, which restores
+one page with sixteen words of margin. Three of those cuts came from the reviewer's own minor list.
+
+## Standing count
+
+Run 2: 26 items, 9 real, all fixed but the title. Run 3: 6 major, 5 fixed, the title recorded.
+Two of run 3's six were created by run 2's fixes. The lesson is not that the document was careless;
+it is that **every edit to a dense page is a chance to introduce an error, and only an outside
+reader with no memory of the previous draft reliably finds them.**
