@@ -46,14 +46,19 @@ if [ "${VERIFY_SKIP_MEASURE:-0}" = "1" ]; then
 fi
 while IFS='|' read -r label ckpt embd mult expect; do
   [ "${VERIFY_SKIP_MEASURE:-0}" = "1" ] && continue
-  [ -z "${label// }" ] && continue
+  # IFS='|' keeps the padding spaces around each field, which turned the path into
+  # "experiments/ checkpoints/..." and reported all three checkpoints missing. None of these
+  # values contain spaces, so stripping them all is the simplest correct fix.
+  label="${label// /}"; ckpt="${ckpt// /}"; embd="${embd// /}"
+  mult="${mult// /}"; expect="${expect// /}"
+  [ -z "$label" ] && continue
   if [ ! -f "experiments/$ckpt" ]; then
     fail "$label: experiments/$ckpt is missing"
     continue
   fi
   got=$(cd experiments && "$PY" -u measure.py --ckpt "$ckpt" --embd "$embd" --mult "$mult" \
           --repeats 5 --out /dev/null 2>/dev/null \
-        | awk '/layer 2 xy/ {print $6}')
+        | awk '/layer 2 xy/ {for (i = 1; i <= NF; i++) if ($i == "ratio") print $(i+1)}')
   if [ "$got" = "$expect" ]; then
     pass "$label -> $got"
   else
