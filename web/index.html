@@ -628,7 +628,14 @@ footer a{color:var(--muted)}
       from <strong>1.4705 to 1.4620</strong>, 0.6% and inside two half-widths of the sampling
       spread, with layer 0 still backwards and layer 2 still the peak. The training loss moves only
       0.1739 to 0.1705 over those extra 1,691 steps, so the last 42% of the schedule buys little
-      here. <strong>At this size the effect is not an artefact of stopping early.</strong> That is
+      here. <strong>At this size the effect is not an artefact of stopping early.</strong> The
+      n=8,192 model finished its schedule on the morning of 8 September and says the same thing
+      about the claim while behaving quite differently underneath: layer 2 moves
+      <strong>2.1201 to 2.2000</strong>, about nine sampling half-widths and upward, where n=2,048
+      moved less than two. Its loss moved as little as n=2,048's did, so the reason we gave above
+      for n=2,048 holding still does not explain n=8,192 moving. The effect survives at both sizes
+      and layer 2 stays the peak at both; how much finishing the schedule shifts the number is
+      itself size-dependent, and we cannot say why. That is
       narrower than settling monotonicity, and we are not claiming otherwise.
     </p>
   </div>

@@ -144,8 +144,10 @@ if not corr:
     sys.exit(2)
 p8 = corr[(8192, 2)]
 print("  correlations n=8192 L2: Pearson %.4f Spearman %.4f" % p8)
-for nm, txt in (("README", rd), ("PDF", cs)):
-    m = re.search(r"Pearson ([0-9.]+),? Spearman (?:&minus;|-|\u2212)?([0-9.]+)", txt)
+for nm, txt in (("README", rd), ("1pager", cs)):
+    # Allow words between the two coefficients: the one-pager names the units each is
+    # computed over. Requiring them adjacent made this check inert the moment that was said.
+    m = re.search(r"Pearson ([0-9.]+)[^,]{0,40},\s*Spearman (?:&minus;|-|\u2212)?([0-9.]+)", txt)
     if m:
         pe, sp = float(m.group(1)), -float(m.group(2))
         ok = abs(pe - p8[0]) < 0.006 and abs(sp - p8[1]) < 0.006
@@ -154,7 +156,10 @@ for nm, txt in (("README", rd), ("PDF", cs)):
         if not ok:
             problems.append("correlation mismatch in " + nm)
     else:
-        print("     %-7s no correlation sentence found" % nm)
+        # Not "fine". Both surfaces are supposed to carry these numbers, so an absent
+        # sentence means this check verified nothing on that surface.
+        print("     %-7s no correlation sentence found -- CHECK IS INERT HERE" % nm)
+        problems.append("no correlation sentence to check in " + nm)
 
 head(5, "STALE NUMBERS FROM THE WALL-CLOCK FAMILY STILL ON A SURFACE")
 old = {"1.4318": "old n=2048 ratio, 4dp",

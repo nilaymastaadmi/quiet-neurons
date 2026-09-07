@@ -341,9 +341,15 @@ still the peak, layer 3 still flat. Notably the training loss only moves 0.1739 
 those 1,691 extra steps, so the last 42% of the schedule buys very little on this task, which is
 the likeliest reason the ratio barely moves.
 
-So at n=2,048 the effect is **not** an artefact of stopping early. That is narrower than settling
-monotonicity and we are not claiming otherwise; n=8,192 is training to completion now and
-n=16,384 does not fit. Method and data in `experiments/results/full_schedule.README.md`, kept in
+So at n=2,048 the effect is **not** an artefact of stopping early. **n=8,192 has now finished the
+schedule too, and it agrees on the claim while disagreeing on the calm.** Layer 2 moves 2.1201 to
+**2.2000**, about nine sampling half-widths and *upward*; layer 1 moves 1.4052 to 1.2890 and layer 3
+crosses 0.9531 to 1.0399. The effect survives and layer 2 stays the peak, so stopping early does not
+manufacture it at either size, and at n=8,192 it was if anything understating it. But the n=8,192
+loss moves as little as n=2,048's did (0.1727 to 0.1703), so "the last 42% of the schedule buys
+little" cannot be why n=2,048 held still. We do not know why the two sizes differ, and we are not
+going to invent a reason. That is still narrower than settling monotonicity, which needs all three
+sizes; n=16,384 does not fit. Method and data in `experiments/results/full_schedule.README.md`, kept in
 its own file so these rows cannot mix into `measured.csv`.
 
 **A bug our own measurement found.** Until 2026-09-06 the per-position loss was paired with

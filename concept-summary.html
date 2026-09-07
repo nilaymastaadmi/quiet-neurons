@@ -101,7 +101,7 @@
 <h2>Evidence, labelled</h2>
 <p>
   <span class="lab">Reproduced here:</span> the three ratios, the counterexample, the
-  surprise-injection check, and browser-against-PyTorch parity (logit max difference 6.1e-5, twelve of twelve sparsity series bit-identical) &mdash; an implementation check, not architectural evidence.
+  surprise-injection check, browser-against-PyTorch parity (logit max difference 6.1e-5, twelve of twelve sparsity series bit-identical) &mdash; an implementation check, not architectural evidence.
   <span class="lab">Developer-reported, not reproduced:</span> the Fig. 14 band; 97.4% on Sudoku
   Extreme, which Pathway's repository says does not reproduce from the open code; the 1B-to-600B scaling runs; BDH-CQ's ARC-AGI-1 result [2]. <span class="lab">Not modelled:</span> BDH-CQ's internals, "proprietary" by its authors' own
   statement [2]; <strong>it has no role here</strong>, and inventing one would be worse. <span class="lab">Where it is likely worse:</span> sparse non-negative activations plausibly cost
@@ -115,7 +115,8 @@
   <strong>not monotonic</strong> and we published the opposite before the third model finished. The
   wall-clock confound is gone, the short two retrained to 2,309 steps, dip surviving at
   <strong>40&times;</strong> the mean half-width; none finished the 4,000-step schedule, though
-  retraining n=2,048 to completion moves layer 2 only 1.4705 to 1.4620. These are toys, 0.4M to
+  retraining n=2,048 to completion moves layer 2 only 1.4705 to 1.4620, while n=8,192 moves 2.1201
+  to 2.2000, about nine half-widths, upward. These are toys, 0.4M to
   6.3M parameters on a synthetic task, as the paper's is. Surprise and sparsity do <em>not</em> track per letter (Pearson 0.30 across phases, Spearman &minus;0.05 letter by letter: the relation is between blocks, not letters),
   killing a stronger claim. Most importantly we establish the <em>signature</em>, not its cause. We
   intervened twice. Fixing the word collapses the gap 2.35&times; to 1.04&times;, but that control is
