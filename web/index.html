@@ -246,7 +246,7 @@ footer a{color:var(--muted)}
   <h1>Quiet Neurons</h1>
   <p class="standfirst">There is a small artificial brain running on this page right now. Not a
     video of one, not a simulation: the real thing, doing arithmetic in your browser as you
-    scroll. It is reading text one letter at a time and trying to guess the next letter.</p>
+    scroll. It is reading text one letter at a time and trying to guess the next letter.<span id="heroLive"></span></p>
   <p class="standfirst">While it does that, some of its artificial neurons switch on and the rest
     stay off. <strong>This page is about a surprising pattern in which ones switch on</strong>,
     and about the moment we found out the obvious explanation for it was wrong.</p>
@@ -389,7 +389,7 @@ footer a{color:var(--muted)}
       </div>
 
       <div id="counter">
-        <div class="bo-lab">The counterexample &middot; live, from the run below</div>
+        <div class="bo-lab">The counterexample &middot; live, from the run below &middot; try any word</div>
         <div class="bo-row">
           <div class="stat">
             <div class="k">Warm-up, 13 letters &middot; mean surprise</div>
@@ -500,7 +500,14 @@ footer a{color:var(--muted)}
             across 15 words, 4 of 15 under +5%. What must never move is the letter before it. If it
             does, the model is reading its own future and every number here is wrong.</p>
         </div>
+        <div class="ctl">
+          <label for="batch">Try it eight times</label>
+          <button class="btn ghost" id="batch">Run 8 random words</button>
+          <p class="hint">Eight fresh words, about ten seconds. Every row is a full forward pass on
+            this machine, so no chosen word decides the claim.</p>
+        </div>
       </div>
+      <div id="batchOut" hidden></div>
 
     </div>
   </div>
@@ -1109,6 +1116,12 @@ function render() {
   if (!cur) return;
   const series = cur.sparsity[layer].xy;
   const st = phaseStats(series);
+  // The first viewport should show the model running, not just assert that it is.
+  // PS design standard 5: open with something already computing.
+  $("#heroLive").textContent =
+    ` Right now, at letter ${+$("#pos").value + 1} of 77, ` +
+    `${Math.round(series[+$("#pos").value] * cur.nNeurons).toLocaleString()} of ` +
+    `${cur.nNeurons.toLocaleString()} neurons are firing.`;
   $("#statMem").textContent = (st.mem * 100).toFixed(1) + "%";
   $("#statRep").textContent = (st.rep * 100).toFixed(1) + "%";
   const drop = (1 - st.rep / st.mem) * 100;
@@ -1186,7 +1199,8 @@ function render() {
          sequence, so they live in the model's trained <strong>weights</strong>. The repeated
          word is new every run, so it can only have come from the <strong>context</strong>,
          seconds ago. Being predictable is not what quietens the model. What the activity
-         tracks is where the knowledge came from. Why it tracks that, we do not show.${caveat}`
+         tracks is where the knowledge came from. Why it tracks that, we do not show.
+         Any word that makes the repeats as loud as the warm-up breaks this.${caveat}`
       : `On this run layer ${layer} does not show the gap (${factor.toFixed(1)}&times;), which
          is itself worth seeing: the effect lives in layers 1 and 2. Layer 0 runs backwards
          and layer 3 is flat at this size. Try them.${caveat}`;
@@ -1503,6 +1517,55 @@ function initTour() {
     $("#pos").value = surprise === null ? 40 : surprise;
     $("#posLabel").textContent = $("#pos").value;
     run();
+  });
+
+  // The single-word break-it control scatters (-8% to +33%), so one word can read as a
+  // refutation. This draws a sample instead. Words are generated here, in the browser, so
+  // nothing is pre-selected, and every row is a real forward pass on the shipped weights.
+  $("#batch").addEventListener("click", async () => {
+    const b = $("#batch");
+    b.disabled = true;
+    const keep = $("#word").value;
+    const settle = () => new Promise(r => {
+      const h = () => $("#runbadge").textContent.trim() === "live" ? r() : setTimeout(h, 40);
+      setTimeout(h, 120);
+    });
+    b.textContent = "running 8 words\u2026";
+    const rows = [];
+    for (let i = 0; i < 8; i++) {
+      const w = Array.from({ length: WORD },
+                           () => LETTERS[Math.floor(Math.random() * 26)]).join("");
+      $("#word").value = w;
+      surprise = null;
+      $("#surprise").textContent = "Inject a surprise";
+      run();
+      await settle();
+      const st = phaseStats(cur.sparsity[2].xy), sp = cur.surprise;
+      const mean = a => { const v = a.filter(Number.isFinite);
+                          return v.reduce((p, q) => p + q, 0) / v.length; };
+      rows.push({ w, warm: st.warm, rep: st.rep,
+                  ws: mean(sp.slice(1, WARM)), rs: mean(sp.slice(WARM + WORD, PERIOD)) });
+      b.textContent = `running word ${i + 1} of 8\u2026`;
+    }
+    const f = rows.map(r => r.warm / r.rep).sort((a, b2) => a - b2);
+    const med = (f[3] + f[4]) / 2;
+    $("#batchOut").innerHTML =
+      `<div class="scroll"><table><tr><th>word</th><th>warm-up firing</th><th>repeats firing</th>` +
+      `<th>warm / rep</th><th>warm-up surprise</th><th>repeats surprise</th></tr>` +
+      rows.map(r => `<tr><td><code>${r.w}</code></td><td class="n">${(r.warm * 100).toFixed(1)}%</td>` +
+        `<td class="n">${(r.rep * 100).toFixed(1)}%</td>` +
+        `<td class="n">${(r.warm / r.rep).toFixed(2)}&times;</td>` +
+        `<td class="n">${r.ws.toFixed(3)}</td><td class="n">${r.rs.toFixed(3)}</td></tr>`).join("") +
+      `</table></div><p class="hint">Layer 2, eight words drawn on this machine just now. Median ` +
+      `warm/rep <strong>${med.toFixed(2)}&times;</strong>; ${f.filter(x => x > 1.3).length} of 8 ` +
+      `above 1.3&times;. Over 1,280 sequences the same model reads 2.35&times;. A run where several ` +
+      `rows land near 1.0&times; with both surprise columns near zero would be evidence against the ` +
+      `claim.</p>`;
+    $("#batchOut").hidden = false;
+    $("#word").value = keep;
+    run();
+    b.textContent = "Run 8 random words";
+    b.disabled = false;
   });
 
   initTour();

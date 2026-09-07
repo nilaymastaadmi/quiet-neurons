@@ -1,0 +1,5 @@
+stub=34004
+worker=28620
+restarted=2026-09-07T21:14 IST
+reason=previous PID 33728 was reaped when its background task wrapper exited 127 at step 600 of 4000; no error in the log, no checkpoint written, 6161s lost
+relaunch=detached via PowerShell Start-Process, OMP_NUM_THREADS=10, budget 64800s

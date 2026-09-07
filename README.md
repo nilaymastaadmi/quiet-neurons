@@ -81,7 +81,9 @@ defined where they first appear.
 3. Name the layers where the effect is absent, and say so out loud rather than hiding it.
 4. Explain why BDH attention is a Gram matrix of neuron activations, and what follows from
    there being no softmax in it.
-5. Reproduce every number here with two commands.
+5. Run eight random words through the model in the page and read the distribution, rather
+   than trusting any single chosen word.
+6. Reproduce every number here with two commands.
 
 ---
 
@@ -95,6 +97,7 @@ The rubric asks for this explicitly, so it is near the top rather than buried.
 | The model on the page (n=2048, 397,312 params) | **Live.** Real weights, real forward pass, computed in your browser on every interaction. Not a recording. |
 | Neuron grid, sparsity trace, counterexample panel, surprise test | **Live.** All recomputed from that forward pass. |
 | Attention heatmap and binding-by-lag chart | **Live**, from the same run. |
+| Batch of eight random words | **Live.** Eight forward passes, words drawn in the browser at click time, nothing pre-selected. |
 | Which individual dot lights up in the neuron grid | **Count live, placement illustrative.** The number of lit cells is computed by the forward pass and printed under the grid. Where they sit is a fixed scatter keyed to the letter position, because which particular neuron fires is not what the claim is about. The grid's own caption says exactly this. |
 | Scaling chart points, and the larger-model curves the size switcher overlays | **Precomputed** by `experiments/measure.py`, shipped as `web/data/scaling.json` and `web/data/traces/`. Only n=2048 runs live; n=8192 and n=16384 are 8x and 16x the compute and cannot, and the page labels their curves "measured, not live". |
 | The paper's band at n=65536 | **Not reproduced by us.** Read off Figure 14 of arXiv:2509.26507 and drawn as a band, because that is how it is reported. |
@@ -194,6 +197,11 @@ seven significant digits, so PyTorch and JavaScript rounded to opposite sides of
 neuron in 2,048 flipped. It is a real property of the arithmetic rather than a bug, it can
 recur on any checkpoint, and the threshold permits exactly one such neuron and no more. This
 model happens not to have one.
+
+**Load your own BDH-GPU checkpoint.** `python export_weights.py --ckpt <file> --embd <d>
+--mult <m> --out ../web/data` writes manifest.json, weights.bin and reference.json; the page
+and parity.html read whatever is there. Any checkpoint trained by sparsity_scan.py, at any
+size the browser can hold, runs unchanged.
 
 ---
 
