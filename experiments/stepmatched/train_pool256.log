@@ -33,3 +33,25 @@ step  1400 loss 0.0421 elapsed   5384s
 step  1450 loss 0.0409 elapsed   5493s
 step  1500 loss 0.0406 elapsed   5617s
 step  1550 loss 0.0398 elapsed   5729s
+step  1600 loss 0.0394 elapsed   5899s
+step  1650 loss 0.0396 elapsed   6034s
+step  1700 loss 0.0393 elapsed   6179s
+step  1750 loss 0.0392 elapsed   6314s
+step  1800 loss 0.0394 elapsed   6406s
+step  1850 loss 0.0391 elapsed   6526s
+step  1900 loss 0.0387 elapsed   6629s
+step  1950 loss 0.0389 elapsed   6729s
+step  2000 loss 0.0386 elapsed   6855s
+step  2050 loss 0.0386 elapsed   6945s
+step  2100 loss 0.0387 elapsed   7079s
+step  2150 loss 0.0385 elapsed   7242s
+step  2200 loss 0.0385 elapsed   7349s
+step  2250 loss 0.0386 elapsed   7472s
+step  2300 loss 0.0384 elapsed   7609s
+TRAINED n=2048 steps=2309 of a 4000-step schedule (stop_at=2309) final_loss=0.0384
+PRECONDITION first_exposure_loss=0.7279 repetition_loss=0.0006 TASK_LEARNED=True
+  layer 0 xy: MEM 0.1129 REP 0.1247 ratio 0.91
+  layer 1 xy: MEM 0.0953 REP 0.0783 ratio 1.22
+  layer 2 xy: MEM 0.0641 REP 0.0414 ratio 1.55
+  layer 3 xy: MEM 0.0719 REP 0.0640 ratio 1.12
+WROTE scaling_results.csv

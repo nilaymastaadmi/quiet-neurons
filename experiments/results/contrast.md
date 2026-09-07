@@ -10,6 +10,12 @@ re-checked rather than believed.
 | dark | 305 | **0** | **5.12:1** |
 | light | 305 | **0** | **4.71:1** |
 
+**The element count is state-dependent and is not the claim.** It moves with which controls are
+active: injecting a surprise and switching layers add and remove readouts. An independent re-run
+counted **315** against our 305 and reached identical floors and the same zero. Reproduce it in the
+state described below and expect a count in that range. What must hold every time is the zero and
+the floor.
+
 Threshold 4.5:1 for normal text, 3:1 for large (≥24 px, or ≥18.66 px at weight ≥700).
 
 ## What was wrong before

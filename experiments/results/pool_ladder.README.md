@@ -72,3 +72,67 @@ Same seed, same 4,000-step OneCycle schedule, same 2,309-step stop as every publ
 Measured with `--repeats 5` into `results/pool_ladder.csv`, never into `measured.csv`. The pool
 travels inside the checkpoint, so each model is evaluated on the distribution it was trained on
 rather than on freshly drawn words it has never seen.
+
+---
+
+# THE RESULT
+
+Measured 2026-09-07, after the pre-registration above was committed. Both intermediate models
+trained 2,309 steps of the same 4,000-step schedule as every published model, and both pass the
+precondition: `TASK_LEARNED=True`, and neither trips the degeneracy check.
+
+| condition | letters in weights | final loss | warm% | rep% | **warm/rep** | CV (xy) |
+|---|---|---|---|---|---|---|
+| K=1, fixed word | 8 | 0.0004 | 21.71 | 20.98 | **1.035** | 2.08% **collapsed** |
+| K=16 | 128 | 0.0188 | 12.93 | 14.01 | **0.923** | 15.58% |
+| K=256 | 2,048 | 0.0384 | 10.47 | 4.13 | **2.536** | 27.16% |
+| K=∞, base task | 0 | 0.1739 | 13.61 | 5.78 | **2.354** | 33.34% |
+
+## 1. The monotonicity prediction FAILED
+
+We predicted `1.035 < r(16) < r(256) < 2.354`. What we got is `1.035, 0.923, 2.536, 2.354`, which
+is out of order at both intermediate points. K=16 falls *below* K=1, and K=256 rises *above* the
+base task. **The registered prediction was wrong and we are reporting it as wrong.**
+
+## 2. The discriminating test PASSED, decisively
+
+This is the test the pre-registration said would separate provenance from task difficulty, and it
+is the reason the ladder was run at all.
+
+If difficulty were the only driver, all four points would lie on the line from (0.0004, 1.035) to
+(0.1739, 2.354). At K=256's loss of 0.0384 that line predicts a ratio of **1.324**.
+
+**K=256 measures 2.536. The residual is +1.212.**
+
+Put without the geometry: **K=256 is four and a half times easier than the base task by final
+loss (0.038 against 0.174) and shows a *larger* effect (2.54× against 2.35×).** An easier task
+producing a bigger effect is the opposite of what the difficulty confound predicts. That confound
+cannot be what generates the effect.
+
+This is the result the degenerate fixed-word control could not deliver, and it is the strongest
+evidence in this project that provenance rather than difficulty is the operative variable.
+
+## 3. K=16 is unexplained, and we are not going to pretend otherwise
+
+At K=16 every layer sits between 0.90 and 1.01, with warm ≈ mem ≈ rep at layer 2 (0.129 / 0.142 /
+0.140). The effect is not merely weaker there, it is absent, and at layers 1, 2 and 3 it inverts
+slightly. Its CV of 15.58% keeps it clear of the degeneracy threshold, so it is not the K=1
+collapse in a milder form by that test, but it is the flattest non-degenerate condition we have.
+
+The reading we find most plausible, and cannot demonstrate: 128 letters is little enough that the
+model can serve the repeat block largely from weights without leaning on context, so neither block
+is context-held and the distinction has nothing to separate. At 2,048 letters it must use the
+context to identify which of 256 words it is seeing, and the distinction returns. **That is a
+story, not a measurement.** Settling it needs a K sweep we do not have time for.
+
+## What this does and does not license
+
+**It licenses**: saying the effect survives an intervention that holds the task recognisably the
+same while moving where the word's content lives, and that difficulty alone cannot generate it.
+
+**It does not license**: calling the mechanism established, or calling the relationship monotone
+in provenance. One of four points is unexplained and the ordering we predicted did not hold.
+
+Data in `pool_ladder.csv`. Checkpoints `checkpoints/bdh_n2048_pool16.pt` and `_pool256.pt`, each
+carrying its own word pool so it can only be re-measured in distribution. Reproduce with
+`python tools/ladder.py`.

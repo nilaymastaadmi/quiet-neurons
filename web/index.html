@@ -748,8 +748,17 @@ footer a{color:var(--muted)}
             real model, and how far a cell rose correlates &minus;0.86 with where it started rather than
             with whether its provenance changed. It solves a trivial task (loss 0.0004 against 0.174).
             So it shows that removing the distinction removes the effect, and it cannot separate
-            provenance from difficulty. A graduated version is pre-registered
-            <span class="tag tag-no">degenerate</span></td></tr>
+            provenance from difficulty <span class="tag tag-no">degenerate</span></td></tr>
+      <tr><td>So we graduated it: draw the word from a pool of K, so the letters are in the weights
+            but the model must still read the context to know <em>which</em>. Prediction registered
+            before the runs finished.</td>
+          <td class="n prose">warm/rep at layer 2: <strong>1.04</strong> (K=1, degenerate),
+            <strong>0.92</strong> (K=16), <strong>2.54</strong> (K=256), <strong>2.35</strong>
+            (base task). We predicted this would rise monotonically and <strong>it did not</strong>.
+            But the test that matters passed: <strong>K=256 is 4.5&times; easier than the base task
+            by final loss and shows a <em>larger</em> effect</strong>, where difficulty alone
+            predicts 1.32. An easier task producing a bigger effect is the opposite of the confound.
+            K=16 we cannot explain <span class="tag tag-ok">difficulty ruled out</span></td></tr>
       <tr><td>This is a toy trained here, not an official BDH checkpoint</td>
           <td class="n prose">architecture is Pathway's, unmodified; weights are ours</td></tr>
       <tr><td>Synthetic task, not natural language</td>
@@ -787,7 +796,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "23";
+const BUILD = "24";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of

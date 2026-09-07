@@ -404,8 +404,45 @@ no argument about the shape of the collapse can rescue it.** `measure.py` now pr
 check, coefficient of variation per tensor per block, flagging anything under 5%; it exists
 because this condition collapsed and we argued around the collapse instead of detecting it.
 
-The graduated version of this experiment, which keeps the copy task alive at intermediate pool
-sizes, is pre-registered in `experiments/results/pool_ladder.README.md`.
+### The graduated version, pre-registered and then run
+
+The fixed-word control fails because switching provenance off entirely also switches the task off.
+So we graduated it: draw the word each sequence from a fixed pool of **K** words. K=1 is the
+fixed-word case. K=∞ is the base task. In between, the letters live in the weights but the model
+must still read the context to know *which* of the K it is seeing, so the copy task stays alive.
+Both intermediate models pass that precondition (`TASK_LEARNED=True`) and neither is degenerate.
+
+**The prediction was committed before the runs finished** — see the git history for
+`pool_ladder.README.md`, which lands before `pool_ladder.csv` exists.
+
+| condition | letters in weights | final loss | warm/rep at layer 2 |
+|---|---|---|---|
+| K=1, fixed word | 8 | 0.0004 | 1.035 (degenerate) |
+| K=16 | 128 | 0.0188 | **0.923** |
+| K=256 | 2,048 | 0.0384 | **2.536** |
+| K=∞, base task | 0 | 0.1739 | 2.354 |
+
+**We predicted the ratio would rise monotonically with K. It did not, and that prediction is
+wrong.** Two of the four points are out of order: K=16 falls below K=1, and K=256 rises above the
+base task.
+
+**The discriminating test, which is what the ladder was for, passed decisively.** If difficulty
+were the only driver, all four points would lie on the line joining the two extremes; at K=256's
+loss that line predicts 1.324, and K=256 measures **2.536**, a residual of **+1.212**. Stated
+without the geometry: **K=256 is four and a half times easier than the base task by final loss and
+shows a larger effect.** An easier task producing a bigger effect is the opposite of what the
+difficulty confound predicts, so difficulty cannot be what generates it.
+
+**K=16 is unexplained.** Every layer sits between 0.90 and 1.01 and at layer 2 warm, mem and rep
+are within 0.013 of each other. Our best guess is that 128 letters is few enough to be served from
+weights without leaning on context, leaving nothing for the distinction to separate; at 2,048 the
+model must use context to identify which word, and the effect returns. **That is a story, not a
+measurement**, and settling it needs a K sweep we do not have time for.
+
+So: the effect survives an intervention that moves where the word's content lives while keeping
+the task recognisably the same, and difficulty alone cannot generate it. That is not the mechanism,
+and the relationship is not monotone in provenance. Full write-up, including the failed prediction
+in the words it was registered in, is in `experiments/results/pool_ladder.README.md`.
 
 Data in `experiments/results/mechanism_control.csv`, checkpoint in
 `experiments/checkpoints/bdh_n2048_fixedword.pt`, and the flag is off by default so every
@@ -434,7 +471,11 @@ published run is bit-identical to before it existed.
 Text contrast passes **WCAG AA in both themes**, measured on 2026-09-07 by walking every
 rendered element on the running page, resolving each one's actual computed foreground against
 its nearest opaque ancestor background, and applying the large-text exemption (3:1 at ≥24 px, or
-≥18.66 px bold) only where it genuinely applies. **305 text elements per theme, zero failures.**
+≥18.66 px bold) only where it genuinely applies. **Zero failures in either theme.** The number of
+text elements is **305 to 315** depending on which controls are active when you run it, because
+injecting a surprise and switching layers add and remove readouts; an independent re-run counted
+315 where ours counted 305, with identical floors. The count is not the claim. The zero and the
+floor are, and both hold in every run.
 The floor is **5.12:1** in dark and **4.71:1** in light, against a 4.5:1 threshold.
 
 An earlier version of this section claimed 4.69:1 and was **wrong**. Two things actually failed:

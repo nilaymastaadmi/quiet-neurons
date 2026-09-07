@@ -49,7 +49,7 @@ contribution sits alongside it rather than inside it.
 
 | Asset | Origin | Licence |
 |---|---|---|
-| `experiments/checkpoints/bdh_n2048.pt`, `bdh_n8192.pt`, `bdh_n16384.pt` | **Trained here from scratch** on synthetic data, on a laptop CPU. Not official BDH weights and not presented as such. | MIT, see `LICENSE` |
+| `experiments/checkpoints/bdh_n2048.pt`, `bdh_n8192.pt`, `bdh_n16384.pt`, and the controls `bdh_n2048_fixedword.pt`, `_pool16.pt`, `_pool256.pt`, plus the superseded `_wallclock.pt` pair | **Trained here from scratch** on synthetic data, on a laptop CPU. Not official BDH weights and not presented as such. | MIT, see `LICENSE` |
 | `web/data/weights.bin`, `manifest.json`, `reference.json` | Exported from `bdh_n2048.pt` by `experiments/export_weights.py` | MIT, see `LICENSE` |
 | `web/data/scaling.json`, `web/data/traces/*.json` | Produced by `experiments/measure.py` from the checkpoints above | MIT, see `LICENSE` |
 | `experiments/results/contrast.md`, `experiments/results/latency.md`, `experiments/results/word_scatter.README.md`, `experiments/results/pool_ladder.README.md`, `experiments/results/onepager_test.md` | Method notes for the three measurements taken by driving the running page rather than by `measure.py`: WCAG contrast, interaction latency, and the per-word surprise-injection scatter, each carrying the console script that reproduces it; plus the pre-registered prediction for the provenance ladder, committed before its data existed | MIT, see `LICENSE` |
