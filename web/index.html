@@ -657,8 +657,9 @@ footer a{color:var(--muted)}
 
   <h3>Activations are forced positive, then multiplied</h3>
   <p>Every layer computes two ReLU'd vectors and multiplies them together elementwise. A ReLU throws
-    away negatives, so each is already sparse; a product of two sparse non-negative vectors is
-    sparser than either. That product is what we count. It is the <em>only</em> quantity in the
+    away negatives, so each is already sparse; a neuron survives the product only if it was
+    non-zero in <em>both</em>, so the product can never be denser than either and in these models
+    is markedly sparser. That product is what we count. It is the <em>only</em> quantity in the
     public code whose magnitude lands inside the band the paper reports; the individual vectors sit
     around 19 to 59 percent dense, several times off.</p>
 

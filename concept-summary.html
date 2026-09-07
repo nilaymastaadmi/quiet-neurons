@@ -59,11 +59,11 @@
 <h2>What BDH changes</h2>
 <p>
   Dragon Hatchling (BDH) [1] makes it structural. In BDH-GPU, which Pathway open-sources,
-  every layer multiplies two rectified (ReLU) vectors elementwise, and that product is sparser
+  every layer multiplies two rectified (ReLU) vectors elementwise, and that product can never be denser
   than either. <em>Active</em> means a strictly non-zero entry there; a rectifier emits no
   negatives, so an active neuron is a positive amount of
-  something rather than a signed coordinate, which lets it read as a concept. That product is the paper's <em>y<sub>t,l</sub></em>: Eq. (8) defines it as
-  <em>(D<sub>y</sub>LN(&rho;x))<sub>+</sub></em>&nbsp;&odot;&nbsp;<em>x</em>, Appendix E reads <code>relu(ln(a) @ decoder_y) * x</code>, and Fig. 14 counts its non-zeros. Naming collision: the code's <code>y_sparse</code> is the paper's rectified <em>intermediate</em>; the paper's
+  something rather than a signed coordinate. That product is the paper's <em>y<sub>t,l</sub></em>: Eq. (8) defines it as
+  <em>(D<sub>y</sub>LN(&rho;x))<sub>+</sub></em>&nbsp;&odot;&nbsp;<em>x</em>, Appendix E reads <code>relu(self.ln(a) @ decoder_y) * x</code>, and Fig. 14 counts its non-zeros. Naming collision: the code's <code>y_sparse</code> is the paper's rectified <em>intermediate</em>; the paper's
   <em>y</em> is the code's <code>xy_sparse</code>. Attention is the second change: query and key are one tensor, so the score matrix is a causally-masked Gram matrix of activations with
   <strong>no softmax</strong>. Positions whose neurons fired alike bind.
 </p>
@@ -82,19 +82,19 @@
 </p>
 <p>
   The same measurement narrows what that can mean. Two blocks of one sequence are predicted
-  almost equally well yet differ 2.65-fold in activity, over 1,280 sequences of the 8,192-neuron model: the 13-letter warm-up runs at <strong>9.7%</strong>
-  of layer 2 active at 0.0004 nats of mean surprise (natural-log units; zero is perfect), the 56 repeated letters at <strong>3.6%</strong> at 0.004 nats. The warm-up is identical in every training sequence, so it lives in the
+  almost equally well yet differ 2.65-fold in activity, over 1,280 sequences of the 8,192-neuron model: the 13-letter warm-up runs at <strong>9.65%</strong>
+  of layer 2 active at 0.0004 nats of mean surprise, the 56 repeated letters at <strong>3.64%</strong> at 0.004 nats. The warm-up is identical in every training sequence, so it lives in the
   <strong>weights</strong>; the repeated word is new each time, so it can only come from
   <strong>context</strong>. What <em>covaries</em> with the difference is not predictability but <strong>where the knowledge
-  came from</strong> &mdash; a correlation, not an established cause. A learner falsifies it in a minute: inject an unpredictable letter mid-repetition and activity
-  rises there, while the letter before is unchanged to nine decimals &mdash; the model reads only leftwards.
+  came from</strong> &mdash; a correlation, not an established cause. A reader tests this in a minute: inject an unpredictable letter mid-repetition and activity
+  rises there, while the letter before is unchanged to nine decimals.
 </p>
 
 <table>
   <tr><th>System</th><th>Where its sparsity comes from</th><th>Carried per token</th><th>Evidence status</th></tr>
   <tr><td>Dense Transformer feed-forward</td><td>Emergent in training [3]; needs a hard rectifier for exact zeros [4]</td><td>A key-value cache, growing with context</td><td>Extensive, independent</td></tr>
   <tr><td>Linear attention / SSM (Mamba [6])</td><td>None by design; dense recurrent state updates</td><td>A fixed-size recurrent state</td><td>Extensive, independent</td></tr>
-  <tr><td><strong>BDH-GPU</strong>, measured here</td><td>Structural: elementwise product of two rectified vectors, sparser than either</td><td>A fixed-size synaptic state</td><td>Reproduced here at toy scale; author-reported at 65,536 neurons</td></tr>
+  <tr><td><strong>BDH-GPU</strong>, measured here</td><td>Structural: elementwise product of two rectified vectors, never denser than either</td><td>A fixed-size synaptic state</td><td>Reproduced here at toy scale; author-reported at 65,536 neurons</td></tr>
   <tr><td>BDH-CQ</td><td>Not public</td><td>Not public</td><td>Developer-reported only</td></tr>
 </table>
 
@@ -103,24 +103,25 @@
   <span class="lab">Reproduced here:</span> the three ratios, the counterexample, the
   surprise-injection check, browser-against-PyTorch parity (logit max difference 6.1e-5, twelve of twelve sparsity series bit-identical) &mdash; an implementation check, not architectural evidence.
   <span class="lab">Developer-reported, not reproduced:</span> the Fig. 14 band; 97.4% on Sudoku
-  Extreme, which Pathway's repository says does not reproduce from the open code; the 1B-to-600B scaling runs; BDH-CQ's ARC-AGI-1 result [2]. <span class="lab">Not modelled:</span> BDH-CQ's internals, "proprietary" by its authors' own
+  Extreme, which Pathway says does not reproduce from the open code; the 1B-to-600B scaling runs; BDH-CQ's ARC-AGI-1 result [2]. <span class="lab">Not modelled:</span> BDH-CQ's internals, "proprietary" by its authors' own
   statement [2]; <strong>it has no role here</strong>, and inventing one would be worse. <span class="lab">Where it is likely worse:</span> sparse non-negative activations plausibly cost
-  capacity against dense superposition, and no published comparison runs past GPT-2 scale.
+  capacity against dense superposition; no published comparison runs past GPT-2 scale.
 </p>
 
 <h2>Limitations and maturity</h2>
 <p>
   Depth matters: layer 0 runs <em>backwards</em> at all three sizes, ratios below 1 (0.80, 0.80,
-  0.86): <em>more</em> neurons fire while repeating; layer 3 is flat below 16,384. Scaling is
+  0.86): <em>more</em> neurons fire while repeating; layer 1 is positive at every size (1.22,
+  1.41, 1.33) and layer 3 is flat below 16,384. Scaling is
   <strong>not monotonic</strong> and we published the opposite before the third model finished. The
-  wall-clock confound is gone, the short two retrained to 2,309 steps, dip surviving at
-  <strong>40&times;</strong> the mean half-width; none finished the 4,000-step schedule, though
-  retraining n=2,048 to completion moves layer 2 only 1.4705 to 1.4620, while n=8,192 moves 2.1201
-  to 2.2000, about nine half-widths, upward. These are toys, 0.4M to
+  wall-clock confound is gone, the short two retrained to 2,309 steps, the dip surviving at <strong>40&times;</strong> its half-width; none of the three published models finished the
+  4,000-step schedule, though separate runs that did finish move layer 2 only 1.4705 to 1.4620 at
+  n=2,048, and 2.1201 to 2.2000 at n=8,192, a rise of 0.0799 against that run's own
+  &plusmn;0.0086 spread. These are toys, 0.4M to
   6.3M parameters on a synthetic task, as the paper's is. Surprise and sparsity do <em>not</em> track per letter (Pearson 0.30 across phases, Spearman &minus;0.05 letter by letter: the relation is between blocks, not letters),
-  killing a stronger claim. Most importantly we establish the <em>signature</em>, not its cause. We
-  intervened twice. Fixing the word collapses the gap 2.35&times; to 1.04&times;, but that control is
-  degenerate and separates nothing. A 256-word pool does separate them, letters still in the weights, identity still from context: that model is <strong>4.5&times; easier by loss (0.038
+  killing a stronger claim. Most importantly: signature, not cause. We
+  intervened twice. Fixing the word collapses n=2,048's 2.35&times; warm-up-to-repeat gap to 1.04&times;, but that control is
+  degenerate and separates nothing. A 256-word pool does separate them, letters still in the weights, identity from context: that model is <strong>4.5&times; easier by loss (0.038
   against 0.174) yet shows a larger effect, 2.54&times; against 2.35&times;</strong>, so the effect
   is not a monotone function of difficulty; K=16 (0.92) falls on the other side of the same line,
   unexplained.
@@ -139,7 +140,7 @@
   here, then [1] §3.2 and Eq. (8) for the equations defining what is counted, then [3] for why
   sparsity alone distinguishes no architecture, then the artifact for the counterexample, which no
   paper states.
-  &mdash; Reproduce every number: <strong>python measure.py --ckpt checkpoints/bdh_n2048.pt --embd 64 --mult 32 --repeats 5</strong>. Code and data MIT; <code>bdh.py</code> is Pathway's, unmodified, MIT.
+  &mdash; Reproduce the n=2,048 row: <strong>python measure.py --ckpt checkpoints/bdh_n2048.pt --embd 64 --mult 32 --repeats 5</strong>. Code and data MIT; <code>bdh.py</code> is Pathway's, unmodified, MIT.
 </p>
 
 </body>

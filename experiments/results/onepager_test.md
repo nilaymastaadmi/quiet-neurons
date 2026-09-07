@@ -113,3 +113,115 @@ result then sharpen it, and the correction landing is the test passing rather th
 that BDH-GPU is central and BDH-CQ is not, without inventing a role for BDH-CQ. The problem
 statement warns specifically against a BDH mention "added only to satisfy the rules", and this
 is the only direct evidence available that the document does not read that way.
+
+---
+
+# Run 2, 2026-09-08 05:0x, on the final PDF
+
+Same conditions: `web/concept-summary.pdf` only, one Read of one file, no README, no repository,
+no live page, fresh model session with no history of this project. The prompt asked for the same
+five acceptance questions the problem statement names, plus an explicit hunt for internal
+inconsistencies, ambiguities, overclaims and confusions.
+
+**It found 26 items across those categories and said "No category came back empty."** Nine were
+real errors. Two of them were introduced hours earlier by the n=8,192 edit, which is exactly what
+this test exists to catch. Raw output follows, unedited, then the fixes.
+
+## Raw output, run 2
+
+### Central claim
+> The document claims that BDH-GPU's activation sparsity tracks **where a piece of knowledge came
+> from** rather than **how predictable the text is**. The title states it flatly. The body's own
+> version is weaker and more careful: "a correlation, not an established cause," and later "we
+> establish the *signature*, not its cause."
+
+### Mechanism, roles of BDH and BDH-CQ, evidence, limitations
+Answered correctly and in the document's own terms. It identified BDH-GPU as the only thing
+measured and BDH-CQ as explicitly out of scope, quoting "it has no role here, and inventing one
+would be worse". On evidence it wrote: "The evidence labelling discipline here is unusually good.
+The problem is not honesty of labelling, it is that the labelled-strong evidence supports the
+*paper's* claim and the document's *own* claim rests on a single block-pair comparison plus one
+compromised intervention." On limitations it chose, as most serious, that "the one non-degenerate
+intervention designed to test it produced a sign-flipped case the author cannot explain... scale
+can be bought and a sign flip cannot be waited out."
+
+### Follow-up question
+> What is K, and why does K=16 give 0.92? A 16-word pool still puts the letters in the weights and
+> the identity in context, which is the exact condition your mechanism says produces quieting, yet
+> the effect inverts.
+
+### Inaccuracies and confusions, all 26
+
+**Internal inconsistencies**
+1. "none finished the 4,000-step schedule" sat in the same sentence as "retraining n=2,048 to
+   completion" and the n=8,192 completion. "Either those runs completed or they did not. As
+   written, both are asserted."
+2. The half-width arithmetic did not work. The only half-width on the page was ±0.005; the
+   n=8,192 change of 0.0799 is 16 of those, not the stated "about nine".
+3. "all for 2,309 steps" reads as a design choice where it was a repair after the wall-clock
+   confound.
+4. Per-letter coupling asserted by the injection check and denied by Spearman −0.05.
+5. 9.7 / 3.6 is 2.69, not the stated "2.65-fold".
+6. "2.35×" used twice with no antecedent.
+
+**Ambiguities**
+7. The title reads as a refutation of the paper while the body says the models agree with it.
+8. The 2.65× comparison introduced as "The same measurement" is a different comparison.
+9. "almost equally well" covers a 10× surprise gap, 0.0004 against 0.004 nats.
+10. "Reproduce every number" beside one command that loads one of three checkpoints.
+11. `ln(a)` parseable as a natural logarithm in a document that also uses natural-log units.
+12. "two rectified vectors" against an equation showing one visible rectifier.
+13. "author-reported" and "developer-reported" used for what looks like one evidence class.
+14. The table's "Evidence status" column has two readings.
+15. Layers 0, 2 and 3 named; layer 1 never mentioned.
+
+**Overclaims**
+16. The title asserts an exclusive causal claim the body twice disclaims.
+17. "that product is sparser than either" stated absolutely. "The support of an elementwise
+    product is the intersection of the two supports, so the correct statement is *at least as
+    sparse as either*, strictly sparser only when the supports differ. Small, but it is the
+    load-bearing architectural claim."
+18. "which lets it read as a concept" offered with no probing or interpretability evidence.
+19. "A learner falsifies it in a minute" overstates a check that mainly confirms causal masking.
+
+**Confusions**
+20. "falsifies *it*" has "a correlation, not an established cause" as its nearest antecedent, so
+    the literal reading is that the check refutes the authors' own claim.
+21. "killing a stronger claim" never names the claim.
+22. "dip surviving at 40× the mean half-width" names neither the dip nor whose half-width.
+23. "Positions whose neurons fired alike bind" leaves "bind" undefined.
+24. Parameter range not checkable against the neuron range from the document alone.
+25. No absolute sparsity percentages for the main protocol, so the reader cannot compare against
+    the paper's 4.0–7.5% and 2.5%.
+26. The BDH-CQ table row reads as inclusion while the prose disclaimer sits 15 lines below.
+
+## What was changed, and what was not
+
+**Fixed (9).** 1 and 2, both introduced by the n=8,192 edit that same night: the sentence now says
+"none of the three published models finished the 4,000-step schedule, though separate runs that did
+finish move layer 2 only 1.4705 to 1.4620 at n=2,048, and 2.1201 to 2.2000 at n=8,192, a rise of
+0.0799 against that run's own ±0.0086 spread." 5: the percentages now read 9.65% and 3.64%, which
+are the values 2.65 is computed from. 6: "n=2,048's 2.35× warm-up-to-repeat gap". 10: "Reproduce
+the n=2,048 row". 11: `relu(self.ln(a) @ decoder_y) * x`. 15: layer 1 added, positive at every size
+(1.22, 1.41, 1.33). 17: "can never be denser than either", on the one-pager and on the page's
+section 06, which carried the same absolute. 18: the concept clause is gone. 19 and 20: "A reader
+tests this in a minute", and the causal-mask restatement dropped. 21 and 22 partly: "Most
+importantly: signature, not cause" and "the dip surviving at 40× its half-width".
+
+**Not fixed, and why.** 16, the title. The reviewer is right that "quietens on what it just
+learned, not on what is merely predictable" is stronger than "a correlation, not an established
+cause" two paragraphs below. It is the project's name, it appears on four surfaces and in the
+repository URL, and the body carries the disclaimer in the same breath as the claim. Changing it
+the morning of the deadline trades one risk for a larger one. **It is the strongest single
+criticism this artifact has and it is recorded here rather than answered.** Items 3, 4, 7, 8, 9,
+12, 13, 14, 23, 24, 25 and 26 are terseness in a document at 948 of 950 permitted words: every fix
+costs words the budget does not have, and none of them is false as written. They are listed above
+so a reader can see them rather than discover them.
+
+## Why run 2 matters more than run 1
+
+Run 1, on 2026-09-07, tested a document that then changed substantially: a third architecture row,
+a rewritten difficulty passage, the canonical claim, and the n=8,192 result. Run 1's clean bill was
+about a document that no longer exists. Run 2 tested what ships, found nine real errors, and two of
+them were less than eight hours old. A no-context reader catching in four minutes what four
+surfaces of self-checking did not is the argument for keeping this gate.
