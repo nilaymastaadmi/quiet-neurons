@@ -476,6 +476,16 @@ text elements is **305 to 315** depending on which controls are active when you 
 injecting a surprise and switching layers add and remove readouts; an independent re-run counted
 315 where ours counted 305, with identical floors. The count is not the claim. The zero and the
 floor are, and both hold in every run.
+
+**Non-text contrast (WCAG 1.4.11) passes too, and it did not before.** That is a separate
+criterion from the text one above: anything needed to *identify a control* must clear 3:1. The
+text input's border measured **1.34:1** in dark mode, because it used the same decorative hairline
+token as the page's dividers, which was never meant to carry that job. A dedicated
+`--control-edge` token fixes it without coarsening every divider on the page. Now **zero failing
+controls in either theme**, floor 3.36:1 dark and 4.01:1 light. A first scan flagged 36 SVG
+elements as well; **35 of those are exempt and were deliberately left alone** — gridlines, band
+shading that is also labelled in text, and `<line>` fill which never renders. Both scripts, and
+the reasoning for what was not changed, are in `experiments/results/contrast.md`.
 The floor is **5.12:1** in dark and **4.71:1** in light, against a 4.5:1 threshold.
 
 An earlier version of this section claimed 4.69:1 and was **wrong**. Two things actually failed:

@@ -20,6 +20,9 @@
      on --fire-soft and 6.25:1 on white. --on-fire is the text colour for anything sitting ON
      the accent: white here, near-black in dark mode, where white measured 2.06:1. */
   --fire:#9A4A0E; --fire-soft:#F7E7D6; --fire-line:#D98A3C; --on-fire:#FFFFFF;
+  /* WCAG 1.4.11: a control's boundary needs 3:1 to be identifiable. --line is a
+     decorative hairline at 1.3:1 and was never meant to carry that. */
+  --control-edge:#767F94;
   --pass:#2A7355; --pass-soft:#DEEEE5;
   --dead:#9B3A32; --dead-soft:#F4E0DE;
   --grid-off:#D9DDE5; --grid-on:#9A4A0E;
@@ -33,6 +36,7 @@
   --line:#2B3040; --line-soft:#222632;
   --ink:#E9EBF1; --ink-2:#C0C5D2; --muted:#939AAE;
   --fire:#FF9E3D; --fire-soft:#37270F; --fire-line:#B4712A; --on-fire:#0F1118;
+  --control-edge:#606B92;
   --pass:#5FB98E; --pass-soft:#152D1F;
   --dead:#DA7C74; --dead-soft:#331917;
   --grid-off:#232936; --grid-on:#FF9E3D;
@@ -43,6 +47,7 @@
   --line:#2B3040; --line-soft:#222632;
   --ink:#E9EBF1; --ink-2:#C0C5D2; --muted:#939AAE;
   --fire:#FF9E3D; --fire-soft:#37270F; --fire-line:#B4712A; --on-fire:#0F1118;
+  --control-edge:#606B92;
   --pass:#5FB98E; --pass-soft:#152D1F;
   --dead:#DA7C74; --dead-soft:#331917;
   --grid-off:#232936; --grid-on:#FF9E3D;
@@ -129,11 +134,11 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 .ctl label{display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;
            text-transform:uppercase;color:var(--muted);margin-bottom:7px}
 .ctl input[type=text]{width:100%;font-family:var(--f-mono);font-size:15px;letter-spacing:.14em;
-  padding:9px 11px;border:1px solid var(--line);border-radius:3px;background:var(--ground);
+  padding:9px 11px;border:1px solid var(--control-edge);border-radius:3px;background:var(--ground);
   color:var(--ink);text-transform:lowercase}
 .ctl input[type=range]{width:100%;accent-color:var(--fire)}
 .ctl input:focus-visible,.ctl button:focus-visible,.seg button:focus-visible{outline:2px solid var(--fire);outline-offset:2px}
-.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:3px;overflow:hidden;width:fit-content}
+.seg{display:flex;gap:0;border:1px solid var(--control-edge);border-radius:3px;overflow:hidden;width:fit-content}
 .seg button{font-family:var(--f-mono);font-size:13px;padding:8px 14px;border:0;cursor:pointer;
             background:var(--ground);color:var(--muted);border-right:1px solid var(--line)}
 .seg button:last-child{border-right:0}
@@ -796,7 +801,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "24";
+const BUILD = "25";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
