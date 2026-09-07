@@ -123,9 +123,9 @@
   0.86) meaning <em>more</em> neurons fire while repeating; layer 3 is flat below 16,384. Scaling is
   <strong>not monotonic</strong> and we published the opposite before the third model finished. The
   wall-clock confound is gone, the short two retrained to 2,309 steps, dip surviving at
-  <strong>40&times;</strong> the mean half-width; still uncontrolled is that none finished the
-  4,000-step schedule. These are toys, 0.4M to 6.3M parameters on a synthetic task, as the paper's
-  is. Surprise and sparsity do <em>not</em> track per letter (Pearson 0.30, Spearman &minus;0.05),
+  <strong>40&times;</strong> the mean half-width; none finished the 4,000-step schedule, though
+  retraining n=2,048 to completion moves layer 2 only 1.4705 to 1.4620. These are toys, 0.4M to
+  6.3M parameters on a synthetic task, as the paper's is. Surprise and sparsity do <em>not</em> track per letter (Pearson 0.30, Spearman &minus;0.05),
   killing a stronger claim. Most importantly we establish the <em>signature</em>, not its cause. We
   intervened twice. Fixing the word collapses the gap 2.35&times; to 1.04&times;, but that control is
   degenerate and separates nothing. Drawing the word instead from a pool of 256 does separate them,

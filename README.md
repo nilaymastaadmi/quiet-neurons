@@ -320,6 +320,18 @@ three stop at 2,309, about 58% of the way through, at a learning rate that is st
 Settling monotonicity properly needs three fully-trained models, roughly thirteen hours of CPU
 that did not fit before the deadline.
 
+**We checked what we could afford to check.** Retraining n=2,048 to the full 4,000 steps, same
+seed and protocol, moves layer 2 from **1.4705 to 1.4620** — 0.6%, under two half-widths of the
+five-sample spread — and leaves every qualitative feature intact: layer 0 still backwards, layer 2
+still the peak, layer 3 still flat. Notably the training loss only moves 0.1739 → 0.1705 across
+those 1,691 extra steps, so the last 42% of the schedule buys very little on this task, which is
+the likeliest reason the ratio barely moves.
+
+So at n=2,048 the effect is **not** an artefact of stopping early. That is narrower than settling
+monotonicity and we are not claiming otherwise; n=8,192 is training to completion now and
+n=16,384 does not fit. Method and data in `experiments/results/full_schedule.README.md`, kept in
+its own file so these rows cannot mix into `measured.csv`.
+
 **A bug our own measurement found.** Until 2026-09-06 the per-position loss was paired with
 the wrong position. `pl[t]` is the cost of *predicting* token `t+1`, so the surprise of
 *reading* letter `t` is `pl[t-1]`. The first-exposure slice therefore dropped the first

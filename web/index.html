@@ -510,6 +510,13 @@ footer a{color:var(--muted)}
       three stop at about 58% of it, with the learning rate still falling. Settling this properly
       needs three fully-trained models, roughly thirteen hours of CPU we do not have before the
       deadline.
+      <br><br>
+      We checked the part we could afford. Retraining n=2,048 to the full 4,000 steps moves layer 2
+      from <strong>1.4705 to 1.4620</strong>, 0.6% and inside two half-widths of the sampling
+      spread, with layer 0 still backwards and layer 2 still the peak. The training loss moves only
+      0.1739 to 0.1705 over those extra 1,691 steps, so the last 42% of the schedule buys little
+      here. <strong>At this size the effect is not an artefact of stopping early.</strong> That is
+      narrower than settling monotonicity, and we are not claiming otherwise.
     </p>
   </div>
   <p class="hint" style="max-width:78ch">Each of our points is 1,280 sequences across 5 independent
@@ -801,7 +808,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "25";
+const BUILD = "26";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
