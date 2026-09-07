@@ -47,8 +47,9 @@ committed trace `web/data/traces/n8192.json`. Whole blocks, not hand-picked lett
 | the 56 repeated letters, new every run, learned from the **context** | 0.0041 nats | **3.64%** |
 
 Both blocks are predicted essentially perfectly, and one uses **2.65x** as many neurons. At the
-extremes the gap is wider still: letter 11 runs at 16.10% against letter 40 at 3.52%, 4.6x
-apart, both under 0.003 nats of surprise. So what separates them is not predictability but where the
+extremes the gap is wider still: **letter 12** runs at 16.10% against **letter 41** at 3.52%,
+4.6x apart, both under 0.003 nats of surprise. (Letters are numbered from 1, as the page's
+scrub control labels them. In `traces/n8192.json` those are array indices 11 and 40.) So what separates them is not predictability but where the
 knowledge came from: the activation level tracks parametric against in-context memory. We show
 that it tracks, not why it does.
 
@@ -185,7 +186,7 @@ pip install torch                                   # CPU is fine; no GPU used a
 
 cd experiments
 # the model that runs on the page: about 30 minutes of laptop CPU
-python sparsity_scan.py --embd 64 --mult 32 --budget 2700
+python sparsity_scan.py --embd 64 --mult 32 --budget 7200 --steps 4000 --stop-at 2309
 python measure.py --ckpt checkpoints/bdh_n2048.pt --embd 64 --mult 32 --repeats 5 \
                   --append --export-trace ../web/data/traces/n2048.json
 python make_scaling.py                              # rebuilds web/data/scaling.json
@@ -198,8 +199,8 @@ the counterexample quoted at the top, come from the larger models: the same two 
 different sizes and a longer budget.
 
 ```bash
-python sparsity_scan.py --embd 128 --mult 64  --budget 10800   # n=8192,  about 3 hours CPU
-python sparsity_scan.py --embd 128 --mult 128 --budget 21600   # n=16384, about 6 hours CPU
+python sparsity_scan.py --embd 128 --mult 64  --budget 43200 --steps 4000 --stop-at 2309   # n=8192,  ~6.5 h CPU
+python sparsity_scan.py --embd 128 --mult 128 --budget 86400 --steps 4000 --stop-at 2309   # n=16384, ~13 h CPU
 python measure.py --ckpt checkpoints/bdh_n8192.pt  --embd 128 --mult 64  --repeats 5 \
                   --append --export-trace ../web/data/traces/n8192.json
 python measure.py --ckpt checkpoints/bdh_n16384.pt --embd 128 --mult 128 --repeats 5 \
@@ -338,20 +339,45 @@ The gap collapsed, from the predicted direction. First-sight loss confirms the m
 took: 3.2738 nats in the context model against **0.0004** in the control, so the word genuinely
 is not being learned from the text any more.
 
-**Where this argument is weak, stated plainly.** The warm-up rose as well, 13.61% to 21.71%, and
-in the control every layer sits near 21%. The model became globally denser, not just denser in
-one block. What survives that objection is the asymmetry: the block whose provenance changed rose
-**3.63×**, the block whose provenance did not changed rose **1.60×**, and a purely global shift
-would move both by the same factor. What does not survive it is any claim of proof. **Memorising
-one word is a far easier task than in-context copying** (final loss 0.0004 against 0.174), so we
-cannot separate "provenance drives activity" from "an easier task yields denser activations".
-Layer 0 shows the same worry from another angle: its repetition barely moved, 20.70% to 20.46%,
-while its warm-up rose to meet it, which looks like everything converging on one uniform level.
+**This control is degenerate, and we are retracting the argument we first built on it.**
 
-**So: the intervention moves activity in the predicted direction and by an asymmetric amount,
-and it is still not the mechanism.** Nothing here explains *why* weight-held knowledge should
-need more neurons. Data in `experiments/results/mechanism_control.csv`, checkpoint in
-`experiments/stepmatched/bdh_n2048_fixedword.pt`, and the flag is off by default so every
+An earlier version of this section argued that the collapse was *asymmetric* and that the
+asymmetry rescued it: the block whose provenance changed rose 3.63×, the block whose provenance
+did not rose 1.60×, and a global shift would move both equally. **That reasoning is wrong.** It
+holds only for a *multiplicative* shift. What this control actually produced is a shift to a
+**common level**, which moves cells by different factors by construction. Computed from
+`mechanism_control.csv` against `measured.csv`:
+
+| | control | the same cells, real model |
+|---|---|---|
+| spread across the 12 cells, tensor `x` | **2.21%** | 15.13% |
+| tensor `y` | **1.73%** | 17.74% |
+| tensor `xy` | **2.08%** | 33.34% |
+
+Every cell converged on one constant per tensor. The correlation between a cell's starting value
+and its rise factor is **−0.86** across 36 cells: the rise is almost entirely explained by where
+the cell began, not by whether its provenance changed. Concretely:
+
+- **28 of 36 cells rose below the 1.60× "unchanged" baseline**, five of them by 1.10× or less.
+- Layer 0 `xy` **repetition**, whose provenance *did* change: 20.70% → 20.46%, a rise of
+  **0.99×**. It did not rise at all.
+- Layer 0 `xy` **warm-up**, whose provenance did *not* change: 12.36% → 20.93%, a rise of
+  **1.69×**, larger than the figure we had quoted as the unchanged reference.
+- The 3.63× we cited is simply the cell that started lowest in the entire matrix, at 5.78%.
+
+**What the control does and does not show.** It shows that removing the provenance distinction
+removes the activation distinction. But it removes it by collapsing the whole model onto a single
+activation level while solving a trivial task (final loss 0.0004 against 0.174), which is equally
+consistent with provenance mattering and with difficulty mattering. **It cannot separate them, and
+no argument about the shape of the collapse can rescue it.** `measure.py` now prints a degeneracy
+check, coefficient of variation per tensor per block, flagging anything under 5%; it exists
+because this condition collapsed and we argued around the collapse instead of detecting it.
+
+The graduated version of this experiment, which keeps the copy task alive at intermediate pool
+sizes, is pre-registered in `experiments/results/pool_ladder.README.md`.
+
+Data in `experiments/results/mechanism_control.csv`, checkpoint in
+`experiments/checkpoints/bdh_n2048_fixedword.pt`, and the flag is off by default so every
 published run is bit-identical to before it existed.
 
 ---
@@ -366,7 +392,7 @@ published run is bit-identical to before it existed.
 | The three models **are** step-matched, as of 2026-09-06 | all three stop at 2,309 steps of the same 4,000-step schedule. The earlier wall-clock-cut numbers are kept in `measured.csv` for comparison |
 | A single sequence is noisy | the surprise-injection jump ranges −8% to +33% across 15 words, median +9%, all in `experiments/results/word_scatter.csv`. The 1,280-sequence ratios do not scatter: every five-sample spread is under 0.02 |
 | Surprise and sparsity do **not** track per letter | at n=8192, layer 2: **Pearson 0.30, Spearman −0.05**. Across the eight letters of first sight, surprise is flat at 3.27 to 3.29 nats while sparsity falls 13.3% to 4.5%. The relationship is between phases, not letters, and a near-zero Spearman is what says so. This killed a stronger claim we wanted to make. Printed by `measure.py`, recorded in `experiments/results/correlations.csv` |
-| We show the signature, not its cause | we now have an *intervention*, not only a correlation: moving the word from context into the weights collapses the gap 2.354× → 1.035×, asymmetrically (3.63× against 1.60×). But that control model also solves a much easier task and is globally denser, so it cannot separate provenance from task difficulty. Nothing here explains *why* weight-held knowledge needs more neurons. An independent reader of the one-page summary raised exactly this, and they were right |
+| We show the signature, not its cause | we ran the intervention: moving the word from context into the weights collapses the gap 2.354× → 1.035×. But that control is **degenerate**, every cell converging on one activation level (spread 1.7–2.2% against 15–33% in the real model, and rise factor correlating −0.86 with starting value), so it cannot separate provenance from task difficulty and an asymmetry argument we briefly published on it was wrong and is retracted above. Nothing here explains *why* weight-held knowledge needs more neurons. An independent reader of the one-page summary raised exactly this, and they were right |
 | Toy model, not an official BDH checkpoint | architecture is Pathway's and unmodified; the weights are ours |
 | Synthetic task, not natural language | so is the paper's §6.4 protocol, deliberately |
 

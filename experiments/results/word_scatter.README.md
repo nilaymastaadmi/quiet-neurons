@@ -44,4 +44,4 @@ are all under 0.02.
 The negative row (`vbnmasdf`, −8%) is kept deliberately. Dropping it would make the scatter look
 one-sided when it is not.
 
-Measured 2026-09-07 against `checkpoints/bdh_n2048_s2309.pt`, the checkpoint the page ships.
+Measured 2026-09-07 against `checkpoints/bdh_n2048.pt`, the checkpoint the page ships.

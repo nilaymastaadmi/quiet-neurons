@@ -67,5 +67,5 @@
       "count": 512
     }
   ],
-  "source_checkpoint": "bdh_n2048_s2309.pt"
+  "source_checkpoint": "bdh_n2048.pt"
 }

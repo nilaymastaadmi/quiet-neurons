@@ -1,5 +1,39 @@
-<title>profile</title><body style="font:13px ui-monospace;background:#111;color:#eee;padding:24px">
+<title>BDH per-phase profile</title>
+<style>
+  body{font:14px/1.6 ui-monospace,"Cascadia Mono",Consolas,monospace;
+       background:#101219;color:#E9EBF1;margin:0;padding:32px;}
+  h1{font-size:18px;letter-spacing:.04em;margin:0 0 4px}
+  .sub{color:#939AAE;margin:0 0 24px;max-width:70ch;line-height:1.5}
+  a{color:#FF9E3D}
+  pre{background:#161922;border:1px solid #2B3040;border-radius:3px;padding:16px;
+      overflow-x:auto;margin:0 0 20px}
+  .note{color:#939AAE;max-width:70ch;line-height:1.5;font-size:13px}
+  .note strong{color:#E9EBF1}
+</style>
+<body>
+<h1>Per-phase profile</h1>
+<p class="sub">
+  Where the browser forward pass actually spends its time, measured in this tab right now.
+  This page exists because a performance assumption in this project turned out to be wrong and
+  was only caught by measuring. Two sequence lengths: <strong>T=77</strong> is what the explainer
+  runs on every interaction, <strong>T=154</strong> is two full periods.
+  &nbsp;&larr; <a href="index.html">back to the explainer</a>
+  &nbsp;&middot;&nbsp; <a href="parity.html">parity check</a>
+</p>
 <pre id="o">running…</pre>
+<p class="note">
+  <strong>How to read it.</strong> <code>xs</code> and <code>ys</code> are the two dense
+  encoder matmuls, <code>scores</code> is the causally-masked Gram matrix, <code>rope</code> is
+  the rotary phase application, <code>nzscan</code> indexes the non-zero entries so the score
+  loop can skip zeros, and <code>count</code> is the sparsity measurement itself.
+  <br><br>
+  <strong>What it is used for.</strong> The two 4-way unrolled loops in <code>bdh.js</code> were
+  added on a hypothesis and first measured at no effect, on a machine that was running two
+  training jobs at the time. Re-measured on a quiet machine they are worth roughly 1.9&times; on
+  <code>xs</code> and 2.0&times; on <code>ys</code>. A benchmark taken on a busy machine is not a
+  weak result, it is not a result. Interaction latency end to end is recorded separately in
+  <code>experiments/results/latency.md</code>.
+</p>
 <script type="module">
 import { loadBDH } from "./bdh.js";
 const m = await loadBDH("data");
@@ -15,4 +49,5 @@ for (const T of [154, 77]) {
   out.push(`T=${T}  total ${total.toFixed(0)} ms\n${rows.join("\n")}`);
 }
 document.getElementById("o").textContent = out.join("\n\n");
-</script></body>
+</script>
+</body>

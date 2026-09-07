@@ -149,6 +149,10 @@ th{font-family:var(--f-mono);font-size:10.5px;font-weight:600;letter-spacing:.1e
    color:var(--muted);text-align:left;padding:0 16px 9px 0;border-bottom:1px solid var(--line);white-space:nowrap}
 td{padding:10px 16px 10px 0;border-bottom:1px solid var(--line-soft);vertical-align:baseline}
 td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Prose does not belong in a nowrap cell. The limits table puts sentences in the value
+   column, and nowrap forced section 07 to 4,059px inside a 912px container: 78% of the
+   honest-disclosure section was off-screen behind a scrollbar. */
+td.n.prose{white-space:normal;font-family:var(--f-body);font-variant-numeric:normal}
 tr.peak td{background:var(--fire-soft)} tr.peak td.n{color:var(--fire);font-weight:600}
 .tag{font-family:var(--f-mono);font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
      padding:2px 7px;border-radius:2px;white-space:nowrap}
@@ -266,7 +270,7 @@ footer a{color:var(--muted)}
 
   <div class="rig">
     <div class="rig-head">
-      <span class="rig-title">Live &middot; BDH n=2048 &middot; running in this tab</span>
+      <span class="rig-title" id="rigTitle">Live &middot; BDH n=2048 &middot; running in this tab</span>
       <span class="badge pre" id="runbadge">loading…</span>
     </div>
     <div class="rig-body">
@@ -340,7 +344,7 @@ footer a{color:var(--muted)}
       </div>
 
       <div class="gridwrap">
-        <canvas id="grid" width="1024" height="128" aria-label="Grid of 2048 neurons; lit cells are firing"></canvas>
+        <canvas id="grid" role="img" width="1024" height="128" aria-label="Grid of 2048 neurons; lit cells are firing"></canvas>
         <div class="gridcap">
           <span id="gridWhen">letter 41 of 77 &middot; repeating</span>
           <span id="gridCount">—</span>
@@ -423,7 +427,7 @@ footer a{color:var(--muted)}
       <span class="badge" id="gramBadge">live</span>
     </div>
     <div class="rig-body">
-      <canvas id="gramCanvas" width="616" height="616"
+      <canvas id="gramCanvas" role="img" width="616" height="616"
               aria-label="Attention matrix: how strongly each letter binds to each earlier letter"></canvas>
       <div class="gridcap">
         <span>rows: the letter doing the reading &nbsp;&middot;&nbsp; columns: the earlier letter it binds to</span>
@@ -688,11 +692,15 @@ footer a{color:var(--muted)}
           from what it is reading, not on text that is merely easy to guess. If your sentence
           would still be true with "easy to guess" alone, it is the paper's aggregate claim and
           not the thing this page adds.</p>
-        <p><strong>2. The evidence that separates them.</strong> Two stretches of one sequence
-          are both predicted almost perfectly, and one uses roughly two and a half times the
-          neurons of the other, 9.7% against 3.6%. Predictability cannot explain that gap; where
-          the knowledge came from can. The warm-up is in the weights, the repeated word is only
-          in the context.</p>
+        <p><strong>2. The evidence that separates them.</strong> Two stretches of the same
+          sequence are both predicted almost perfectly, and one uses roughly two and a half times
+          the neurons of the other. On the <strong>n=8,192</strong> model, averaged over
+          <strong>1,280 sequences</strong>, that is <strong>9.7% against 3.6%</strong>; switch the
+          size selector in section 01 to 8k to see that curve. On the n=2,048 model running live
+          in front of you the same two blocks read about <strong>14.4% against 5.5%</strong>, a
+          smaller gap in the same direction. Predictability cannot explain either; where the
+          knowledge came from can. The warm-up is in the weights, the repeated word is only in the
+          context.</p>
         <p><strong>3. The limit.</strong> This shows the <em>signature</em>, not the cause.
           Nothing here explains <em>why</em> knowledge held in context should need fewer neurons.
           An explanation that sounds certain about the mechanism is overclaiming, and we do not
@@ -719,31 +727,33 @@ footer a{color:var(--muted)}
     <thead><tr><th>Limit</th><th>What we actually see</th></tr></thead>
     <tbody>
       <tr><td>Layer 0 runs <em>backwards</em>, at every size</td>
-          <td class="n">0.80, 0.80, 0.86 at 2k, 8k, 16k <span class="tag tag-no">against us</span></td></tr>
+          <td class="n prose">0.80, 0.80, 0.86 at 2k, 8k, 16k <span class="tag tag-no">against us</span></td></tr>
       <tr><td>Layer 3 is flat at 2k and 8k, weakly positive at 16k</td>
-          <td class="n">0.97, 0.95, 1.11 <span class="tag tag-no">against us</span></td></tr>
+          <td class="n prose">0.97, 0.95, 1.11 <span class="tag tag-no">against us</span></td></tr>
       <tr><td>Scaling is <em>not</em> monotonic</td>
-          <td class="n">1.47 → 2.12 → <strong>1.87</strong> at 2k, 8k, 16k, all at 2,309 steps <span class="tag tag-no">against us</span></td></tr>
+          <td class="n prose">1.47 → 2.12 → <strong>1.87</strong> at 2k, 8k, 16k, all at 2,309 steps <span class="tag tag-no">against us</span></td></tr>
       <tr><td>The three models were not step-matched. <em>This one we fixed.</em></td>
-          <td class="n">they had been cut by wall clock at 1,854, 1,917 and 2,309 steps of one schedule, so
+          <td class="n prose">they had been cut by wall clock at 1,854, 1,917 and 2,309 steps of one schedule, so
             each stopped at a different learning rate. We retrained the two short ones to 2,309. Both
             rose, 1.43 to 1.47 and 1.97 to 2.12, and the dip at 16k survived
             <span class="tag tag-ok">removed</span></td></tr>
       <tr><td>A single sequence is noisy</td>
-          <td class="n">the injection jump spans &minus;8% to +33% across 15 words, median +9%; the
+          <td class="n prose">the injection jump spans &minus;8% to +33% across 15 words, median +9%; the
             1,280-sequence ratios have five-sample spreads under 0.02</td></tr>
       <tr><td>We show the signature, not the cause. <em>We did run the control.</em></td>
-          <td class="n">retrained with the word <em>fixed</em>, so identical content sits in the weights
+          <td class="n prose">retrained with the word <em>fixed</em>, so identical content sits in the weights
             instead of the context: the warm-up-to-repetition gap collapses <strong>2.35&times; to
-            1.04&times;</strong>, and asymmetrically, the block that changed provenance rising 3.63&times;
-            against 1.60&times; for the block that did not. But that model also became globally denser
-            and solves a far easier task (loss 0.0004 against 0.174), so provenance and task difficulty
-            are not separated. An intervention, not a mechanism
-            <span class="tag tag-ok">ran it</span></td></tr>
+            1.04&times;</strong>. But that control is <strong>degenerate</strong>: every layer, tensor
+            and block converges on one activation level, spread 1.7&ndash;2.2% against 15&ndash;33% in the
+            real model, and how far a cell rose correlates &minus;0.86 with where it started rather than
+            with whether its provenance changed. It solves a trivial task (loss 0.0004 against 0.174).
+            So it shows that removing the distinction removes the effect, and it cannot separate
+            provenance from difficulty. A graduated version is pre-registered
+            <span class="tag tag-no">degenerate</span></td></tr>
       <tr><td>This is a toy trained here, not an official BDH checkpoint</td>
-          <td class="n">architecture is Pathway's, unmodified; weights are ours</td></tr>
+          <td class="n prose">architecture is Pathway's, unmodified; weights are ours</td></tr>
       <tr><td>Synthetic task, not natural language</td>
-          <td class="n">the paper's §6.4 protocol is synthetic too, deliberately</td></tr>
+          <td class="n prose">the paper's §6.4 protocol is synthetic too, deliberately</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -766,7 +776,7 @@ footer a{color:var(--muted)}
   <a href="https://github.com/nilaymastaadmi/quiet-neurons">github.com/nilaymastaadmi/quiet-neurons</a>
   &mdash; all of it: the PyTorch training and measurement code, the raw results, and this page.<br>
   <strong style="color:var(--ink)">Reproduce.</strong>
-  <code>python sparsity_scan.py --embd 64 --mult 32</code> trains it;
+  <code>python sparsity_scan.py --embd 64 --mult 32 --steps 4000 --stop-at 2309</code> trains it;
   <code>python measure.py --ckpt … --repeats 5</code> produces every number on this page.<br>
   <span id="perf"></span>
 </footer>
@@ -777,7 +787,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "21";
+const BUILD = "22";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
@@ -1339,6 +1349,11 @@ function initTour() {
     const n = +b.dataset.n;
     [...$("#sizeSeg").children].forEach(c => c.setAttribute("aria-pressed", c === b));
     overlayN = n === 2048 ? null : n;
+    // D8: the header claimed "running in this tab" with a lit live badge while an 8k or
+    // 16k PRECOMPUTED curve was on screen. Only n=2048 runs here.
+    $("#rigTitle").innerHTML = overlayN
+      ? `Measured &middot; BDH n=${overlayN} &middot; precomputed, not running here`
+      : "Live &middot; BDH n=2048 &middot; running in this tab";
     if (overlayN && !overlays[overlayN]) {
       try { overlays[overlayN] = await fetch(`data/traces/n${overlayN}.json`).then(r => r.json()); }
       catch { overlays[overlayN] = null; b.textContent += " (n/a)"; }

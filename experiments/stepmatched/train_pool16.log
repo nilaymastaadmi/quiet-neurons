@@ -2,3 +2,10 @@ C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f62
   cpu = _conversion_method_template(device=torch.device("cpu"))
 WORD POOL control: K=16 words, 128 letters in the weights; identity still comes from the context
 n=2048 d=64 L=4 params=397,312 T=154 B=16 budget=21600s
+step    50 loss 2.8699 elapsed    150s
+step   100 loss 1.9783 elapsed    397s
+step   150 loss 1.0639 elapsed    650s
+step   200 loss 0.3497 elapsed    968s
+step   250 loss 0.0973 elapsed   1194s
+step   300 loss 0.1190 elapsed   1368s
+step   350 loss 0.0744 elapsed   1571s
