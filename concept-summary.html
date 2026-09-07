@@ -50,11 +50,11 @@
 
 <h2>The design pressure</h2>
 <p>
-  A dense Transformer evaluates every feed-forward unit for every token, hard or not; activation
+  A dense Transformer evaluates every feed-forward unit for every token; activation
   sparsity is the counter-proposal. But Transformer sparsity is already emergent [3], needs a
   hard rectifier for exact zeros [4], and is input-dependent in <em>which</em> units fire, not
-  merely how many [5]. Sparsity alone distinguishes nothing. What distinguishes an architecture
-  is what its sparsity is a function of.
+  merely how many [5]. Sparsity alone distinguishes nothing. What distinguishes an architecture is what its
+  sparsity depends on.
 </p>
 
 <h2>What BDH changes</h2>
@@ -63,40 +63,38 @@
   every layer multiplies two rectified (ReLU) vectors elementwise, and a product of two sparse
   non-negative vectors is sparser than either. <em>Active</em> means a strictly non-zero entry in
   that product; a rectifier cannot emit a negative, so an active neuron is a positive amount of
-  something rather than a signed coordinate, which lets it be read as a concept. That
+  something rather than a signed coordinate, which lets it read as a concept. That
   product is the paper's <em>y<sub>t,l</sub></em>: Eq. (8) defines it as
   <em>(D<sub>y</sub>LN(&rho;x))<sub>+</sub></em>&nbsp;&odot;&nbsp;<em>x</em>, Appendix E's listing
   reads <code>relu(ln(a) @ decoder_y) * x</code>, and Fig. 14 counts its non-zeros. Mind the naming collision:
   the released code's <code>y_sparse</code> is the paper's rectified <em>intermediate</em>; the
-  paper's <em>y</em> is the code's <code>xy_sparse</code>. Attention is the second change: query
-  and key are the same tensor, so the score matrix is a causally-masked Gram matrix of activations
-  with <strong>no softmax</strong>. Positions whose neurons fired alike bind to each other.
+  paper's <em>y</em> is the code's <code>xy_sparse</code>. Attention is the second change: query and key are
+  the same tensor, so the score matrix is a causally-masked Gram matrix of activations with
+  <strong>no softmax</strong>. Positions whose neurons fired alike bind.
 </p>
 
 <h2>The claim, and the correction it needed</h2>
 <p>
   Section 6.4 reports that "fewer neurons are active ... for more predictable input signals": at
   layer 2 of a 65,536-neuron model, 4.0&ndash;7.5% active while memorising a new word against about
-  2.5% while repeating it, a 1.6&ndash;3.0&times; ratio [1, Fig. 14]. We reproduced that protocol on
-  three models trained here from the public code, all for the same 2,309 steps, and it survives a
-  32-fold shrink: <strong>1.47&times;, 2.12&times; and 1.87&times;</strong> at 2,048, 8,192 and
-  16,384 neurons, each 1,280 sequences over five pinned samples, spread &plusmn;0.005 half-width
+  2.5% while repeating it, a 1.6&ndash;3.0&times; ratio [1, Fig. 14]. We reproduced that protocol on three models trained
+  here from the public code, all for 2,309 steps, and it survives a 32-fold shrink: <strong>1.47&times;, 2.12&times; and 1.87&times;</strong> at 2,048, 8,192 and
+  16,384 neurons, each 1,280 sequences over five independently seeded evaluation samples, spread &plusmn;0.005 half-width
   (tables quote full min-to-max).
-  <strong>In aggregate the paper is right: predictable text is quieter.</strong> What follows
-  sharpens that rather than contradicting it.
+  <strong>In aggregate our three models agree with the paper: predictable text is quieter.</strong>
+  What follows sharpens that rather than contradicting it.
 </p>
 <p>
-  The same measurement narrows what that result can mean. Two blocks of the same sequence are both
-  predicted almost perfectly yet differ 2.65-fold in activity, averaged over 1,280 sequences of the
-  8,192-neuron model: the 13-letter warm-up runs at
-  <strong>9.7%</strong> of layer 2 active at 0.0004 nats of mean surprise (a nat is the natural-log
-  unit of cross-entropy; zero is perfect prediction), the 56 repeated letters at <strong>3.6%</strong>
-  at 0.004 nats. The warm-up is identical in every training sequence, so it lives in the
-  <strong>weights</strong>; the repeated word is new each time, so it can only come from the
-  <strong>context</strong>. What separates them is not predictability but <strong>where the
-  knowledge came from</strong>. We show activity tracks that; we do not show why. A learner
-  falsifies it in a minute: inject an unpredictable letter mid-repetition and activity rises there,
-  while the letter before is unchanged to nine decimals, because the model reads only leftwards.
+  The same measurement narrows what that result can mean. Two blocks of the same sequence are both predicted
+  almost perfectly yet differ 2.65-fold in activity, over 1,280 sequences of the 8,192-neuron model: the 13-letter warm-up runs at <strong>9.7%</strong>
+  of layer 2 active at 0.0004 nats of mean surprise (a nat is the natural-log unit of cross-entropy;
+  zero is perfect), the 56 repeated letters at <strong>3.6%</strong> at 0.004 nats. The warm-up is identical in every training sequence, so it lives in the
+  <strong>weights</strong>; the repeated word is new each time, so it can only come from
+  <strong>context</strong>. What <em>covaries</em> with the difference is not predictability but
+  <strong>where the knowledge came from</strong>. That is a correlation; we have not established
+  it as the cause, and the control below that tried to failed. A learner falsifies it in a minute: inject an unpredictable letter mid-repetition and activity
+  rises there, while the letter before is unchanged to nine decimals, because the model reads only
+  leftwards.
 </p>
 
 <table>
@@ -110,35 +108,35 @@
 <p>
   <span class="lab">Reproduced here:</span> the three ratios, the counterexample, the
   surprise-injection check, and parity of the in-browser model against PyTorch (logit max difference
-  6.1e-5, twelve of twelve sparsity series bit-identical).
+  6.1e-5, twelve of twelve sparsity series bit-identical) &mdash; an implementation check, not
+  evidence for the architectural claim.
   <span class="lab">Developer-reported, not reproduced:</span> the Fig. 14 band; 97.4% on Sudoku
-  Extreme, which Pathway's own repository says comes from their internal implementation and does not
-  reproduce from the open code; the 1B-to-600B scaling experiments; and BDH-CQ's 29.5% pass@2 on
-  ARC-AGI-1 at $0.0007 per task [2]. <span class="lab">Not modelled:</span> BDH-CQ's internals,
-  "proprietary" by its authors' own statement [2]; <strong>it has no direct role here</strong>, and inventing
-  one would be worse than saying so. The strongest external grounding Pathway offers is development
-  on Amazon SageMaker HyperPod, a commercial partnership, not an independent evaluation. <span class="lab">Where it is likely worse:</span> sparse non-negative activations
-  plausibly cost capacity against dense superposition, and no published comparison runs past GPT-2
-  scale.
+  Extreme, which Pathway's repository says comes from their internal implementation and does not
+  reproduce from the open code; the 1B-to-600B scaling runs; BDH-CQ's 29.5% pass@2 on ARC-AGI-1 [2]. <span class="lab">Not modelled:</span> BDH-CQ's internals, "proprietary" by its authors' own
+  statement [2]; <strong>it has no role here</strong>, and inventing one would be worse. Pathway's
+  strongest external grounding is development on Amazon SageMaker HyperPod, a commercial
+  partnership, not an independent evaluation. <span class="lab">Where it is likely worse:</span> sparse non-negative activations plausibly cost
+  capacity against dense superposition, and no published comparison runs past GPT-2 scale.
 </p>
 
 <h2>Limitations, maturity, and what would settle them</h2>
 <p>
-  Depth matters: layer 0 runs <em>backwards</em> at all three sizes (0.80, 0.80, 0.86), layer 3 is
-  flat below 16,384 and weakly positive (1.11&times;) there. Scaling is <strong>not monotonic</strong>,
-  and we published the opposite before the third model finished. The obvious confound is gone: the three had been
-  cut by wall clock at different steps, so we retrained the short two to 2,309. Both rose and the
-  dip survived, the 8,192-to-16,384 gap of 0.246 being <strong>40&times;</strong> the mean
-  half-width. Still uncontrolled: none finished the 4,000-step schedule, all stopping at 58%. These are toys, 0.4M to 6.3M parameters on a synthetic
-  task, as the paper's protocol is. Surprise and sparsity do <em>not</em> track per letter (8,192
-  neurons, layer 2: Pearson 0.30, Spearman &minus;0.05), which killed a stronger claim. Most
+  Depth matters: layer 0 runs <em>backwards</em> at all three sizes, ratios below 1 (0.80, 0.80,
+  0.86) meaning <em>more</em> neurons fire while repeating than while first reading; layer 3 is
+  flat below 16,384 and weakly positive (1.11&times;) there. Scaling is <strong>not monotonic</strong>, and we
+  published the opposite before the third model finished. The obvious confound is gone: the three had been cut
+  by wall clock at different steps, so we retrained the short two to 2,309. Both rose and the dip
+  survived at <strong>40&times;</strong> the mean half-width. Still uncontrolled: none finished the
+  4,000-step schedule, all stopping at 58%. These are toys, 0.4M to 6.3M parameters on a synthetic task,
+  as the paper's is. Surprise and sparsity do <em>not</em> track per letter (8,192 neurons,
+  layer 2: Pearson 0.30, Spearman &minus;0.05), killing a stronger claim. Most
   importantly we establish the <em>signature</em>, not its cause. We did intervene: fixing the word
   so identical content sits in the weights not the context collapses the gap
-  <strong>2.35&times; to 1.04&times;</strong>. But that control is <em>degenerate</em>, every cell
-  converging on one activation level (spread 1.7&ndash;2.2% against 15&ndash;33%) on a trivial task,
-  so it cannot separate provenance from difficulty; a graduated version is pre-registered.
+  <strong>2.35&times; to 1.04&times;</strong>. But that control is <em>degenerate</em>, every cell converging
+  on one activation level (spread 1.7&ndash;2.2% against 15&ndash;33%), so it cannot separate
+  provenance from difficulty; a graduated version is pre-registered.
   <span class="lab">Maturity:</span> credible and outsider-checkable for this narrow property; the
-  wider programme is earlier, its headline benchmarks developer-reported.
+  wider programme is earlier, its headline results developer-reported.
 </p>
 
 <p class="refs">
