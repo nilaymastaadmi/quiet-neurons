@@ -40,7 +40,7 @@
 </head>
 <body>
 
-<h1>Quiet Neurons: a BDH quietens on what it just learned, not on what is merely predictable</h1>
+<h1>Quiet Neurons: a BDH's layer 2 quietens on what it just learned, not on what is merely predictable</h1>
 <p class="sub">
   DataForge 2026, Pathway track &middot; concept <strong>Sparse Non-Negative Activations</strong> &middot;
   Nilay Toshniwal, solo &middot;
@@ -77,7 +77,7 @@
   <strong>On the paper's own protocol our three models reproduce its result.</strong>
   This model goes quiet on words it has just picked up from the text in front of it; it does not go
   quiet just because text is easy to guess. From the outside those two look identical, and they are
-  not the same thing.
+  not the same thing. That they come apart is what we show; why, we do not.
 </p>
 <p>
   The same measurement narrows what that can mean. Two blocks of one sequence are predicted
@@ -113,7 +113,7 @@
   0.86): <em>more</em> neurons fire while repeating; layer 1 is positive at every size (1.22,
   1.41, 1.33) and layer 3 is flat below 16,384. Scaling is
   <strong>not monotonic</strong> and we published the opposite before the third model finished. The
-  wall-clock confound is gone, the short two retrained to 2,309 steps, the dip surviving at <strong>40&times;</strong> the mean of the two half-widths; none of the three published models finished the
+  wall-clock confound is gone, the short two retrained to 2,309 steps, the dip 0.2459 at <strong>40&times;</strong> the mean of half-widths 0.0081 and 0.0042; none of the three published models finished the
   4,000-step schedule, though separate runs that did finish move layer 2 only 1.4705 to 1.4620 at
   n=2,048, but 2.1201 to 2.2000 at n=8,192, a rise of 0.0799 against that run's own
   &plusmn;0.0086 spread. These are toys, 0.4M to 6.3M parameters on a synthetic task. Surprise and sparsity do <em>not</em> track per letter (Pearson 0.30 across phases, Spearman &minus;0.05 letter by letter: the relation is between blocks, not letters),

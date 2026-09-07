@@ -1,7 +1,8 @@
 # Quiet Neurons
 
-**A 397,000-parameter Dragon Hatchling runs in your browser. It quietens on text it just
-learned, but not on text baked into its weights. Both are perfectly predictable.**
+**A 397,000-parameter Dragon Hatchling runs in your browser. At layer 2 it quietens on text it
+just learned, but not on text baked into its weights. Both are predicted almost perfectly: 0.004
+nats of surprise against 0.0004.**
 
 DataForge 2026, Pathway Track. Approved topic: **Sparse Non-Negative Activations**.
 

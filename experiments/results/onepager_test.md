@@ -289,3 +289,95 @@ Run 2: 26 items, 9 real, all fixed but the title. Run 3: 6 major, 5 fixed, the t
 Two of run 3's six were created by run 2's fixes. The lesson is not that the document was careless;
 it is that **every edit to a dense page is a chance to introduce an error, and only an outside
 reader with no memory of the previous draft reliably finds them.**
+
+---
+
+# Run 4, 2026-09-08 06:2x, on the PDF corrected after run 3
+
+Same conditions, with the prompt tightened again: before listing an arithmetic item the reviewer
+was told to test every denominator the document offers, and told to write "NONE" rather than pad.
+
+**One major inaccuracy.** Everything else cleared, and the reviewer showed its working on the
+arithmetic it had cleared:
+
+> 4.0/2.5 = 1.6 and 7.5/2.5 = 3.0 (the stated 1.6-3.0x band checks); 65,536/2,048 = 32 (the
+> "32-fold shrink" checks); 9.65/3.64 = 2.651 (the 2.65-fold counterexample checks);
+> 2.2000 - 2.1201 = 0.0799 (checks, and is 9.3x the stated +/-0.0086); 64 x 32 = 2,048, matching
+> the bdh_n2048 reproduce command and --repeats 5 matching "five independently seeded samples";
+> "bit-identical" sparsity series alongside a 6.1e-5 logit difference is not a contradiction,
+> since non-zero counts are integers.
+
+Every number run 3 sent me back to fix now divides out.
+
+## The one that remained, and what was done about it
+
+> "a BDH quietens on what it just learned, not on what is merely predictable"
+
+Category, in the reviewer's words: "a claim stated as established that the document's own evidence
+does not support, and self-contradiction." Two distinct complaints inside it. **"A BDH" is a claim
+about the architecture** where the support is layer 2, with layer 0 running backwards at all three
+sizes, layer 1 weak, and layer 3 flat. And **the headline is a flat declarative** while the body
+says "a correlation, not an established cause" and "signature, not cause", so a reader who takes
+the title away as the finding has taken away something the document itself retracts.
+
+It also said, fairly: "the correction is in the same one page, not hidden in an appendix. This is
+an overclaimed headline over honest body text, not a fabrication."
+
+**Runs 2, 3 and 4 all named this independently, and run 4 named it as the only major item left.
+Three no-context readers agreeing is not a matter of taste, so it was fixed rather than recorded a
+third time.** The title now reads "a BDH's **layer 2** quietens on what it just learned, not on
+what is merely predictable", which is exactly the scope the evidence has. The claim paragraph now
+ends "That they come apart is what we show; why, we do not", so the limit sits in the same breath
+as the assertion instead of fifteen lines below it.
+
+The three claim sentences themselves were not touched: they are byte-identical across the page,
+README, START_HERE and this document, and gate G1 enforces that. Only the title and the sentence
+after the claim changed.
+
+---
+
+# Run 5, 2026-09-08 07:0x, on the PDF corrected after run 4
+
+Same conditions. The prompt added two rules meant to stop a reviewer inflating the major list:
+test every denominator the document offers before calling arithmetic wrong, and check whether a
+claim is scoped or hedged anywhere on the page before calling it an overclaim.
+
+## MAJOR INACCURACIES: NONE
+
+The reviewer wrote exactly that, under the instruction to write "NONE" and nothing else if it
+found none. G21's condition is zero major inaccuracies against the shipped PDF, and this is the
+first run that meets it.
+
+It read the corrected headline the way the fix intended: "Only layer 2 carries the headline,
+**which the title scopes**." And on the claim: "It states explicitly that the two look identical
+from outside, that showing they come apart is the contribution, and **that why they come apart is
+not shown**." It still chose the causal gap as the most serious limitation, "in its sharpest form
+the unexplained K=16 result of 0.92" — which is the right answer, and is what the document says
+about itself.
+
+## The one number it still could not check, now fixed
+
+> "the dip surviving at 40x the mean of the two half-widths": from the figures given (2.12 vs
+> 1.87, ±0.005) the separation reads as 50x ... the per-model half-widths are never given
+> exactly, so it cannot actually be checked. State the two half-widths.
+
+Correct, and fair. The line now reads "the dip 0.2459 at 40x the mean of half-widths 0.0081 and
+0.0042", so a reader can divide it: 0.2459 / 0.00615 = 40.0. Twelve further minor confusions are
+listed in the raw output and left standing, because each is terse rather than false and the
+document is at 949 of 950 permitted words.
+
+## The five runs, end to end
+
+| run | major items | what happened |
+|---|---|---|
+| 1 (2026-09-07) | clean, but on a document that no longer exists | superseded by four surfaces of edits |
+| 2 | 26 items, 9 real | all fixed but the title |
+| 3 | 6 major | 5 fixed; **2 had been created by run 2's own fixes** |
+| 4 | 1 major | the title, named independently for the third time; fixed |
+| 5 | **NONE** | one minor numeric fix taken as well |
+
+Runs 2 to 5 cost about twenty minutes of model time and caught fourteen real errors, two of them
+introduced by the fixes for earlier ones. Nothing in this project's own checking chain found any
+of them: every one sat in prose, and the chain checks numbers against data. **A reader with no
+memory of the previous draft is a different instrument from a checker, and this artifact needed
+both.**

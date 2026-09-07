@@ -34,6 +34,15 @@ WHAT IS IN THIS ZIP
   web/                    the artifact itself: static files, no backend, no build step
   experiments/            training, measurement and export scripts, plus the raw
                           results and run logs every published number comes from
+  verify.sh               one command that re-derives the three headline ratios from the
+                          checkpoints and runs every other check. Needs torch and bash
+  tools/                  the checking chain verify.sh calls: sweep.py for cross-surface
+                          agreement, gate_checks.py which reads every published number off
+                          the README, page and one-pager and carries a negative control that
+                          must fail on a planted error, ladder.py for the pre-registered
+                          provenance test, manual_gates.py for the four gates judged by hand,
+                          parity_check.sh for the browser-against-PyTorch check, build_zip.py
+                          which builds this zip from a list so nothing is omitted by hand
   AI_DISCLOSURE.md        AI assistance, code, data, asset and licence disclosure
   LICENSE                 MIT, this project's own code
   experiments/LICENSES.md component-by-component source and licence record
