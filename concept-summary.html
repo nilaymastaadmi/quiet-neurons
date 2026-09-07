@@ -53,7 +53,7 @@
   A dense Transformer evaluates every feed-forward unit for every token; activation
   sparsity is the counter-proposal. But Transformer sparsity is already emergent [3], needs a
   hard rectifier for exact zeros [4], and is input-dependent in <em>which</em> units fire, not
-  merely how many [5]. Sparsity alone distinguishes nothing; what its sparsity depends on does.
+  merely how many [5]. Sparsity alone distinguishes nothing; what an architecture's sparsity depends on does.
 </p>
 
 <h2>What BDH changes</h2>
@@ -62,7 +62,7 @@
   every layer multiplies two rectified (ReLU) vectors elementwise, and that product is sparser
   than either. <em>Active</em> means a strictly non-zero entry there; a rectifier emits no
   negatives, so an active neuron is a positive amount of
-  something rather than a signed coordinate, which lets it read as a concept. It is the paper's <em>y<sub>t,l</sub></em>: Eq. (8) defines it as
+  something rather than a signed coordinate, which lets it read as a concept. That product is the paper's <em>y<sub>t,l</sub></em>: Eq. (8) defines it as
   <em>(D<sub>y</sub>LN(&rho;x))<sub>+</sub></em>&nbsp;&odot;&nbsp;<em>x</em>, Appendix E reads <code>relu(ln(a) @ decoder_y) * x</code>, and Fig. 14 counts its non-zeros. Naming collision: the code's <code>y_sparse</code> is the paper's rectified <em>intermediate</em>; the paper's
   <em>y</em> is the code's <code>xy_sparse</code>. Attention is the second change: query and key are one tensor, so the score matrix is a causally-masked Gram matrix of activations with
   <strong>no softmax</strong>. Positions whose neurons fired alike bind.
@@ -72,7 +72,7 @@
 <p>
   Section 6.4 reports "fewer neurons are active ... for more predictable input signals": at
   layer 2 of a 65,536-neuron model, 4.0&ndash;7.5% active while memorising a new word against about
-  2.5% repeating it, a 1.6&ndash;3.0&times; ratio [1, Fig. 14]. We reproduced that protocol on three models trained here
+  2.5% while repeating it, a 1.6&ndash;3.0&times; ratio [1, Fig. 14]. We reproduced that protocol on three models trained here
   from the public code, all for 2,309 steps; it survives a 32-fold shrink: <strong>1.47&times;, 2.12&times; and 1.87&times;</strong> at 2,048, 8,192 and
   16,384 neurons, each 1,280 sequences over five independently seeded samples, &plusmn;0.005 half-width.
   <strong>In aggregate our three models agree with the paper: predictable text is quieter.</strong>
@@ -117,8 +117,8 @@
   <strong>40&times;</strong> the mean half-width; none finished the 4,000-step schedule, though
   retraining n=2,048 to completion moves layer 2 only 1.4705 to 1.4620. These are toys, 0.4M to
   6.3M parameters on a synthetic task, as the paper's is. Surprise and sparsity do <em>not</em> track per letter (Pearson 0.30 across phases, Spearman &minus;0.05 letter by letter: the relation is between blocks, not letters),
-  killing a stronger claim. Most importantly we establish the <em>signature</em>, not its cause. Two
-  interventions. Fixing the word collapses the gap 2.35&times; to 1.04&times;, but that control is
+  killing a stronger claim. Most importantly we establish the <em>signature</em>, not its cause. We
+  intervened twice. Fixing the word collapses the gap 2.35&times; to 1.04&times;, but that control is
   degenerate and separates nothing. A 256-word pool does separate them, letters still in the weights, identity still from context: that model is <strong>4.5&times; easier by loss (0.038
   against 0.174) yet shows a larger effect, 2.54&times; against 2.35&times;</strong>, so the effect
   is not a monotone function of difficulty; K=16 (0.92) falls on the other side of the same line,
