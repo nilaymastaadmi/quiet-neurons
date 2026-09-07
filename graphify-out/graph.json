@@ -1,0 +1,1501 @@
+{
+  "nodes": [
+    {
+      "id": "experiments_bdh",
+      "label": "bdh.py",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_bdhconfig",
+      "label": "BDHConfig",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L12",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_get_freqs",
+      "label": "get_freqs()",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L21",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_attention",
+      "label": "Attention",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L32",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_attention_init",
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L33",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_attention_phases_cos_sin",
+      "label": ".phases_cos_sin()",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L44",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_attention_rope",
+      "label": ".rope()",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L51",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_attention_forward",
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L56",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_bdh",
+      "label": "BDH",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L77",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_bdh_init",
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L78",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_bdh_init_weights",
+      "label": "._init_weights()",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L101",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_bdh_forward",
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L109",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "no_grad",
+      "label": "no_grad",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_bdh_bdh_generate",
+      "label": ".generate()",
+      "file_type": "code",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L154",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "tensor",
+      "label": "Tensor",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_export_weights",
+      "label": "export_weights.py",
+      "file_type": "code",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_export_weights_fwd",
+      "label": "fwd()",
+      "file_type": "code",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L86",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_export_weights_rationale_1",
+      "label": "Export a trained BDH checkpoint for the browser, plus a reference trace the\u2026",
+      "file_type": "rationale",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_make_scaling",
+      "label": "make_scaling.py",
+      "file_type": "code",
+      "source_file": "experiments/make_scaling.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_make_scaling_rationale_1",
+      "label": "Build web/data/scaling.json from results/measured.csv. Only rows written by\u2026",
+      "file_type": "rationale",
+      "source_file": "experiments/make_scaling.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_measure",
+      "label": "measure.py",
+      "file_type": "code",
+      "source_file": "experiments/measure.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_measure_make_batch",
+      "label": "make_batch()",
+      "file_type": "code",
+      "source_file": "experiments/measure.py",
+      "source_location": "L82",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_measure_fwd",
+      "label": "fwd()",
+      "file_type": "code",
+      "source_file": "experiments/measure.py",
+      "source_location": "L89",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_measure_one_pass",
+      "label": "one_pass()",
+      "file_type": "code",
+      "source_file": "experiments/measure.py",
+      "source_location": "L103",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_measure_pearson",
+      "label": "_pearson()",
+      "file_type": "code",
+      "source_file": "experiments/measure.py",
+      "source_location": "L148",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_measure_ranks",
+      "label": "_ranks()",
+      "file_type": "code",
+      "source_file": "experiments/measure.py",
+      "source_location": "L157",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_measure_spearman",
+      "label": "_spearman()",
+      "file_type": "code",
+      "source_file": "experiments/measure.py",
+      "source_location": "L173",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_measure_rationale_1",
+      "label": "Measure the Figure 14 sparsity effect on an already-trained checkpoint.\u2026",
+      "file_type": "rationale",
+      "source_file": "experiments/measure.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_measure_rationale_104",
+      "label": "One full measurement on a pinned sample of random words.",
+      "file_type": "rationale",
+      "source_file": "experiments/measure.py",
+      "source_location": "L104",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_measure_rationale_158",
+      "label": "Average ranks, so ties do not bias Spearman.",
+      "file_type": "rationale",
+      "source_file": "experiments/measure.py",
+      "source_location": "L158",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_sparsity_scan",
+      "label": "sparsity_scan.py",
+      "file_type": "code",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_sparsity_scan_make_batch",
+      "label": "make_batch()",
+      "file_type": "code",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L58",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_sparsity_scan_fwd",
+      "label": "fwd()",
+      "file_type": "code",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L121",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "experiments_sparsity_scan_rationale_1",
+      "label": "Reproduce BDH paper Fig 14 (Sec 6.4) at a chosen neuron count n, and record how\u2026",
+      "file_type": "rationale",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_bdh",
+      "label": "bdh.js",
+      "file_type": "code",
+      "source_file": "web/bdh.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_bdh_layernorm",
+      "label": "layerNorm()",
+      "file_type": "code",
+      "source_file": "web/bdh.js",
+      "source_location": "L13",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "web_bdh_bdh",
+      "label": "BDH",
+      "file_type": "code",
+      "source_file": "web/bdh.js",
+      "source_location": "L26",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "web_bdh_bdh_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "web/bdh.js",
+      "source_location": "L28",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "web_bdh_bdh_rope",
+      "label": "._rope()",
+      "file_type": "code",
+      "source_file": "web/bdh.js",
+      "source_location": "L48",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "web_bdh_bdh_forward",
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "web/bdh.js",
+      "source_location": "L72",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "web_bdh_buildsequence",
+      "label": "buildSequence()",
+      "file_type": "code",
+      "source_file": "web/bdh.js",
+      "source_location": "L267",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "web_bdh_loadbdh",
+      "label": "loadBDH()",
+      "file_type": "code",
+      "source_file": "web/bdh.js",
+      "source_location": "L274",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest",
+      "label": "manifest.json",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_n_neurons",
+      "label": "n_neurons",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L2",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_n",
+      "label": "N",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L3",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_d",
+      "label": "D",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L4",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_n_head",
+      "label": "n_head",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L5",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_n_layer",
+      "label": "n_layer",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L6",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_vocab_size",
+      "label": "vocab_size",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L7",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_period",
+      "label": "period",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L8",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_warm",
+      "label": "warm",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L9",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_word",
+      "label": "word",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L10",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_reps",
+      "label": "reps",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L11",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_dtype",
+      "label": "dtype",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L12",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_tensors",
+      "label": "tensors",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L13",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_data_manifest_source_checkpoint",
+      "label": "source_checkpoint",
+      "file_type": "code",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L70",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_worker",
+      "label": "worker.js",
+      "file_type": "code",
+      "source_file": "web/worker.js",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "web_worker_ensure",
+      "label": "ensure()",
+      "file_type": "code",
+      "source_file": "web/worker.js",
+      "source_location": "L15",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "web_worker_drain",
+      "label": "drain()",
+      "file_type": "code",
+      "source_file": "web/worker.js",
+      "source_location": "L21",
+      "_callable": true,
+      "_origin": "ast"
+    }
+  ],
+  "edges": [
+    {
+      "source": "experiments_bdh",
+      "target": "dataclasses",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh",
+      "target": "math",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh",
+      "target": "torch",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh",
+      "target": "torch_nn_functional",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh",
+      "target": "torch",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh",
+      "target": "experiments_bdh_bdhconfig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh",
+      "target": "experiments_bdh_get_freqs",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh",
+      "target": "experiments_bdh_attention",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_attention",
+      "target": "experiments_bdh_attention_init",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_attention",
+      "target": "experiments_bdh_attention_phases_cos_sin",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_attention",
+      "target": "experiments_bdh_attention_rope",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_attention",
+      "target": "experiments_bdh_attention_forward",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh",
+      "target": "experiments_bdh_bdh",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L77",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_bdh",
+      "target": "experiments_bdh_bdh_init",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_bdh_init",
+      "target": "experiments_bdh_bdhconfig",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_bdh",
+      "target": "experiments_bdh_bdh_init_weights",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L101",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_bdh",
+      "target": "experiments_bdh_bdh_forward",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L109",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_bdh_generate",
+      "target": "no_grad",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L153",
+      "weight": 1.0,
+      "context": "decorator",
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_bdh",
+      "target": "experiments_bdh_bdh_generate",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L154",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_bdh_generate",
+      "target": "tensor",
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L154",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_attention_init",
+      "target": "experiments_bdh_bdh_init",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_attention_init",
+      "target": "experiments_bdh_get_freqs",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_attention_forward",
+      "target": "experiments_bdh_attention_rope",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_bdh_init",
+      "target": "experiments_bdh_attention",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/bdh.py",
+      "source_location": "L88",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_export_weights",
+      "target": "argparse",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_export_weights",
+      "target": "json",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_export_weights",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_export_weights",
+      "target": "struct",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_export_weights",
+      "target": "torch",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_export_weights",
+      "target": "torch_nn_functional",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_export_weights",
+      "target": "bdh",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_export_weights",
+      "target": "experiments_export_weights_fwd",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L86",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_export_weights_rationale_1",
+      "target": "experiments_export_weights",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/export_weights.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_make_scaling",
+      "target": "csv",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/make_scaling.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_make_scaling",
+      "target": "json",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/make_scaling.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_make_scaling",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/make_scaling.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_make_scaling_rationale_1",
+      "target": "experiments_make_scaling",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/make_scaling.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "argparse",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "csv",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "torch",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "torch_nn_functional",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "bdh",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "experiments_measure_make_batch",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "experiments_measure_fwd",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L89",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "experiments_measure_one_pass",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "experiments_measure_pearson",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L148",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "experiments_measure_ranks",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L157",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "experiments_measure_spearman",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L173",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure",
+      "target": "json",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L201",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure_one_pass",
+      "target": "experiments_measure_make_batch",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L109",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure_one_pass",
+      "target": "experiments_measure_fwd",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L131",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure_spearman",
+      "target": "experiments_measure_pearson",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L174",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure_spearman",
+      "target": "experiments_measure_ranks",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L174",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure_rationale_1",
+      "target": "experiments_measure",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure_rationale_104",
+      "target": "experiments_measure_one_pass",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L104",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_measure_rationale_158",
+      "target": "experiments_measure_ranks",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/measure.py",
+      "source_location": "L158",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_sparsity_scan",
+      "target": "argparse",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_sparsity_scan",
+      "target": "csv",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_sparsity_scan",
+      "target": "os",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_sparsity_scan",
+      "target": "time",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_sparsity_scan",
+      "target": "torch",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_sparsity_scan",
+      "target": "torch_nn_functional",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_sparsity_scan",
+      "target": "bdh",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_sparsity_scan",
+      "target": "experiments_sparsity_scan_make_batch",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_sparsity_scan",
+      "target": "experiments_sparsity_scan_fwd",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L121",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_sparsity_scan_rationale_1",
+      "target": "experiments_sparsity_scan",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "experiments/sparsity_scan.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_bdh",
+      "target": "web_bdh_layernorm",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/bdh.js",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_bdh",
+      "target": "web_bdh_bdh",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/bdh.js",
+      "source_location": "L26",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_bdh_bdh",
+      "target": "web_bdh_bdh_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "web/bdh.js",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_bdh_bdh",
+      "target": "web_bdh_bdh_rope",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "web/bdh.js",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_bdh_bdh",
+      "target": "web_bdh_bdh_forward",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "web/bdh.js",
+      "source_location": "L72",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_bdh",
+      "target": "web_bdh_buildsequence",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/bdh.js",
+      "source_location": "L267",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_bdh",
+      "target": "web_bdh_loadbdh",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/bdh.js",
+      "source_location": "L274",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_bdh_bdh_forward",
+      "target": "web_bdh_bdh_rope",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "web/bdh.js",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_bdh_bdh_forward",
+      "target": "web_bdh_layernorm",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "web/bdh.js",
+      "source_location": "L87",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_bdh_loadbdh",
+      "target": "web_bdh_bdh",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "web/bdh.js",
+      "source_location": "L279",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_n_neurons",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_n",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_d",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_n_head",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_n_layer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_vocab_size",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_period",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_warm",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_word",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_reps",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_dtype",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_tensors",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_data_manifest",
+      "target": "web_data_manifest_source_checkpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/data/manifest.json",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_worker",
+      "target": "web_worker_ensure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/worker.js",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_worker",
+      "target": "web_worker_drain",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "web/worker.js",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "web_worker_drain",
+      "target": "web_worker_ensure",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "web/worker.js",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "experiments_bdh_attention_rope",
+      "target": "experiments_bdh_attention_phases_cos_sin",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "experiments/bdh.py",
+      "source_location": "L53",
+      "weight": 1.0,
+      "_origin": "ast"
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -1,0 +1,57 @@
+C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f629\scratchpad\bdhvenv\Lib\site-packages\torch\_subclasses\functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\utils\tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+FIXED WORD control: word=[2, 12, 24, 21, 8, 15, 13, 3] shared by every sequence
+n=2048 d=64 L=4 params=397,312 T=154 B=16 budget=7200s
+step    50 loss 2.3574 elapsed     34s
+step   100 loss 1.5195 elapsed     95s
+step   150 loss 0.5172 elapsed    224s
+step   200 loss 0.0601 elapsed    393s
+step   250 loss 0.0207 elapsed    479s
+step   300 loss 0.0114 elapsed    561s
+step   350 loss 0.0073 elapsed    663s
+step   400 loss 0.0052 elapsed    783s
+step   450 loss 0.0040 elapsed    890s
+step   500 loss 0.0032 elapsed   1054s
+step   550 loss 0.0027 elapsed   1228s
+step   600 loss 0.0024 elapsed   1300s
+step   650 loss 0.0021 elapsed   1391s
+step   700 loss 0.0019 elapsed   1481s
+step   750 loss 0.0017 elapsed   1561s
+step   800 loss 0.0016 elapsed   1641s
+step   850 loss 0.0014 elapsed   2052s
+step   900 loss 0.0013 elapsed   2354s
+step   950 loss 0.0012 elapsed   2814s
+step  1000 loss 0.0012 elapsed   3141s
+step  1050 loss 0.0011 elapsed   3454s
+step  1100 loss 0.0010 elapsed   3753s
+step  1150 loss 0.0010 elapsed   3873s
+step  1200 loss 0.0009 elapsed   3966s
+step  1250 loss 0.0009 elapsed   4059s
+step  1300 loss 0.0009 elapsed   4115s
+step  1350 loss 0.0008 elapsed   4169s
+step  1400 loss 0.0008 elapsed   4216s
+step  1450 loss 0.0008 elapsed   4263s
+step  1500 loss 0.0007 elapsed   4314s
+step  1550 loss 0.0007 elapsed   4377s
+step  1600 loss 0.0007 elapsed   4433s
+step  1650 loss 0.0006 elapsed   4490s
+step  1700 loss 0.0006 elapsed   4539s
+step  1750 loss 0.0006 elapsed   4589s
+step  1800 loss 0.0006 elapsed   4638s
+step  1850 loss 0.0006 elapsed   4693s
+step  1900 loss 0.0005 elapsed   4742s
+step  1950 loss 0.0005 elapsed   4785s
+step  2000 loss 0.0005 elapsed   4827s
+step  2050 loss 0.0005 elapsed   4877s
+step  2100 loss 0.0005 elapsed   4935s
+step  2150 loss 0.0005 elapsed   4989s
+step  2200 loss 0.0005 elapsed   5039s
+step  2250 loss 0.0004 elapsed   5091s
+step  2300 loss 0.0004 elapsed   5143s
+TRAINED n=2048 steps=2309 of a 4000-step schedule (stop_at=2309) final_loss=0.0004
+PRECONDITION first_exposure_loss=0.0004 repetition_loss=0.0004 TASK_LEARNED=False
+  layer 0 xy: MEM 0.2053 REP 0.2046 ratio 1.00
+  layer 1 xy: MEM 0.2159 REP 0.2147 ratio 1.01
+  layer 2 xy: MEM 0.2106 REP 0.2098 ratio 1.00
+  layer 3 xy: MEM 0.2127 REP 0.2102 ratio 1.01
+WROTE scaling_results.csv

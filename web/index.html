@@ -360,10 +360,13 @@ footer a{color:var(--muted)}
           <label for="word">The repeated word</label>
           <input id="word" type="text" maxlength="8" value="fact" spellcheck="false" autocomplete="off">
           <p class="hint">Any letters. It is new to the model every time, so it has to learn it from
-            the text rather than recall it. <strong>Each change costs about two seconds</strong>:
-            2,048 neurons through four layers, single-threaded JavaScript, computed in your tab with
-            no server. That is the price of the page being real rather than a recording, and it is
-            slower than the sub-second standard we would want. Measured per phase in
+            the text rather than recall it. <strong>Each change costs about one second</strong>,
+            measured input to readout across eight words: median <strong>1.01 s</strong>, of which
+            <strong>0.87 s</strong> is the forward pass itself and only ~0.03 s is moving data back
+            from the worker. The <em>first</em> change after the page loads is slower, about 1.8 s,
+            because it also pays for layout and JIT. That is 2,048 neurons through four layers in
+            single-threaded JavaScript, in your tab, with no server: the price of this being real
+            rather than a recording. Per-phase breakdown in
             <a href="profile.html">profile.html</a>.</p>
         </div>
         <div class="ctl">
@@ -693,7 +696,10 @@ footer a{color:var(--muted)}
         <p><strong>3. The limit.</strong> This shows the <em>signature</em>, not the cause.
           Nothing here explains <em>why</em> knowledge held in context should need fewer neurons.
           An explanation that sounds certain about the mechanism is overclaiming, and we do not
-          know it either.</p>
+          know it either. We did test it though, by retraining with the word fixed so it lives in
+          the weights instead of the context: the gap collapses from 2.35&times; to 1.04&times;.
+          That is an intervention rather than a correlation, and it still is not the mechanism.
+          See section 07.</p>
         <p><strong>The two wrong versions.</strong> "A BDH goes quiet on predictable text" is
           the aggregate result, true on average and not what is new here: the warm-up is the most
           predictable stretch in the sequence and it is the <em>loud</em> one. And "this refutes
@@ -726,6 +732,14 @@ footer a{color:var(--muted)}
       <tr><td>A single sequence is noisy</td>
           <td class="n">the injection jump spans &minus;8% to +33% across 15 words, median +9%; the
             1,280-sequence ratios have five-sample spreads under 0.02</td></tr>
+      <tr><td>We show the signature, not the cause. <em>We did run the control.</em></td>
+          <td class="n">retrained with the word <em>fixed</em>, so identical content sits in the weights
+            instead of the context: the warm-up-to-repetition gap collapses <strong>2.35&times; to
+            1.04&times;</strong>, and asymmetrically, the block that changed provenance rising 3.63&times;
+            against 1.60&times; for the block that did not. But that model also became globally denser
+            and solves a far easier task (loss 0.0004 against 0.174), so provenance and task difficulty
+            are not separated. An intervention, not a mechanism
+            <span class="tag tag-ok">ran it</span></td></tr>
       <tr><td>This is a toy trained here, not an official BDH checkpoint</td>
           <td class="n">architecture is Pathway's, unmodified; weights are ours</td></tr>
       <tr><td>Synthetic task, not natural language</td>
@@ -763,7 +777,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "19";
+const BUILD = "21";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of

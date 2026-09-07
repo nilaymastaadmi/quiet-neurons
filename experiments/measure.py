@@ -32,6 +32,13 @@ ap.add_argument("--eval-seed", type=int, default=20260908,
                 help="pins the evaluation words. sparsity_scan.py draws its eval words "
                      "after training has consumed the RNG stream, so its sample is not "
                      "reproducible from a checkpoint alone; this is.")
+ap.add_argument("--eval-word", default=None,
+                help="comma-separated letter indices to use as THE word in every eval "
+                     "sequence, instead of drawing random ones. Required when measuring a "
+                     "--fixed-word control checkpoint: that model was trained on one word, "
+                     "so evaluating it on a fresh random word would put the word back in "
+                     "the context and measure the wrong condition. Off by default, and "
+                     "when off it consumes no RNG, so every published run is unchanged.")
 ap.add_argument("--steps-trained", type=int, default=None,
                 help="how many optimiser steps this checkpoint actually saw. Recorded in the "
                      "CSV so wall-clock-cut and step-matched runs of the same size cannot be "
@@ -66,8 +73,15 @@ model.eval()
 WARMUP_SEQ = ck["warmup"]
 nparams = sum(p.numel() for p in model.parameters())
 
+EVAL_WORD = (torch.tensor([int(v) for v in a.eval_word.split(",")], dtype=torch.long)
+             if a.eval_word else None)
+if EVAL_WORD is not None:
+    assert EVAL_WORD.numel() == WORD, f"--eval-word needs {WORD} indices"
+    print(f"EVAL WORD pinned to {EVAL_WORD.tolist()} in every sequence", flush=True)
+
 def make_batch(b=B):
-    words = torch.randint(0, 26, (b, WORD))
+    words = (EVAL_WORD.expand(b, WORD) if EVAL_WORD is not None
+             else torch.randint(0, 26, (b, WORD)))
     block = torch.cat([WARMUP_SEQ.expand(b, WARM), words.repeat(1, REPS)], dim=1)
     seq = block.repeat(1, NPER + 1)
     return seq[:, :T].contiguous(), seq[:, 1:T + 1].contiguous()
@@ -244,7 +258,13 @@ for c in corr:
 
 if a.append:
     cfields = list(corr[0].keys())
-    cpath = "results/correlations.csv"
+    # Follow --out. Hardcoding results/correlations.csv meant that measuring ANY variant
+    # checkpoint appended rows keyed (n, steps_trained, layer) into the file the published
+    # correlations live in, colliding with the real rows and distinguishable only by
+    # inspecting first_expo_loss. Measuring the --fixed-word control did exactly that.
+    cpath = os.path.join(os.path.dirname(a.out) or ".",
+                         os.path.basename(a.out).replace(".csv", "") + "_correlations.csv"
+                         if os.path.basename(a.out) != "measured.csv" else "correlations.csv")
     cnew = not os.path.exists(cpath)
     with open(cpath, "a", newline="") as f:
         w = csv.DictWriter(f, fieldnames=cfields)

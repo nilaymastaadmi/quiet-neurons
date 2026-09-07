@@ -314,6 +314,48 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 
 ---
 
+## The provenance control: we moved the word into the weights
+
+Everything above is a **correlation**. Activity is low on text the model learned from its
+context and high on text it learned during training, but we never intervened on that variable,
+so we could only say activity *tracks* provenance.
+
+So we intervened. In the normal task the 13-letter warm-up is drawn once and shared by every
+sequence, which puts it in the **weights**, while the 8-letter word is redrawn per sequence and
+can only be known from the **context**. `sparsity_scan.py --fixed-word` draws the word once too.
+Identical content, identical protocol, identical 2,309 steps of the identical schedule; the only
+thing that changes is where the word's knowledge lives.
+
+Prediction, written down before the run: the warm-up-over-repetition gap should collapse toward
+1.0, and it should collapse *because repetition rises*.
+
+| n=2048, layer 2 | warm-up | repetition | warm / rep |
+|---|---|---|---|
+| Word in the **context** | 13.61% | **5.78%** | **2.354×** |
+| Word in the **weights** (`--fixed-word`) | 21.71% | **20.98%** | **1.035×** |
+
+The gap collapsed, from the predicted direction. First-sight loss confirms the manipulation
+took: 3.2738 nats in the context model against **0.0004** in the control, so the word genuinely
+is not being learned from the text any more.
+
+**Where this argument is weak, stated plainly.** The warm-up rose as well, 13.61% to 21.71%, and
+in the control every layer sits near 21%. The model became globally denser, not just denser in
+one block. What survives that objection is the asymmetry: the block whose provenance changed rose
+**3.63×**, the block whose provenance did not changed rose **1.60×**, and a purely global shift
+would move both by the same factor. What does not survive it is any claim of proof. **Memorising
+one word is a far easier task than in-context copying** (final loss 0.0004 against 0.174), so we
+cannot separate "provenance drives activity" from "an easier task yields denser activations".
+Layer 0 shows the same worry from another angle: its repetition barely moved, 20.70% to 20.46%,
+while its warm-up rose to meet it, which looks like everything converging on one uniform level.
+
+**So: the intervention moves activity in the predicted direction and by an asymmetric amount,
+and it is still not the mechanism.** Nothing here explains *why* weight-held knowledge should
+need more neurons. Data in `experiments/results/mechanism_control.csv`, checkpoint in
+`experiments/stepmatched/bdh_n2048_fixedword.pt`, and the flag is off by default so every
+published run is bit-identical to before it existed.
+
+---
+
 ## Where the effect is absent
 
 | Limit | What we actually measure |
@@ -324,7 +366,7 @@ numbers were not checkable. Everything quoted in this project comes from `measur
 | The three models **are** step-matched, as of 2026-09-06 | all three stop at 2,309 steps of the same 4,000-step schedule. The earlier wall-clock-cut numbers are kept in `measured.csv` for comparison |
 | A single sequence is noisy | the surprise-injection jump ranges −8% to +33% across 15 words, median +9%, all in `experiments/results/word_scatter.csv`. The 1,280-sequence ratios do not scatter: every five-sample spread is under 0.02 |
 | Surprise and sparsity do **not** track per letter | at n=8192, layer 2: **Pearson 0.30, Spearman −0.05**. Across the eight letters of first sight, surprise is flat at 3.27 to 3.29 nats while sparsity falls 13.3% to 4.5%. The relationship is between phases, not letters, and a near-zero Spearman is what says so. This killed a stronger claim we wanted to make. Printed by `measure.py`, recorded in `experiments/results/correlations.csv` |
-| We show the signature, not its cause | nothing here explains *why* context-held knowledge needs fewer neurons than weight-held knowledge. The measurement separates the two; the mechanism behind that separation is open. An independent reader of the one-page summary raised exactly this, and they were right |
+| We show the signature, not its cause | we now have an *intervention*, not only a correlation: moving the word from context into the weights collapses the gap 2.354× → 1.035×, asymmetrically (3.63× against 1.60×). But that control model also solves a much easier task and is globally denser, so it cannot separate provenance from task difficulty. Nothing here explains *why* weight-held knowledge needs more neurons. An independent reader of the one-page summary raised exactly this, and they were right |
 | Toy model, not an official BDH checkpoint | architecture is Pathway's and unmodified; the weights are ours |
 | Synthetic task, not natural language | so is the paper's §6.4 protocol, deliberately |
 

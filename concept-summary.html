@@ -18,7 +18,7 @@
   sizes is evidence, not comparison, so those numbers are inline and the table compares systems.
 -->
 <style>
-  @page { size: A4; margin: 12mm 14mm; }
+  @page { size: A4; margin: 11mm 13mm; }
   html, body { margin: 0; padding: 0; }
   body {
     font-family: Georgia, "Times New Roman", serif;
@@ -52,10 +52,9 @@
 <p>
   A dense Transformer evaluates every feed-forward unit for every token, hard or not; activation
   sparsity is the counter-proposal. But Transformer sparsity is already emergent, arriving with
-  training rather than by design [3]; it needs a hard rectifier, because only that yields exact
-  zeros [4]; and <em>which</em> units fire is input-dependent, not merely how many [5]. Sparsity
-  alone distinguishes nothing. What distinguishes an architecture is what its sparsity is a function
-  of.
+  training rather than by design [3]; it needs a hard rectifier for exact zeros [4]; and
+  <em>which</em> units fire is input-dependent, not merely how many [5]. Sparsity alone
+  distinguishes nothing. What distinguishes an architecture is what its sparsity is a function of.
 </p>
 
 <h2>What BDH changes</h2>
@@ -134,9 +133,12 @@
   4,000-step schedule; all stop at 58% of it. These are toys, 0.4M to 6.3M parameters on a synthetic
   task, as the paper's protocol is. Surprise and sparsity do <em>not</em> track per letter (8,192
   neurons, layer 2: Pearson 0.30, Spearman &minus;0.05), which killed a stronger claim. Most
-  importantly we establish the <em>signature</em>, not its cause: nothing explains why context-held
-  knowledge needs fewer neurons, and the control that would settle it relocates identical content
-  between weights and context. <span class="lab">Maturity:</span> credible and outsider-checkable
+  importantly we establish the <em>signature</em>, not its cause. We did intervene: retraining with
+  the word <em>fixed</em>, so identical content sits in the weights not the context, collapses the
+  warm-up-to-repetition gap <strong>2.35&times; to 1.04&times;</strong>, asymmetrically
+  (3.63&times; against 1.60&times;). Causal, not correlational. But that model is globally denser
+  on a far easier task (loss 0.0004 against 0.174), so provenance and difficulty stay entangled,
+  and <em>why</em> weight-held knowledge costs more is unexplained. <span class="lab">Maturity:</span> credible and outsider-checkable
   for this narrow property; the wider programme is earlier, its headline benchmarks
   developer-reported.
 </p>

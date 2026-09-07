@@ -24,6 +24,10 @@ ap.add_argument("--budget", type=int, default=2700, help="training seconds")
 ap.add_argument("--steps", type=int, default=4000,
                 help="length of the OneCycle schedule. Changing it changes the schedule, so "
                      "models trained with different values are NOT comparable.")
+ap.add_argument("--fixed-word", action="store_true",
+                help="provenance control: draw the 8-letter word ONCE and share it across every "
+                     "sequence, so it lives in the weights like the warm-up instead of in the "
+                     "context. Off by default and consumes no RNG when off.")
 ap.add_argument("--stop-at", type=int, default=None,
                 help="stop after this many steps WITHOUT shortening the schedule. This is how "
                      "you step-match models of different sizes: same --steps, same --stop-at, "
@@ -40,8 +44,20 @@ NPER, B = 2, 16
 T = PERIOD * NPER                    # 154
 WARMUP_SEQ = torch.randint(0, 26, (WARM,))
 
+# --fixed-word is the provenance control. Normally the warm-up is drawn once and shared by
+# every sequence, so it ends up in the WEIGHTS, while the 8-letter word is redrawn per
+# sequence and can only be known from the CONTEXT. That difference is the whole claim.
+# With this flag the word is drawn once too, so identical content moves from context into
+# weights and nothing else about the task changes. Note the draw is inside the branch: with
+# the flag off no extra number is consumed from the RNG, so training is bit-identical to
+# every run that produced the published numbers.
+FIXED_WORD = torch.randint(0, 26, (WORD,)) if a.fixed_word else None
+if FIXED_WORD is not None:
+    print(f"FIXED WORD control: word={FIXED_WORD.tolist()} shared by every sequence", flush=True)
+
 def make_batch(b=B):
-    words = torch.randint(0, 26, (b, WORD))
+    words = (FIXED_WORD.expand(b, WORD) if FIXED_WORD is not None
+             else torch.randint(0, 26, (b, WORD)))
     block = torch.cat([WARMUP_SEQ.expand(b, WARM), words.repeat(1, REPS)], dim=1)
     return (lambda s: (s[:, :T].contiguous(), s[:, 1:T+1].contiguous()))(
         block.repeat(1, NPER + 1))
@@ -72,8 +88,11 @@ while time.time() - t0 < a.budget and step < stop_at:
 final_loss = sum(losses[-50:]) / max(1, len(losses[-50:]))
 print(f"TRAINED n={n_neurons} steps={step} of a {a.steps}-step schedule "
       f"(stop_at={stop_at}) final_loss={final_loss:.4f}", flush=True)
-torch.save({"model": model.state_dict(), "warmup": WARMUP_SEQ, "cfg": vars(a)},
-           f"bdh_n{n_neurons}.pt")
+torch.save({"model": model.state_dict(), "warmup": WARMUP_SEQ, "cfg": vars(a),
+            # saved so a --fixed-word control can be re-measured on the word it was
+            # actually trained on, without re-deriving it from the RNG stream
+            "fixed_word": (FIXED_WORD.tolist() if FIXED_WORD is not None else None)},
+           f"bdh_n{n_neurons}{'_fixedword' if a.fixed_word else ''}.pt")
 
 model.eval()
 # precondition: per-position loss -> did it learn in-context copying?
