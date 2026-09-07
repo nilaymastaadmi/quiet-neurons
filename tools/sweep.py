@@ -161,6 +161,24 @@ for nm, txt in (("README", rd), ("1pager", cs)):
         print("     %-7s no correlation sentence found -- CHECK IS INERT HERE" % nm)
         problems.append("no correlation sentence to check in " + nm)
 
+head(5, "FILES THE DISCLOSURE SAYS ARE NOT SHIPPED, BUT ARE")
+# The disclosure says scaling_results.csv is deliberately not in the package because it carries
+# a single-sample version of every published ratio. That promise held only while the file did
+# not exist on disk; a training run recreates it and build_zip picked it up again.
+import zipfile as _zf
+_zp = "dist/quiet-neurons-dataforge2026-nilay-toshniwal.zip"
+_banned = ("experiments/scaling_results.csv",)
+if os.path.exists(_zp):
+    _names = set(_zf.ZipFile(_zp).namelist())
+    for _b in _banned:
+        if _b in _names:
+            print("  %-52s SHIPPED, and the disclosure says it is not" % _b)
+            problems.append("disclosure says %s is not shipped, but the zip contains it" % _b)
+        else:
+            print("  %-52s correctly absent from the zip" % _b)
+else:
+    print("  no zip built yet; run tools/build_zip.py")
+
 head(5, "STALE NUMBERS FROM THE WALL-CLOCK FAMILY STILL ON A SURFACE")
 old = {"1.4318": "old n=2048 ratio, 4dp",
        "1.9731": "old n=8192 ratio, 4dp",
