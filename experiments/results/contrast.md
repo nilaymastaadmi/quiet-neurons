@@ -16,6 +16,24 @@ counted **315** against our 305 and reached identical floors and the same zero. 
 state described below and expect a count in that range. What must hold every time is the zero and
 the floor.
 
+## Rerun, 2026-09-08 04:4x, on the final build
+
+Same script, same state, both themes, on a quiet machine after the n=8,192 training job finished.
+
+| theme | text elements | failures | floor |
+|---|---|---|---|
+| dark | 451 | **0** | **5.12:1** |
+| light | 451 | **0** | **4.71:1** |
+
+**Both floors reproduce to two decimals** and both themes are still at zero failures. The dark floor
+is the counterexample panel's "Same letter, no surprise" label; the light floor is a numeric
+readout in the same panel.
+
+The element count moved 305 to 451 and that is expected, not drift: the page gained four primer
+boxes, the eight-word batch panel and its output table, and the live neuron counter in the
+standfirst between the two measurements. The count is a function of how much text is on screen and
+in what state. **The floor and the zero are the claim; the count is not.**
+
 Threshold 4.5:1 for normal text, 3:1 for large (≥24 px, or ≥18.66 px at weight ≥700).
 
 ## What was wrong before

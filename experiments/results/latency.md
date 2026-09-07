@@ -20,6 +20,28 @@ Individual totals: 1793, 1011, 989, 1010, and separately 1670, 989.
 So the steady-state interaction is **about one second**, and the first one is roughly 1.8 s
 because it also pays for layout and JIT.
 
+## Rerun, 2026-09-08 04:5x, on the final build
+
+Same script, quiet machine, n=8,192 training job finished. Four word changes:
+
+| | ms |
+|---|---|
+| **median total after discarding the warm-up** | **1,004** |
+| individual totals | 1577 (warm-up, discarded), 1004, 1068, 930 |
+| forward pass, all four | 853, 877, 873, 851 |
+
+The steady state reproduces the 2026-09-07 record to within 1%: 1,004 against 1,010 ms total, and
+853-877 against 868 ms of forward pass. The batch panel and the standfirst counter added since then
+cost nothing measurable, which is what you would expect: neither runs during a word change.
+
+**One condition of the recorded method was not met.** The browser tab was not visible during this
+rerun, because the machine was unattended at the time. That matters for exactly one number: the
+very first pass after a page load measured **3,009 ms** here against the 1,793 ms in the table
+above, since Windows runs a hidden tab's renderer at background quality-of-service and the first
+pass is the one that pays for JIT compilation. It did not affect the steady state, which is the
+number the design standard is about and which is within 6 ms of the record. **A strict rerun with
+the tab visible is still worth thirty seconds** before quoting the first-pass figure to anyone.
+
 ## Why this is worth recording
 
 An external audit measured 2,606 / 2,002 / 1,002 ms and concluded the page runs at 1.7 to 2.6 s,

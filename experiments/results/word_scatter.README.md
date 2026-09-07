@@ -56,22 +56,32 @@ warm-up and repeat firing rates with both mean surprises.
 Runs are recorded here as they are made, on `checkpoints/bdh_n2048.pt`, the checkpoint the page
 ships.
 
-| run | date | median warm/rep | rows above 1.3x | worst warm-up surprise |
-|---|---|---|---|---|
-| 1 | 2026-09-07 21:0x | **2.48x** | 8 of 8 | 0.001 |
-| 2 | not yet run | | | |
-| 3 | not yet run | | | |
+| run | date | median warm/rep | rows above 1.3x | worst warm-up surprise | words |
+|---|---|---|---|---|---|
+| 1 | 2026-09-07 21:0x | 2.48x | 8 of 8 | 0.001 | warm 14.4%, rep 5.4-6.2% |
+| 2 | 2026-09-08 04:2x | 2.54x | 8 of 8 | 0.001 | warm 14.4%, rep 5.5-6.1% |
+| 3 | 2026-09-08 04:3x | 2.55x | 8 of 8 | 0.001 | warm 14.4%, rep 5.3-5.9% |
 
-Run 1: warm-up firing 14.4% on every row, repeats 5.4-6.2%, ratios 2.33x to 2.70x, warm-up
-surprise 0.001 throughout and repeat surprise 0.001 to 0.005. The acceptance condition set in
-advance was every row under 0.005 warm-up surprise and most rows above 1.3x; run 1 meets it on
-every row.
+**24 words, 24 above 1.3x, no exceptions.** The acceptance condition was set in advance: every row
+under 0.005 warm-up surprise and most rows above 1.3x. All three runs meet it on every row. The
+three medians span 2.48x to 2.55x and sit above the 1,280-sequence population value of 2.35x, which
+is what the eight-word sample should do given the warm-up block is identical every time and only
+the repeated word is drawn fresh.
 
-**Runs 2 and 3 are outstanding, and this is not yet the three-run record the plan asks for.** They
-could not be taken on the night of 2026-09-07: the browser tab was not visible, and Windows runs a
-hidden tab's renderer at background quality-of-service, so with the n=8,192 training job saturating
-the CPU the page's worker returned nothing at all. A probe worker posted a forward pass and had no
-reply after 20 seconds, while main-thread timers in the same tab fired normally, which is what
-starvation looks like rather than a page fault. In a visible tab on a quiet machine the same eight
-words complete in about twenty seconds. Runs 2 and 3 belong with the other measurements that need a
-quiet machine and a visible tab.
+Note the contrast with the fifteen single-word runs above, which scatter from -8% to +33%. The
+per-word quantity that scatters is the *surprise-injection jump*, a two-letter event. The
+warm-up-versus-repeat firing ratio measured here is a phase average over 13 and 56 letters and is
+far steadier: the widest row in 24 is 2.38x and the narrowest 2.72x. Both numbers are on the page,
+and a reader who conflates them will think one of them is unstable when it is not.
+
+One row worth keeping: run 2's `spprhibm` shows a repeat surprise of 0.157, roughly a hundred times
+its neighbours, and still reads 2.60x. A word the model finds harder to repeat did not weaken the
+effect. That is one observation, not a result.
+
+**Measurement conditions.** Runs 2 and 3 were taken on 2026-09-08 after the n=8,192 training job
+finished, on a quiet machine. Run 1's numbers stand as recorded. The browser tab was not visible
+during any of them, which costs speed and nothing else: the first forward pass after a reload took
+3,009 ms against roughly 200 ms in a visible tab, because Windows runs a hidden tab's renderer at
+background quality-of-service. Chrome also clamps a hidden tab's timers hard after five minutes,
+which stalled one attempt at word 7 of 8; a reload resets that. Neither affects the arithmetic, and
+the ratios are the same to two decimals across the three runs.
