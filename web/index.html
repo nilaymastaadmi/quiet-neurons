@@ -172,6 +172,14 @@ tr.peak td{background:var(--fire-soft)} tr.peak td.n{color:var(--fire);font-weig
 .b-mem{flex:8;background:var(--fire-soft);color:var(--fire)}
 .b-rep{flex:56;background:var(--pass-soft);color:var(--pass)}
 
+.prim{border:1px solid var(--line);border-left:3px solid var(--fire);border-radius:3px;
+      background:var(--surface);padding:16px 18px;margin:0 0 14px;box-shadow:var(--shadow)}
+.prim h4{font-family:var(--f-disp);font-size:17px;margin:0 0 8px;color:var(--ink);
+      display:flex;align-items:baseline;gap:10px}
+.prim .pn{font-family:var(--f-mono);font-size:12px;color:var(--on-fire);background:var(--fire);
+      border-radius:2px;padding:2px 7px;flex:none}
+.prim p{margin:0 0 9px;max-width:74ch}
+.prim p:last-child{margin-bottom:0}
 .cardrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:20px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:18px 20px;
       box-shadow:var(--shadow)}
@@ -231,38 +239,109 @@ footer a{color:var(--muted)}
     <span>Dragon Hatchling</span><span>arXiv:2509.26507 §6.4</span><span>Sparse non-negative activations</span>
   </div>
   <h1>Quiet Neurons</h1>
-  <p class="standfirst">A 397,000-parameter Dragon Hatchling is running in this page, on your
-    machine, right now. Not a simulation of one. Watch it stop paying attention, then find the
-    place where it refuses to.</p>
+  <p class="standfirst">There is a small artificial brain running on this page right now. Not a
+    video of one, not a simulation: the real thing, doing arithmetic in your browser as you
+    scroll. It is reading text one letter at a time and trying to guess the next letter.</p>
+  <p class="standfirst">While it does that, some of its artificial neurons switch on and the rest
+    stay off. <strong>This page is about a surprising pattern in which ones switch on</strong>,
+    and about the moment we found out the obvious explanation for it was wrong.</p>
 
   <div class="claim">
-    <div class="lab">The claim, and you can break it below</div>
-    <q>A trained BDH quietens down when it has just learned something from the text in front of
-      it. Not when the text is merely predictable. Those two look identical from the outside,
-      and they are not.</q>
+    <div class="lab">The claim, in plain words. You can try to break it further down.</div>
+    <q>This model goes quiet on words it has just picked up from the text in front of it. It does
+      <em>not</em> go quiet just because text is easy to guess. From the outside those two look
+      identical, and they are not the same thing.</q>
   </div>
+  <p class="standfirst" style="font-size:15px">If any of that already means something to you,
+    skip to <a href="#instrument">the instrument</a>. If it does not, the next thirty seconds
+    are for you.</p>
 </header>
 
 <section id="who">
-  <h2><span class="num">00 / WHO THIS IS FOR</span>Before you start</h2>
+  <h2><span class="num">00 / START HERE</span>Four things, in plain words</h2>
+  <p class="lede">No background assumed. If you already know what a language model does and what
+    a sparse activation is, none of this will be new and you can
+    <a href="#rig">skip to the instrument</a>. Everything else on this page builds on these four
+    ideas, so they come first.</p>
+
+  <div class="prim">
+    <h4><span class="pn">1</span> What is the thing running on this page?</h4>
+    <p>A <strong>language model</strong>, and a very small one. It has been shown a lot of text and
+      trained to do exactly one job: <em>look at the letters so far and guess the next letter</em>.
+      That is all. ChatGPT does the same job on a vastly larger scale, guessing the next word
+      rather than the next letter.</p>
+    <p>Ours is roughly <strong>400,000 numbers</strong> that get adjusted during training until the
+      guessing gets good. Those numbers are called the <strong>weights</strong>, and they are the
+      model's permanent memory: whatever it learned during training lives there. For scale, the
+      models behind commercial chatbots have hundreds of billions of weights. This one is small
+      enough to run in a browser tab, which is why you can watch it work.</p>
+  </div>
+
+  <div class="prim">
+    <h4><span class="pn">2</span> What does "a neuron fires" mean?</h4>
+    <p>Inside the model are thousands of little units called <strong>neurons</strong>, borrowing the
+      word from biology. As each letter goes in, every neuron computes a number. If that number is
+      <strong>above zero</strong> the neuron is <em>active</em>, or firing. If it is zero, the
+      neuron sits out that letter entirely.</p>
+    <p>Two things make this worth watching. Most neurons are <strong>off</strong> at any moment,
+      typically about 95 of every 100, which is what <strong>sparse</strong> means. And a neuron
+      can never be negative here, only zero or positive, which is what
+      <strong>non-negative</strong> means. So "5% active" means five neurons in a hundred are doing
+      something and the other ninety-five are silent.</p>
+    <p><strong>Why anyone cares:</strong> if only a few neurons are on for a given piece of text,
+      you can ask <em>which</em> ones, and start reading the model's internals as something closer
+      to concepts than to noise. That is the whole appeal of sparsity, and it is why the concept
+      this page explains was on the approved list.</p>
+  </div>
+
+  <div class="prim">
+    <h4><span class="pn">3</span> What is BDH, and why not just use a Transformer?</h4>
+    <p><strong>BDH</strong> is short for <strong>Dragon Hatchling</strong>, an architecture
+      published in 2025 by Pathway. An architecture is the blueprint: which parts a model has and
+      how they connect. Nearly every model you have heard of uses one blueprint, the
+      <strong>Transformer</strong>.</p>
+    <p>In a Transformer, sparsity <em>happens</em>. Nobody designs it in; it emerges during training,
+      and researchers noticed it afterwards. In BDH it is <strong>built into the shape of the
+      maths</strong>: every layer multiplies two lists of non-negative numbers together, and a
+      product is zero whenever <em>either</em> side is zero. Sparsity is guaranteed by construction
+      rather than hoped for.</p>
+    <p><strong>Why that matters:</strong> a property you designed in is one you can rely on and
+      study. A property that merely showed up might vanish in the next model. That difference is
+      the reason this architecture is interesting, and it is what we set out to test.</p>
+  </div>
+
+  <div class="prim">
+    <h4><span class="pn">4</span> So what is the actual question?</h4>
+    <p>The BDH paper reports that the model gets <strong>quieter</strong>, fewer neurons firing,
+      when the text is <strong>more predictable</strong>. Sensible: easy text, less work.</p>
+    <p>We reproduced that, and it holds. <strong>Then we found a case it does not explain.</strong>
+      There are two stretches of text this model predicts almost perfectly, so "predictability"
+      says they should look the same. They do not. One uses roughly two and a half times as many
+      neurons as the other.</p>
+    <p>What separates them is not how predictable they are but <strong>where the model learned
+      them</strong>. One was baked into the weights during training. The other it picked up seconds
+      ago, from the text on screen. <strong>That is the claim at the top of this page, and the rest
+      of the page is you checking it.</strong></p>
+  </div>
+
   <div class="cardrow">
     <div class="card">
-      <h4>Audience</h4>
-      <p>Anyone who has met a neural network once. Undergraduates, engineers new to
-        post-Transformer architectures, and researchers who would rather have the BDH sparsity
-        result checked than described.</p>
+      <h4>Who this is for</h4>
+      <p>Anyone willing to read the four boxes above. No machine-learning background is assumed and
+        nothing about attention, state-space models or Hebbian learning is needed. If you already
+        have that background, the four boxes are skippable and nothing later depends on having read
+        them slowly.</p>
     </div>
     <div class="card">
-      <h4>Prerequisites</h4>
-      <p>That a model turns text into numbers and predicts what comes next. Nothing about
-        attention, state space models or Hebbian learning is assumed. Terms are defined where
-        they first appear.</p>
+      <h4>What you actually need</h4>
+      <p>A browser. Everything computes on your machine, so there is no sign-in, no server and
+        nothing to install. A word you can type. Ten minutes.</p>
     </div>
     <div class="card">
       <h4>Ten minutes from now you can</h4>
-      <p>Say what a sparse non-negative activation is; explain why a BDH quietens on text it
-        just learned but not on text baked into its weights; name the two layers where the
-        effect is absent; and reproduce all of it with two commands.</p>
+      <p>Say what a sparse non-negative activation is in your own words; explain why this model goes
+        quiet on text it just learned but not on text baked into its weights; name the layers where
+        the effect is absent or reversed; and reproduce every number here with two commands.</p>
     </div>
   </div>
 </section>
@@ -420,11 +499,29 @@ footer a{color:var(--muted)}
 
 <section id="gram">
   <h2><span class="num">02 / THE MECHANISM</span>Why learning it makes it cheap</h2>
-  <p class="lede">Here is the part that explains the rest. In Pathway's code the query and the
-    key are <em>the same tensor</em>; the file literally asserts <code>K is Q</code>. So an
-    attention score is not a learned lookup. It is the overlap between which neurons fired at
-    two letters. Letters that fire alike, bind. And there is <strong>no softmax anywhere</strong>
-    in it, which is a real break from a Transformer.</p>
+  <p class="lede">Here is the part that explains the rest, and it needs one idea first.</p>
+
+  <div class="prim">
+    <h4><span class="pn">?</span> What is "attention", in one paragraph?</h4>
+    <p>To guess the next letter, a model has to look back at earlier letters and decide which of
+      them matter. That looking-back is called <strong>attention</strong>. In a normal Transformer
+      each position produces two different summaries of itself: a <strong>query</strong>, meaning
+      roughly "here is what I am looking for", and a <strong>key</strong>, meaning "here is what I
+      have to offer". The model compares one position's query against every earlier position's key,
+      and the pairs that match best get attended to. Both summaries are learned during training.</p>
+    <p>The comparison scores then go through a step called <strong>softmax</strong>, which squashes
+      them so they add up to 1, like splitting a fixed budget of attention across the earlier
+      letters.</p>
+  </div>
+
+  <p class="lede">BDH does neither of those things. In Pathway's code the query and the key are
+    <em>the same list of numbers</em> — the file literally asserts <code>K is Q</code>. So there is
+    no "what I want" and "what I offer" to learn separately. An attention score here is just
+    <strong>the overlap between which neurons fired at two different letters</strong>: letters that
+    lit up the same neurons bind to each other, and letters that did not, do not. And there is
+    <strong>no softmax anywhere</strong> in it, so there is no fixed budget being divided up. Both
+    are real breaks from a Transformer, and both are why the sparsity you watched in section 01 is
+    doing structural work rather than decorating.</p>
 
   <div class="rig">
     <div class="rig-head">
@@ -808,7 +905,7 @@ footer a{color:var(--muted)}
 // Bump on every change to the model code. The worker imports bdh.js as a module and
 // browsers cache module graphs aggressively; without this the page silently keeps
 // running an old forward pass, which is the worst possible failure for this project.
-const BUILD = "26";
+const BUILD = "27";
 const $ = s => document.querySelector(s);
 // One 77-letter cycle is the whole claim: warm-up, first sight of the word, then the
 // repeats. A second cycle only restates it, and attention cost grows with the square of
