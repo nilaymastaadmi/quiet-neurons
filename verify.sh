@@ -23,6 +23,17 @@ cd "$(dirname "$0")"
 
 PY="${BDH_PYTHON:-python}"
 FAILED=0
+
+# Section 1 needs a Python with torch installed. If the default one does not have it, say so
+# once and clearly, rather than letting three checks fail in a way that looks like number drift.
+if ! "$PY" -c "import torch" >/dev/null 2>&1; then
+  echo "NOTE: '$PY' has no torch, so section 1 cannot run."
+  echo "      Point BDH_PYTHON at the environment you trained in, e.g."
+  echo "        BDH_PYTHON=/path/to/venv/Scripts/python.exe ./verify.sh"
+  echo "      or set VERIFY_SKIP_MEASURE=1 to run everything else knowingly."
+  echo
+  VERIFY_SKIP_MEASURE=1
+fi
 pass() { printf '  \033[32mPASS\033[0m  %s\n' "$1"; }
 fail() { printf '  \033[31mFAIL\033[0m  %s\n' "$1"; FAILED=1; }
 
