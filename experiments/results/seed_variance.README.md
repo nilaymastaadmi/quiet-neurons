@@ -67,8 +67,17 @@ two seeds at one size it is not stable enough to be called a property of anythin
 
 Three seeds at each of three sizes, nine runs. At the measured rates that is roughly 30 hours of
 CPU for the two smaller sizes and considerably more for n=16,384, so it was never in scope for this
-deadline. A second seed at n=16,384 is running as this is written and will be added here; two seeds
-at two sizes is still not a variance estimate, it is two differences.
+deadline.
+
+**A second seed at n=16,384 was started and then killed at step 1,250 of 2,309.** It was running at
+11.6 s/step and would have landed at 15:25 on the submission day, which left no time to review what
+it changed. A run stopped early is not step-matched to anything, and this project has already
+learned once that a partial run is worse than no run because it invites a comparison it cannot
+support, so it was discarded rather than reported. Nothing from it appears in any CSV.
+
+So the comparison in this file rests on **one** between-seed difference, at one size. That is enough to show
+the five-sample half-width is the wrong ruler, which is what it is used for here. It is not a
+variance estimate and this file does not present it as one.
 
 **The right way to read the three published ratios is as three single draws, each measured
 precisely, from a distribution whose width we have now sampled exactly once and found to be wide.**
