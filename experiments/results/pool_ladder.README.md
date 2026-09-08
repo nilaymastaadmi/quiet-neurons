@@ -81,12 +81,17 @@ Measured 2026-09-07, after the pre-registration above was committed. Both interm
 trained 2,309 steps of the same 4,000-step schedule as every published model, and both pass the
 precondition: `TASK_LEARNED=True`, and neither trips the degeneracy check.
 
-| condition | letters in weights | final loss | warm% | rep% | **warm/rep** | CV (xy) |
-|---|---|---|---|---|---|---|
-| K=1, fixed word | 8 | 0.0004 | 21.71 | 20.98 | **1.035** | 2.08% **collapsed** |
-| K=16 | 128 | 0.0188 | 12.93 | 14.01 | **0.923** | 15.58% |
-| K=256 | 2,048 | 0.0384 | 10.47 | 4.13 | **2.536** | 27.16% |
-| K=∞, base task | 0 | 0.1739 | 13.61 | 5.78 | **2.354** | 33.34% |
+| condition | letters in weights | first-exposure surprise | share of word already in weights | final loss | **warm/rep** | **mem/rep** | CV (xy) |
+|---|---|---|---|---|---|---|---|
+| K=1, fixed word | 8 | 0.0004 | 99.99% | 0.0004 | **1.035** | **1.004** | 2.08% **collapsed** |
+| K=16 | 128 | 0.3532 | **89.2%** | 0.0188 | **0.923** | **1.013** | 15.58% |
+| K=256 | 2,048 | 0.7309 | 77.7% | 0.0384 | **2.536** | **1.547** | 27.16% |
+| K=∞, base task | 0 | 3.2738 | 0% | 0.1739 | **2.354** | **1.470** | 33.34% |
+
+First-exposure surprise is how many nats the model spends on the eight letters of the word the
+first time it sees them in a sequence. It is the direct measure of how much the model must **read**
+rather than **recall**, the random baseline is log 26 = 3.258, and it was recorded in
+`pool_ladder.csv` from the day these runs were made.
 
 ## 1. The monotonicity prediction FAILED
 
@@ -113,26 +118,48 @@ K=256 is 4.5× easier than the base task by final loss and shows a larger effect
 monotone dependence on difficulty produces. **Difficulty is not ruled out as a driver**, and no
 argument about the geometry rescues K=16.
 
-## 3. K=16 is unexplained, and we are not going to pretend otherwise
+## 3. K=16, revisited 2026-09-08: the story had a measurement all along
 
-At K=16 every layer sits between 0.90 and 1.01, with warm ≈ mem ≈ rep at layer 2 (0.129 / 0.142 /
-0.140). The effect is not merely weaker there, it is absent, and at layers 1, 2 and 3 it inverts
-slightly. Its CV of 15.58% keeps it clear of the degeneracy threshold, so it is not the K=1
-collapse in a milder form by that test, but it is the flattest non-degenerate condition we have.
+**What this section said until 2026-09-08.** That K=16 was unexplained; that the plausible reading
+was that 128 letters is little enough to be served from the weights, leaving the distinction
+nothing to separate; and that this was "a story, not a measurement" needing a K sweep we did not
+have time for.
 
-The reading we find most plausible, and cannot demonstrate: 128 letters is little enough that the
-model can serve the repeat block largely from weights without leaning on context, so neither block
-is context-held and the distinction has nothing to separate. At 2,048 letters it must use the
-context to identify which of 256 words it is seeing, and the distinction returns. **That is a
-story, not a measurement.** Settling it needs a K sweep we do not have time for.
+**It did not need a K sweep.** How much a model must read rather than recall is measured directly,
+once per condition, by first-exposure surprise, and every value had been in `pool_ladder.csv` since
+the runs were made. Read that column and the ladder stops being a failed monotone rise and becomes
+a **step**:
+
+- **Word in the weights.** K=1 at 0.0004 nats and K=16 at 0.3532, so 99.99% and 89.2% of the word
+  already known. mem/rep **1.004** and **1.013**. No effect.
+- **Word must be read.** K=256 at 0.7309 nats and the base task at 3.2738, so 77.7% and 0% already
+  known. mem/rep **1.547** and **1.470**. Full effect.
+
+The two no-effect conditions agree to 0.009 and the two full-effect conditions to 0.077. K=16 shows
+nothing because there is almost nothing for it to show: with 89% of the word already in the
+weights, the repeat block is barely more context-held than the first-sight block.
+
+**And K=16 was never an inversion.** 0.923 against K=1's 1.035 is a gap between two points that
+both mean "nothing here", and we had been reading it as signal for a day. On **mem/rep**, which is
+the quantity every headline number in this project reports (1.4705, 2.1201, 1.8742), K=16 reads
+**1.013**. There is no inversion to explain.
+
+**What is still not settled.** The switch happens somewhere between first-exposure surprise 0.35
+and 0.73 nats. Two points bracket it; none locates it. A K sweep would locate it, and that is still
+not affordable. And none of this says *why* context-held knowledge needs more neurons, which is the
+question the whole project keeps arriving at.
 
 ## What this does and does not license
 
 **It licenses**: saying the effect survives an intervention that holds the task recognisably the
-same while moving where the word's content lives, and that difficulty alone cannot generate it.
+same while moving where the word's content lives; that it appears exactly when the model must read
+the word rather than recall it, on four conditions spanning 0% to 100% context-dependence; and that
+it is not a monotone function of task difficulty, since K=256 is 4.5× easier by final loss
+than the base task and shows a slightly larger effect.
 
-**It does not license**: calling the mechanism established, or calling the relationship monotone
-in provenance. One of four points is unexplained and the ordering we predicted did not hold.
+**It does not license**: calling the mechanism established, calling the relationship monotone in
+provenance, or claiming to know where the switch sits. The registered prediction was a monotone
+rise and what we got is a step; two points bracket the threshold and none locates it.
 
 Data in `pool_ladder.csv`. Checkpoints `checkpoints/bdh_n2048_pool16.pt` and `checkpoints/bdh_n2048_pool256.pt`, each
 carrying its own word pool so it can only be re-measured in distribution. Reproduce with

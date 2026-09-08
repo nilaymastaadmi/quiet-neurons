@@ -32,7 +32,10 @@ def layer2(rs, want_pool=None):
             continue
         w, rep = float(r["warmup"]), float(r["rep"])
         return {"warm": w, "rep": rep, "warm_over_rep": w / rep,
-                "mem_over_rep": float(r["mem_over_rep"])}
+                "mem_over_rep": float(r["mem_over_rep"]),
+                # how much of the word the model must READ rather than RECALL. This is the
+                # variable the ladder is actually ordered by, and it was in the CSV all along.
+                "first_expo": float(r["first_expo_loss"])}
     return None
 
 
@@ -82,7 +85,8 @@ print("THE PROVENANCE LADDER")
 print("prediction, committed in advance: warm/rep rises monotonically with K")
 print("=" * 74)
 print()
-print("  condition             final loss   warm%    rep%    warm/rep   mem/rep")
+BASELINE = 3.258          # log 26, the surprise of a letter the model cannot know
+print("  condition             final loss  1st-expo   in weights   warm/rep   mem/rep")
 pts = []
 missing = []
 for label, rs, pool, loss in CONDS:
@@ -92,7 +96,8 @@ for label, rs, pool, loss in CONDS:
         print(f"  {label:<20}  (not measured yet)")
         continue
     ls = f"{loss:.4f}" if loss is not None else "  ?   "
-    print(f"  {label:<20}  {ls:>10}   {d['warm']*100:5.2f}   {d['rep']*100:5.2f}"
+    held = max(0.0, 100.0 * (1.0 - d["first_expo"] / BASELINE))
+    print(f"  {label:<20}  {ls:>10}   {d['first_expo']:7.4f}   {held:8.1f}%"
           f"    {d['warm_over_rep']:6.3f}    {d['mem_over_rep']:6.3f}")
     if loss is not None:
         pts.append((label, loss, d["warm_over_rep"]))
@@ -160,4 +165,34 @@ else:
     print("  READING: the points lie on the difficulty line. Say exactly that:")
     print("  provenance and difficulty are not separable in this design, and we now have")
     print("  four points showing it rather than one. This is the registered negative.")
+
+print()
+print("=" * 74)
+print("THE STEP  (added 2026-09-08: rank by what the model must READ, not by K)")
+print("=" * 74)
+# The registered prediction was a monotone rise in K and it failed. Ordered by first-exposure
+# surprise, which measures how much of the word is NOT already in the weights, the same four
+# points fall into two flat regimes. That is a different shape from a failed rise, and it is
+# the shape the data has.
+ranked = sorted(((layer2(rs, pool)["first_expo"], label, layer2(rs, pool))
+                 for label, rs, pool, _ in CONDS if layer2(rs, pool)), key=lambda t: t[0])
+LO, HI = [], []
+for fe, label, d in ranked:
+    (LO if d["mem_over_rep"] < 1.25 else HI).append((fe, label, d))
+for name, group in (("word is in the WEIGHTS, no effect", LO),
+                    ("word must be READ from context, full effect", HI)):
+    print(f"  {name}:")
+    for fe, label, d in group:
+        print(f"    {label:<20} first-expo {fe:6.4f} nats"
+              f"   {max(0.0, 100.0*(1.0-fe/BASELINE)):5.1f}% already known"
+              f"   mem/rep {d['mem_over_rep']:6.3f}")
+if LO and HI:
+    print()
+    print(f"  Within each regime the ratios agree to "
+          f"{max(d['mem_over_rep'] for _, _, d in LO) - min(d['mem_over_rep'] for _, _, d in LO):.3f}"
+          f" and "
+          f"{max(d['mem_over_rep'] for _, _, d in HI) - min(d['mem_over_rep'] for _, _, d in HI):.3f}.")
+    print(f"  The switch lies between first-exposure surprise "
+          f"{max(fe for fe, _, _ in LO):.4f} and {min(fe for fe, _, _ in HI):.4f} nats.")
+    print("  Two points bracket it. None locates it. Do not claim a threshold value.")
 print("=" * 74)

@@ -68,8 +68,17 @@ def ladder_rows():
             if r["layer"] == "2" and r["tensor"] == "xy" and (k is None or r.get("word_pool", "") == str(k)):
                 return warm_over_rep(r)
         return None
+    def l2m(rows, k=None):
+        for r in rows:
+            if r["layer"] == "2" and r["tensor"] == "xy" and (k is None or r.get("word_pool", "") == str(k)):
+                return float(r["mem_over_rep"])
+        return None
     return {"K1": l2(ctrl), "K16": l2(pool, 16), "K256": l2(pool, 256),
-            "base": warm_over_rep(pub[(2048, 2, "xy")])}
+            "base": warm_over_rep(pub[(2048, 2, "xy")]),
+            # mem/rep is the column every published headline uses, and since 2026-09-08 it is
+            # the column the one-pager reports the ladder on.
+            "mK1": l2m(ctrl), "mK16": l2m(pool, 16), "mK256": l2m(pool, 256),
+            "mbase": float(pub[(2048, 2, "xy")]["mem_over_rep"])}
 
 # ---------------------------------------------------------------- the gates
 CANON_CLAIM = ("goes quiet on words it has just picked up from the text in front of it")
@@ -173,10 +182,15 @@ def g_onepager_numbers():
         if tok not in cs:
             fail("one-pager missing %s" % tok)
     lad = ladder_rows()
-    if ("%.2f×" % round(lad["K256"], 2)) not in cs:
-        fail("one-pager K=256 ratio %.2f not present" % lad["K256"])
-    if "0.92" not in cs:
-        fail("one-pager K=16 ratio 0.92 not present")
+    # All four rungs, on the column the one-pager states them in. Every value has to appear.
+    for key, label in (("mK1", "K=1"), ("mK16", "K=16"), ("mK256", "K=256"), ("mbase", "base task")):
+        tok = "%.2f" % round(lad[key], 2)
+        if tok not in cs:
+            fail("one-pager ladder %s mem/rep %s not present" % (label, tok))
+    # and the difficulty argument's two losses, which the same sentence depends on
+    for tok in ("0.0384", "0.1739"):
+        if tok not in cs:
+            fail("one-pager missing ladder loss %s" % tok)
 
 def g_repro_command():
     """The README's own measure.py command names the checkpoint verify.sh tests."""

@@ -906,13 +906,17 @@ footer a{color:var(--muted)}
           <td class="n prose">warm/rep at layer 2: <strong>1.04</strong> (K=1, degenerate),
             <strong>0.92</strong> (K=16), <strong>2.54</strong> (K=256), <strong>2.35</strong>
             (base task). We predicted this would rise monotonically and <strong>it did not</strong>.
-            The pre-registered line test reads positive at K=256 (2.54 measured against 1.32
-            predicted from a line through the two extremes), so an easier task shows a bigger
-            effect. But K=16 sits below the same line (0.92 against 1.18), and drawing the line in
-            log-loss makes K=16 the larger anomaly (&minus;0.95 against +0.51 for K=256). What the
-            four points support is that the effect is <strong>not a monotone function of task
-            difficulty</strong>. They do not rule difficulty out, and K=16 is unexplained
-            <span class="tag tag-ok">not monotone in difficulty</span></td></tr>
+            We predicted the ratio would climb steadily with K. It does not: it
+            <strong>steps</strong>. Ranked by how much of the word the model must read rather than
+            recall &mdash; its surprise on first sight, against a 3.26 baseline &mdash; the four
+            conditions split cleanly in two. K=1 (0.0004 nats) and K=16 (0.3532) sit at
+            <strong>1.004</strong> and <strong>1.013</strong>: no effect. K=256 (0.7309) and the
+            base task (3.2738) sit at <strong>1.547</strong> and <strong>1.470</strong>: full
+            effect. K=16 shows nothing because <strong>89% of the word is already in its
+            weights</strong>, so there is almost no context-acquired knowledge for the effect to act
+            on. The registered prediction still failed, and the switch is only bracketed between
+            0.35 and 0.73 nats, not located
+            <span class="tag tag-ok">a step, and we know what steps it</span></td></tr>
       <tr><td>This is a toy trained here, not an official BDH checkpoint</td>
           <td class="n prose">architecture is Pathway's, unmodified; weights are ours</td></tr>
       <tr><td>Synthetic task, not natural language</td>

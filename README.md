@@ -469,16 +469,43 @@ function of task difficulty**: K=256 is 4.5× easier than the base task by final
 larger effect. Difficulty is not ruled out as a driver, and no argument about the geometry rescues
 K=16.
 
-**K=16 is unexplained.** Every layer sits between 0.90 and 1.01 and at layer 2 warm, mem and rep
-are within 0.013 of each other. Our best guess is that 128 letters is few enough to be served from
-weights without leaning on context, leaving nothing for the distinction to separate; at 2,048 the
-model must use context to identify which word, and the effect returns. **That is a story, not a
-measurement**, and settling it needs a K sweep we do not have time for.
+**K=16 is not unexplained, and it never needed the K sweep we said it needed.** The earlier
+version of this section offered a guess: that 128 letters is few enough to be served from the
+weights without leaning on context, leaving nothing for the distinction to separate, and called
+that "a story, not a measurement". The measurement was already in the CSVs. How much of the word a
+model must **read** rather than **recall** is exactly what first-exposure surprise measures, and it
+is recorded once per condition:
 
-So: the effect survives an intervention that moves where the word's content lives while keeping
-the task recognisably the same, and it is not a monotone function of difficulty. That is not the mechanism,
-and the relationship is not monotone in provenance. Full write-up, including the failed prediction
-in the words it was registered in, is in `experiments/results/pool_ladder.README.md`.
+| condition | first-exposure surprise | share of the word already in the weights | mem/rep | warm/rep |
+|---|---|---|---|---|
+| K=1 | 0.0004 | 99.99% | 1.004 | 1.035 |
+| K=16 | 0.3532 | **89.2%** | **1.013** | 0.923 |
+| K=256 | 0.7309 | 77.7% | **1.547** | 2.536 |
+| K=&infin; base task | 3.2738 | 0% | 1.470 | 2.354 |
+
+Against a random baseline of log 26 = 3.258 nats.
+
+**The ladder is a step, not a rise.** When the word is in the weights the ratio is 1.00; when it
+has to be read from context it is 1.5. Both no-effect conditions and both full-effect conditions
+agree with each other to within 0.08. **K=16 is a no-effect point, and it is one because 89% of the
+word is already in its weights**, so there is barely any context-acquired knowledge for the effect
+to act on. That is the same story as before, now with the number that tests it.
+
+And K=16 was never an inversion. Its 0.923 against K=1's 1.035 on warm/rep is the gap between two
+points that both mean "nothing here", and we had been reading that gap as signal. On **mem/rep**,
+which is the column every headline number in this project uses, K=16 reads **1.013**: exactly
+nothing.
+
+What does not change: **the registered prediction still failed.** We committed in advance to a
+monotone rise with K and got a step. That is recorded as a failure in
+`experiments/results/pool_ladder.README.md` in the words it was registered in. What we now know is
+where the step is: the switch happens between first-exposure surprise 0.35 and 0.73 nats. Two
+points bracket it and none locates it, so the threshold's position is unmeasured.
+
+So: the effect appears exactly when the model has to read the word from the text in front of it,
+and vanishes when it can recall it instead, on four conditions spanning the full range from 0% to
+100% context-dependence. **That is still not the mechanism.** Nothing here says why
+context-acquired knowledge needs more neurons.
 
 Data in `experiments/results/mechanism_control.csv`, checkpoint in
 `experiments/checkpoints/bdh_n2048_fixedword.pt`, and the flag is off by default so every
