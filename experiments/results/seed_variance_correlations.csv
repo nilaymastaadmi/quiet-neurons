@@ -1,0 +1,5 @@
+n,steps_trained,layer,tensor,pearson,spearman,first_expo_loss_min,first_expo_loss_max,first_expo_sparsity_first,first_expo_sparsity_last,positions,eval_passes
+2048,2309,0,xy,-0.0601,-0.111,3.2684,3.2866,0.21207,0.23295,77,5
+2048,2309,1,xy,0.5412,0.4101,3.2684,3.2866,0.13016,0.13768,77,5
+2048,2309,2,xy,0.157,-0.0259,3.2684,3.2866,0.12597,0.07643,77,5
+2048,2309,3,xy,-0.0351,-0.4213,3.2684,3.2866,0.11566,0.06437,77,5

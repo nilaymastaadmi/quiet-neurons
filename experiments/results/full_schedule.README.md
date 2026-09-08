@@ -70,6 +70,31 @@ explanation we reached for there — the extra steps buy little, therefore the r
 predicts a stationary ratio here and gets a moving one. We are publishing the refutation of our own
 explanation alongside the result it came from.
 
+## Correction, 2026-09-08: these moves were measured against the wrong error bar
+
+Everything above compares a full-schedule run against its step-matched twin using the five-sample
+half-width, and calls the n=8,192 move of 0.0799 "about nine half-widths" and therefore large.
+
+A second training seed at n=2,048, run later the same day, moves layer 2 by **0.2514**
+(`seed_variance.README.md`). The five-sample half-width measures how precisely we measured one
+trained model. It does not measure how much another run of the same configuration would differ,
+and that is the comparison every number in this file is making.
+
+Against the only between-run figure we have, **0.0799 is a third of a seed gap, and 0.0085 at
+n=2,048 is a thirtieth of one.** So the honest reading of this file changes:
+
+- **What stands.** Both completed models still show the effect, layer 2 well above 1 in both, and
+  finishing the schedule does not destroy it. That was the question this file was built to ask.
+- **What does not.** "The n=8,192 layer 2 moves nine half-widths and that is a finding" does not
+  stand. Neither does the contrast drawn between n=2,048 barely moving and n=8,192 moving a lot,
+  because both moves are inside the range a reseed produces at a single size.
+- **What was already right, by luck rather than design.** The paragraph above arguing that the
+  loss barely moves in both cases and therefore cannot explain the difference between them: there
+  may be no difference between them to explain.
+
+The measurements are unchanged and the CSV is untouched. What changed is the size of the ruler we
+were holding them against.
+
 ## What this does and does not license
 
 **Licenses:** saying the effect is not an artefact of stopping early, at n=2,048.

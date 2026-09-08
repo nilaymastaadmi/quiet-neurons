@@ -329,16 +329,26 @@ rose. n=2,048 went from 1.4318 to **1.4705**; n=8,192 from 1.9731 to **2.1201**.
 cut had been suppressing the two smaller models, which is exactly what a confound does when you
 take it away.
 
-**The non-monotonicity survives, and sharpens.** Controlled, the sequence reads 1.47, 2.12,
-1.87, and the drop from 8k to 16k is 40× the mean half-width, as computed above. It is a property
-of the models, not of where training stopped. Both families are in
+**The non-monotonicity was reported as sharp, and on 2026-09-08 a second seed took that back.**
+Controlled, the sequence reads 1.47, 2.12, 1.87, and the drop from 8k to 16k is 40× the mean
+half-width. That was true and it was **the wrong error bar**: the half-width is the spread of five
+evaluation samples drawn from one trained model, so it says how precisely we measured that model,
+not how much another model of the same size would differ. Retraining n=2,048 with seed 1338 and
+nothing else changed moves layer 2 from **1.4705 to 1.7219**, a gap of **0.2514**, which is
+*larger* than the 0.2459 dip between 8k and 16k. Against the only between-run number we have, the
+dip is **1.0×**, not 40×. **With one seed per size, no size-to-size difference here is
+distinguishable from seed variation**, and that includes the dip and the rise. Full write-up in
+`experiments/results/seed_variance.README.md`. What the second seed did *not* do is disturb the
+claim: layer 2 is 1.4705 and 1.7219, both well above 1, and the new seed is the stronger of the
+two. Both families are in
 `experiments/results/measured.csv`, told apart by a `steps_trained` column, so the before and
 after are both checkable. Final losses are close (0.174, 0.173,
 0.172), so they are comparably trained on the task, but that is not a controlled comparison.
 
-The defensible statement is therefore narrower than the one we started with: **the effect is
-far stronger at 8k and 16k than at 2k, and both land inside the range the paper reports for
-a model four to eight times larger again. Whether it grows monotonically, we do not know.**
+The defensible statement is therefore narrower than the one we started with, and narrower again
+since the second seed: **the effect is present at all three sizes and lands inside the range the
+paper reports for a model four to eight times larger again. What shape it takes with size, we do
+not know, and with one seed per size we cannot know from this data.**
 What is no longer in doubt is the step count: all three now stop at 2,309 steps of the same
 schedule, so *where training stopped* cannot be what produces the dip. What is still
 uncontrolled is that none of them **finished** that schedule. It is 4,000 steps long and all
@@ -571,7 +581,8 @@ Reproduce with `python transformer_control.py --stop-at 2309 --repeats 5`, about
 |---|---|
 | Layer 0 runs **backwards** at every size | ratio 0.80, 0.80, 0.86 at n = 2k, 8k, 16k |
 | Layer 3 is flat at 2k and 8k, weakly positive at 16k | 0.97, 0.95, **1.11**. "No effect" is true of the two smaller models only |
-| Scaling is **not** monotonic, and now controlled | 1.47 → 2.12 → 1.87 at n = 2k, 8k, 16k, all trained for the same 2,309 steps. We expected monotone growth and said so publicly until the third model landed |
+| Scaling shape is **not established**, and we retracted the claim that it was | 1.47 → 2.12 → 1.87 at n = 2k, 8k, 16k, all at 2,309 steps. We expected monotone growth, said so publicly, then reported non-monotonicity instead. A second seed at n=2,048 alone moves layer 2 by **0.2514**, larger than the **0.2459** dip between 8k and 16k, so with one seed per size no size-to-size difference here survives. `seed_variance.README.md` |
+| Layer 3 being flat is **seed-dependent** | 0.9654 on seed 1337 and 1.1847 on seed 1338, same size, same schedule: it crosses from below 1 to above it. Two seeds at one size are not enough to call layer 3 anything |
 | The three models **are** step-matched, as of 2026-09-06 | all three stop at 2,309 steps of the same 4,000-step schedule. The earlier wall-clock-cut numbers are kept in `measured.csv` for comparison |
 | A single sequence is noisy | the surprise-injection jump ranges −8% to +33% across 15 words, median +9%, all in `experiments/results/word_scatter.csv`. The 1,280-sequence ratios do not scatter: every five-sample spread is under 0.02 |
 | Surprise and sparsity do **not** track per letter | at n=8192, layer 2: **Pearson 0.30, Spearman −0.05**. Across the eight letters of first sight, surprise is flat at 3.27 to 3.29 nats while sparsity falls 13.3% to 4.5%. The relationship is between phases, not letters, and a near-zero Spearman is what says so. This killed a stronger claim we wanted to make. Printed by `measure.py`, recorded in `experiments/results/correlations.csv` |

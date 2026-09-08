@@ -895,7 +895,12 @@ footer a{color:var(--muted)}
       <tr><td>Layer 3 is flat at 2k and 8k, weakly positive at 16k</td>
           <td class="n prose">0.97, 0.95, 1.11 <span class="tag tag-no">against us</span></td></tr>
       <tr><td>Scaling is <em>not</em> monotonic</td>
-          <td class="n prose">1.47 → 2.12 → <strong>1.87</strong> at 2k, 8k, 16k, all at 2,309 steps <span class="tag tag-no">against us</span></td></tr>
+          <td class="n prose">1.47 → 2.12 → <strong>1.87</strong> at 2k, 8k, 16k, all at 2,309 steps.
+            On 2026-09-08 a second seed at n=2,048 alone moved layer 2 by <strong>0.2514</strong>,
+            larger than the <strong>0.2459</strong> dip between 8k and 16k, so <strong>no
+            size-to-size difference here is distinguishable from seed variation</strong> and we
+            retracted the claim that the dip was sharp. The effect itself survived the seed change,
+            1.4705 and 1.7219, both well above 1 <span class="tag tag-no">against us</span></td></tr>
       <tr><td>The three models were not step-matched. <em>This one we fixed.</em></td>
           <td class="n prose">they had been cut by wall clock at 1,854, 1,917 and 2,309 steps of one schedule, so
             each stopped at a different learning rate. We retrained the two short ones to 2,309. Both

@@ -98,8 +98,8 @@
 
 <h2>Evidence, labelled</h2>
 <p>
-  <span class="lab">Measured here:</span> the three ratios, the counterexample, the
-  surprise-injection check, browser-against-PyTorch parity (6.1e-5 max logit difference, sparsity series exact) &mdash; an implementation check, not architectural evidence.
+  <span class="lab">Measured here:</span> the three ratios, the counterexample,
+  browser-against-PyTorch parity (6.1e-5 max logit difference, sparsity series exact) &mdash; an implementation check, not architectural evidence.
   <span class="lab">Developer-reported, not reproduced:</span> the Fig. 14 band; 97.4% on Sudoku
   Extreme, which Pathway says does not reproduce from the open code; BDH-CQ's ARC-AGI-1 result [2]. <span class="lab">Not modelled:</span> BDH-CQ's internals, "proprietary" by its authors [2];
   <strong>it has no role here</strong>. <span class="lab">Where it is likely worse:</span> sparse non-negative activations plausibly cost
@@ -109,18 +109,17 @@
 <h2>Limitations and maturity</h2>
 <p>
   Depth matters: layer 0 runs <em>backwards</em> at all three sizes, ratios below 1 (0.80, 0.80,
-  0.86): <em>more</em> neurons fire while repeating; layer 1 is positive at every size (1.22,
-  1.41, 1.33) and layer 3 is flat below 16,384. Scaling is
-  <strong>not monotonic</strong>; we published the opposite before the third model finished. The
-  wall-clock confound is gone, the short two retrained to 2,309 steps, the dip 0.2459 at <strong>40&times;</strong> the mean of half-widths 0.0081 and 0.0042; none of the three published models finished the
-  4,000-step schedule, though separate runs that did finish move layer 2 only 1.4705 to 1.4620 at
-  n=2,048, but 2.1201 to 2.2000 at n=8,192, a rise of 0.0799 against that run's own
-  &plusmn;0.0086 spread. These are toys, 0.4M to 6.3M parameters on a synthetic task. Surprise and sparsity do <em>not</em> track per letter (Pearson 0.30 across phases, Spearman &minus;0.05 letter by letter),
-  killing a stronger claim. Most importantly: signature, not cause. Four
-  conditions vary how much of the word sits in the weights. Ranked by first-sight surprise, they
+  0.86); layer 1 is positive (1.22, 1.41, 1.33). <strong>Scaling shape is not established.</strong> A second seed at n=2,048 alone
+  moves layer 2 by <strong>0.2514</strong>, larger than the 0.2459 dip between 8k and 16k, so no
+  size-to-size difference here survives seed variation; we had quoted that dip against the
+  five-sample half-width, which measures the measurement, not another training run. The effect
+  itself survived the reseed (1.4705 and 1.7219, the new seed stronger), layer 3 did not (0.97 to
+  1.18). None of the three finished the 4,000-step schedule; separate completed runs move layer 2
+  1.4705 to 1.4620 at n=2,048 and 2.1201 to 2.2000 at n=8,192, both smaller than the seed gap
+  above. These are toys, 0.4M to 6.3M parameters on a synthetic task. Surprise and sparsity do <em>not</em> track per letter (Pearson 0.30 across phases, Spearman &minus;0.05 letter by letter),
+  killing a stronger claim. Most importantly: signature, not cause. Four conditions vary how much of the word sits in the weights; ranked by first-sight surprise they
   <strong>step</strong> rather than rise: mem/rep 1.00 and 1.01 when the word is already learnt,
-  1.55 and 1.47 when it must be read. K=16 shows nothing because 89% of its word is in the weights;
-  the fixed-word control is degenerate. The 0.73-nat condition is <strong>4.5&times; easier by loss
+  1.55 and 1.47 when it must be read. K=16 shows nothing because 89% of its word is already in the weights. The 0.73-nat condition is <strong>4.5&times; easier by loss
   (0.0384 against 0.1739) yet shows the larger effect</strong>, so difficulty is not the driver. We
   predicted a rise and got a step.
   <span class="lab">Maturity:</span> credible and outsider-checkable for this property; the
