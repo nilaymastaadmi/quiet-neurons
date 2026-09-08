@@ -727,6 +727,18 @@ footer a{color:var(--muted)}
     on <em>any</em> of the three tensors. Only the size of the effect moves. All twelve numbers are
     in <code>experiments/results/measured.csv</code>.</p>
 
+  <p><strong>One step toward how, from the same CSV.</strong> The counted tensor is the product of two
+    rectified factors: the input factor <code>x</code> and the attention-gated factor <code>y</code>. If
+    they fired independently, the product's density would be <code>x &middot; y</code>. It is lower, and it
+    is lowest on repeats: measured density over <code>x &middot; y</code> at layer 2 is 0.876 on the warm-up
+    against 0.745 on repeats at n=2,048, 0.851 against 0.733 at 8,192, and 0.950 against 0.852 at
+    16,384. The counted ratio also exceeds what the two factors' own ratios predict at every size:
+    1.471 against 1.361, 2.120 against 1.773, 1.874 against 1.737. So the quietening is not only each
+    factor firing less. Once the word is in context, the input factor and the attention readout also
+    stop firing on the same neurons. This is an observation on shipped numbers, not a mechanism: it
+    says where in the product the drop sits, not why. <code>python tools/overlap.py</code> prints it
+    from <code>measured.csv</code>.</p>
+
   <h3>Attention is a similarity between firing patterns</h3>
   <p>In <code>bdh.py</code> the query and the key are <em>the same tensor</em> — the code literally
     asserts <code>K is Q</code>. So the attention scores are a Gram matrix: position <em>t</em>

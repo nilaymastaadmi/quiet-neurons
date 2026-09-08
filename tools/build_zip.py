@@ -16,6 +16,7 @@ FILES = ["START_HERE.txt", "README.md", "AI_DISCLOSURE.md", "LICENSE", "concept-
          "verify.sh", "tools/sweep.py", "tools/ladder.py", "tools/gate_checks.py", "tools/build_zip.py",
     "tools/manual_gates.py",
     "tools/parity_check.sh",
+    "tools/overlap.py",
          "experiments/LICENSES.md", "experiments/bdh.py", "experiments/sparsity_scan.py",
          "experiments/measure.py", "experiments/export_weights.py", "experiments/make_scaling.py",
          "experiments/transformer_control.py"]

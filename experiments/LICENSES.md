@@ -11,6 +11,7 @@ this repository's own licence text is in [`../LICENSE`](../LICENSE) (MIT).
 | `experiments/bdh.py` | [pathwaycom/bdh](https://github.com/pathwaycom/bdh), **used unmodified**; the BDH-GPU formulation that repository ships | MIT, Copyright 2025 Pathway Technology, Inc. |
 | `experiments/sparsity_scan.py` | This repo. Trains one model and reproduces the paper's Section 6.4 protocol | MIT, `../LICENSE` |
 | `verify.sh`, `tools/sweep.py`, `tools/ladder.py`, `tools/gate_checks.py`, `tools/build_zip.py`, `tools/manual_gates.py`, `tools/parity_check.sh` | This repo. The checking chain; `gate_checks.py` carries a negative control that must fail on a planted error before either checker is trusted | MIT, `../LICENSE` |
+| `tools/overlap.py` | This repo. Prints the factor-overlap statistics quoted in section 05 from measured.csv | MIT, `../LICENSE` |
 | `experiments/measure.py` | This repo. Measures a checkpoint on a pinned sample; source of every number quoted in this project | MIT, `../LICENSE` |
 | `experiments/export_weights.py` | This repo. Exports weights and a PyTorch reference trace for the browser | MIT, `../LICENSE` |
 | `experiments/make_scaling.py` | This repo. Builds `web/data/scaling.json` from `results/measured.csv` | MIT, `../LICENSE` |

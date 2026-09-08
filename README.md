@@ -304,6 +304,8 @@ choice at all: measured on all three tensors at layer 2, n=8,192, the ratios are
 1.27 (`y_sparse`) and 2.12 (`xy`). Every one is above 1.0. Picking a different tensor changes the
 size of the effect, never its sign.
 
+**One step toward how, from the same CSV.** The counted tensor is the product of two rectified factors: the input factor `x` and the attention-gated factor `y`. If they fired independently, the product's density would be `x · y`. It is lower, and it is lowest on repeats: measured density over `x · y` at layer 2 is 0.876 on the warm-up against 0.745 on repeats at n=2,048, 0.851 against 0.733 at 8,192, and 0.950 against 0.852 at 16,384. The counted ratio also exceeds what the two factors' own ratios predict at every size: 1.471 against 1.361, 2.120 against 1.773, 1.874 against 1.737. So the quietening is not only each factor firing less. Once the word is in context, the input factor and the attention readout also stop firing on the same neurons. This is an observation on shipped numbers, not a mechanism: it says where in the product the drop sits, not why. `python tools/overlap.py` prints it from `measured.csv`.
+
 *"Spread" means one thing throughout this README: the half-width of the five-sample range.*
 
 | n | params | steps | MEM | REP | ratio | spread over 5 samples |
