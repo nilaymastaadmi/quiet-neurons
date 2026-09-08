@@ -45,6 +45,11 @@ WHAT IS IN THIS ZIP
                           results and run logs every published number comes from
   verify.sh               one command that re-derives the three headline ratios from the
                           checkpoints and runs every other check. Needs torch and bash
+                          Run verify.sh from the git clone, not from this zip: the
+                          checkpoints are not shipped, so from the zip section 1 skips,
+                          tools/sweep.py lists the checkpoint paths as missing, and
+                          gate_checks reports 'zip not built'. Those three messages are
+                          expected here and are not defects.
   tools/                  the checking chain verify.sh calls: sweep.py for cross-surface
                           agreement, gate_checks.py which reads every published number off
                           the README, page and one-pager and carries a negative control that

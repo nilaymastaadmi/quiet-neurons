@@ -72,7 +72,7 @@
   layer 2 of a 65,536-neuron model, 4.0&ndash;7.5% active while memorising a new word against about
   2.5% while repeating it, a 1.6&ndash;3.0&times; ratio [1, Fig. 14]. We reproduced that protocol on three models trained here
   from the public code, all for 2,309 steps; it survives a 32-fold shrink: <strong>1.47&times;, 2.12&times; and 1.87&times;</strong> at 2,048, 8,192 and
-  16,384 neurons, each 1,280 sequences over five independently seeded samples, &plusmn;0.005 half-width.
+  16,384 neurons, each 1,280 sequences over five independently seeded samples, half-width at most 0.008.
   <strong>On the paper's own protocol our three models reproduce its result.</strong>
   This model goes quiet on words it has just picked up from the text in front of it; it does not go
   quiet just because text is easy to guess. From the outside those two look identical, and they are
@@ -91,7 +91,7 @@
 <table>
   <tr><th>System</th><th>Where its sparsity comes from</th><th>Carried per token</th><th>Evidence status</th></tr>
   <tr><td>Dense Transformer feed-forward</td><td>Emergent in training [3]; needs a hard rectifier for exact zeros [4]</td><td>A key-value cache, growing with context</td><td>Extensive, independent; trained here, no signature (0.83&ndash;1.02)</td></tr>
-  <tr><td>Linear attention / SSM (Mamba [6])</td><td>None by design; dense recurrent state updates</td><td>A fixed-size recurrent state</td><td>Extensive, independent</td></tr>
+  <tr><td>Selective SSM (Mamba [6])</td><td>None by design; dense recurrent state updates</td><td>A fixed-size recurrent state</td><td>Extensive, independent</td></tr>
   <tr><td><strong>BDH-GPU</strong>, measured here</td><td>Structural: elementwise product of two rectified vectors, never denser than either</td><td>A fixed-size synaptic state</td><td>Reproduced here at toy scale; author-reported at 65,536 neurons</td></tr>
   <tr><td>BDH-CQ</td><td>Not public</td><td>Not public</td><td>Developer-reported only</td></tr>
 </table>

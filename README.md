@@ -60,7 +60,7 @@ surprise; any word that makes the repeats as loud as the warm-up, or pushes the 
 off zero, breaks the claim. The batch control runs eight random words in about ten seconds so no
 single word decides it. Second, the surprise injection: activity should rise at the injected letter
 and the letter before it must be unchanged to nine decimals. The size of the rise scatters by word
-(−8% to +33%, median +9%, 4 of 15 under +5%, `experiments/results/word_scatter.csv`), so a small
+(−8% to +33%, median +9%, 5 of 15 below +5%, one of them negative, `experiments/results/word_scatter.csv`), so a small
 rise is not a refutation. A change in the preceding letter would be.
 
 ---
@@ -275,8 +275,10 @@ this experiment was undertrained and would have produced a clean-looking false n
 
 ### Measured results
 
-Layer 2, `xy` product tensor, memorisation over repetition. Each row is 1,280 sequences
+Layer 2[^layer], `xy` product tensor, memorisation over repetition. Each row is 1,280 sequences
 across 5 independent pinned samples.
+
+[^layer]: The paper does not state whether Figure 14's layer numbering starts at 0 or 1; ours starts at 0.
 
 **Which tensor `xy` is, and why it is the paper's `y`.** Figure 14 counts "the fraction of
 neurons with non-zero entry `y_{t,l}`", so everything depends on which tensor that is. The paper
@@ -302,23 +304,14 @@ choice at all: measured on all three tensors at layer 2, n=8,192, the ratios are
 1.27 (`y_sparse`) and 2.12 (`xy`). Every one is above 1.0. Picking a different tensor changes the
 size of the effect, never its sign.
 
+*"Spread" means one thing throughout this README: the half-width of the five-sample range.*
+
 | n | params | steps | MEM | REP | ratio | spread over 5 samples |
 |---|---|---|---|---|---|---|
 | 2,048 | 397,312 | 2,309 | 0.0850 | 0.0578 | **1.4705x** | 1.4647 – 1.4740 |
 | 8,192 | 3,153,920 | 2,309 | 0.0772 | 0.0364 | **2.1201x** | 2.1139 – 2.1301 |
 | 16,384 | 6,299,648 | 2,309 | 0.0820 | 0.0438 | **1.8742x** | 1.8699 – 1.8782 |
 | 65,536 | Pathway's | — | 4.0–7.5% | ~2.5% | 1.6–3.0x | reported as a range, not reproduced here |
-
-**The scaling is not monotonic, and we published the opposite before the third model
-finished.** n=16384 comes in at 1.87, *below* n=8192's 2.12. The gap is **0.246**, and it is
-**40×** the sampling spread, so it is not evaluation-sampling noise. Whether it is training-seed noise we cannot say: each size was trained once, and the spread here is five re-draws of evaluation words on the same weights.
-
-*"Spread" means one thing throughout this README: the half-width of the five-sample range.* The
-tables quote the same quantity as a full min-to-max, which is twice as large, and mixing the two
-is how this number becomes unreproducible. Explicitly: 8,192 ranges 2.1139–2.1301, half-width
-0.0081; 16,384 ranges 1.8699–1.8782, half-width 0.0042; mean half-width **0.0061**; and
-0.246 ÷ 0.0061 = **40.1**. Against the full widths instead it is 15× and 30×, which is the same
-finding stated on a different denominator.
 
 **We removed the confound rather than disclosing it.** The three models were originally each
 cut by a wall-clock budget at 1,854, 1,917 and 2,309 steps of one 4,000-step OneCycle schedule,
@@ -342,8 +335,7 @@ distinguishable from seed variation**, and that includes the dip and the rise. F
 claim: layer 2 is 1.4705 and 1.7219, both well above 1, and the new seed is the stronger of the
 two. Both families are in
 `experiments/results/measured.csv`, told apart by a `steps_trained` column, so the before and
-after are both checkable. Final losses are close (0.174, 0.173,
-0.172), so they are comparably trained on the task, but that is not a controlled comparison.
+after are both checkable.
 
 The defensible statement is therefore narrower than the one we started with, and narrower again
 since the second seed: **the effect is present at all three sizes and lands inside the range the
@@ -435,12 +427,12 @@ holds only for a *multiplicative* shift. What this control actually produced is 
 
 | | control | the same cells, real model |
 |---|---|---|
-| spread across the 12 cells, tensor `x` | **2.21%** | 15.13% |
+| coefficient of variation across the 12 cells, tensor `x` | **2.21%** | 15.13% |
 | tensor `y` | **1.73%** | 17.74% |
 | tensor `xy` | **2.08%** | 33.34% |
 
 Every cell converged on one constant per tensor. The correlation between a cell's starting value
-and its rise factor is **−0.86** across 36 cells: the rise is almost entirely explained by where
+and its rise factor is **−0.76** across 36 cells (Pearson; −0.86 on log-log axes): the rise is almost entirely explained by where
 the cell began, not by whether its provenance changed. Concretely:
 
 - **28 of 36 cells rose below the 1.60× "unchanged" baseline**, five of them by 1.10× or less.
@@ -501,7 +493,7 @@ is recorded once per condition:
 |---|---|---|---|---|
 | K=1 | 0.0004 | 99.99% | 1.004 | 1.035 |
 | K=16 | 0.3532 | **89.2%** | **1.013** | 0.923 |
-| K=256 | 0.7309 | 77.7% | **1.547** | 2.536 |
+| K=256 | 0.7309 | 77.6% | **1.547** | 2.536 |
 | K=&infin; base task | 3.2738 | 0% | 1.470 | 2.354 |
 
 Against a random baseline of log 26 = 3.258 nats.
@@ -557,14 +549,14 @@ loss 0.0007 against 0.0090. It is not failing to copy in context.
 | **2** | **2.354** | **0.962** | **1.471** | **0.831** |
 | 3 | 1.928 | 1.015 | 0.965 | 0.839 |
 
-All eight Transformer ratios sit between **0.83 and 1.02**, with five-sample spreads at most 0.002
+All eight Transformer ratios sit between **0.83 and 1.02**, with five-sample spreads under 0.003
 wide. BDH's layer 2 reads 2.354 on the same measurement. **So the effect is not simply a property
 of the task**, and on this comparison it is a property of the architecture.
 
 Three things this does not do. It is one Transformer, one seed, one size. It does not explain
 *why* BDH behaves this way, which is still the open question. And the comparison is asymmetric in
 two ways we state rather than bury: the Transformer carries **1,129,216 parameters against BDH's
-397,312**, so it is 2.8x the larger model and was not starved; and its activations are dense, 42%
+397,312**, so it is 2.8x the larger model and was not starved; and its activations are dense, 35%
 to 49% of units on against BDH layer 2's 5.8% to 13.6%, so a sceptic can fairly say a ReLU sitting
 near half-on has less room to move. The counter is that room was available: three of its four
 layers do move, by up to 17%, just in the opposite direction.
@@ -586,7 +578,8 @@ Reproduce with `python transformer_control.py --stop-at 2309 --repeats 5`, about
 | The three models **are** step-matched, as of 2026-09-06 | all three stop at 2,309 steps of the same 4,000-step schedule. The earlier wall-clock-cut numbers are kept in `measured.csv` for comparison |
 | A single sequence is noisy | the surprise-injection jump ranges −8% to +33% across 15 words, median +9%, all in `experiments/results/word_scatter.csv`. The 1,280-sequence ratios do not scatter: every five-sample spread is under 0.02 |
 | Surprise and sparsity do **not** track per letter | at n=8192, layer 2: **Pearson 0.30, Spearman −0.05**. Across the eight letters of first sight, surprise is flat at 3.27 to 3.29 nats while sparsity falls 13.3% to 4.5%. The relationship is between phases, not letters, and a near-zero Spearman is what says so. This killed a stronger claim we wanted to make. Printed by `measure.py`, recorded in `experiments/results/correlations.csv` |
-| We show the signature, not its cause | we ran the intervention: moving the word from context into the weights collapses the gap 2.354× → 1.035×. But that control is **degenerate**, every cell converging on one activation level (spread 1.7–2.2% against 15–33% in the real model, and rise factor correlating −0.86 with starting value), so it cannot separate provenance from task difficulty and an asymmetry argument we briefly published on it was wrong and is retracted above. Nothing here explains *why* weight-held knowledge needs more neurons. An independent reader of the one-page summary raised exactly this, and they were right |
+| We show the signature, not its cause | we ran the intervention: moving the word from context into the weights collapses the gap 2.354× → 1.035×. But that control is **degenerate**, every cell converging on one activation level (coefficient of variation 1.7–2.2% against 15–33% in the real model, and rise factor correlating −0.76 with starting value; −0.86 on log-log axes), so it cannot separate provenance from task difficulty and an asymmetry argument we briefly published on it was wrong and is retracted above. Nothing here explains *why* weight-held knowledge needs more neurons. An independent reader of the one-page summary raised exactly this, and they were right |
+| Position and accumulated context are confounded with provenance | The warm-up sits at letters 1–13 where the attention state is nearly empty; the repeats sit at 22–77. Inside the warm-up, layer-2 activity at n=8,192 rises from 3.95% at letter 1 to 16.10% at letter 12 while surprise stays near 0.0003 nats, and all thirteen letters are equally weight-held, so provenance does not explain that gradient. The partial counter: in a two-period sequence the warm-up reappears at letter 78 with 77 letters of context behind it and still fires at 12.7% against 5.5% for the repeats (experiments/results/one_period_vs_two.md), so accumulation alone does not close the gap. We have not separated the two. |
 | The effect is **absent in a dense Transformer** trained identically | all eight ratios between 0.83 and 1.02 against BDH layer 2's 2.354, on a model that learns the task to a slightly better loss. Section above; data in `experiments/results/transformer_control.csv` |
 | Toy model, not an official BDH checkpoint | architecture is Pathway's and unmodified; the weights are ours |
 | Synthetic task, not natural language | so is the paper's §6.4 protocol, deliberately |
@@ -637,8 +630,10 @@ one JavaScript module, a worker, and 1.59 MB of weights.
 
 ## Three claims we deliberately refuse
 
-1. **"BDH is linear attention."** The public code materialises a full T×T score matrix. It
-   is quadratic. We *counted operations* rather than timing them: at T=154, N=512, D=64 and
+1. **"BDH's public code runs in linear time."** The public code materialises a full T×T score
+   matrix, so the shipped implementation is quadratic in sequence length even though the
+   attention mechanism itself is linear (no softmax). We *counted operations* rather than timing
+   them: at T=154, N=512, D=64 and
    4 heads, the shipped quadratic form costs 27.1M multiply-adds per layer against 40.4M for
    the recurrent form, and the two cross at T = 4ND/(N+D) + 1 ≈ **230 tokens**. Below that
    the quadratic form is genuinely the cheaper one, which is presumably why the reference

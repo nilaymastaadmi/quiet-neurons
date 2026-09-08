@@ -512,7 +512,7 @@ footer a{color:var(--muted)}
           <button class="btn" id="surprise">Inject a surprise</button>
           <p class="hint">Swaps one letter deep in the repetition. The neurons should wake up at
             that letter and nowhere earlier. How much they wake varies by word: &minus;8% to +33%
-            across 15 words, 4 of 15 under +5%. What must never move is the letter before it. If it
+            across 15 words, 5 of 15 below +5%, one of them negative. What must never move is the letter before it. If it
             does, the model is reading its own future and every number here is wrong.</p>
         </div>
         <div class="ctl">
@@ -616,7 +616,7 @@ footer a{color:var(--muted)}
       We expected the effect to keep strengthening with size, and said so on this page until the
       third model finished training. It does not. <strong>n=16384 comes in at 1.87, below
       n=8192's 2.12.</strong> The gap is 0.246, which is <strong>40&times;</strong> the mean
-      half-width of the five-sample spread (0.0061), so it is not evaluation-sampling noise. Whether it is training-seed noise we cannot say: each size was trained once, and the spread here is five re-draws of evaluation words on the same weights. The tables below quote
+      half-width of the five-sample spread (0.0061), so it is not evaluation-sampling noise. It is, however, indistinguishable from training-seed noise: a second seed at n=2,048 alone moves layer 2 by 0.2514, larger than this dip (section 07). Whether it is training-seed noise we cannot say: each size was trained once, and the spread here is five re-draws of evaluation words on the same weights. The tables below quote
       that spread as a full min-to-max range, which is twice the half-width; on that denominator
       the same gap reads 15&times; and 30&times;.
       <br><br>
@@ -656,7 +656,8 @@ footer a{color:var(--muted)}
   </div>
   <p class="hint" style="max-width:78ch">Each of our points is 1,280 sequences across 5 independent
     samples; the spread is smaller than the marker. The paper's band is read off Figure 14 and is
-    plotted as a band, not a point, because that is how it is reported.</p>
+    plotted as a band, not a point, because that is how it is reported. The paper does not state
+    whether Figure 14's layer numbering starts at 0 or 1; ours starts at 0.</p>
 </section>
 
 <section>
@@ -687,7 +688,7 @@ footer a{color:var(--muted)}
     nothing: all eight of its warm-to-repeat and first-sight-to-repeat ratios land between
     <strong>0.83 and 1.02</strong>, where BDH's layer 2 reads <strong>2.35</strong>. Two
     asymmetries worth your suspicion: the Transformer is the bigger model, 1.13M parameters against
-    0.40M, and its activations are dense, 42 to 49 percent on, so a fair sceptic can say a rectifier
+    0.40M, and its activations are dense, 35 to 49 percent on, so a fair sceptic can say a rectifier
     sitting near half-on has less room to move. Three of its four layers do move, by up to 17
     percent, in the opposite direction.
     <span class="cav">One Transformer, one seed, one size. It says the effect is not just the task.
@@ -738,8 +739,10 @@ footer a{color:var(--muted)}
   <div class="notclaim">
     <h4>Three things we refuse to claim</h4>
     <ul>
-      <li><span class="k">BDH is linear attention</span><span class="d">The public code builds a full
-        T&times;T score matrix. It is quadratic. We <em>counted operations</em> rather than timing
+      <li><span class="k">BDH's public code runs in linear time</span><span class="d">The public code
+        materialises a full T&times;T score matrix, so the shipped implementation is quadratic in
+        sequence length even though the attention mechanism itself is linear (no softmax). We
+        <em>counted operations</em> rather than timing
         them: at T=154 the shipped form costs 27.1M multiply-adds per layer against 40.4M for the
         recurrent form, and the two cross at T = 4ND/(N+D) + 1 &asymp; 230 tokens. Below that the
         quadratic form is genuinely the cheaper one, which is why the reference implementation
@@ -913,8 +916,8 @@ footer a{color:var(--muted)}
           <td class="n prose">retrained with the word <em>fixed</em>, so identical content sits in the weights
             instead of the context: the warm-up-to-repetition gap collapses <strong>2.35&times; to
             1.04&times;</strong>. But that control is <strong>degenerate</strong>: every layer, tensor
-            and block converges on one activation level, spread 1.7&ndash;2.2% against 15&ndash;33% in the
-            real model, and how far a cell rose correlates &minus;0.86 with where it started rather than
+            and block converges on one activation level, coefficient of variation 1.7&ndash;2.2% against 15&ndash;33% in the
+            real model, and how far a cell rose correlates &minus;0.76 with where it started (Pearson; &minus;0.86 on log-log axes) rather than
             with whether its provenance changed. It solves a trivial task (loss 0.0004 against 0.174).
             So it shows that removing the distinction removes the effect, and it cannot separate
             provenance from difficulty <span class="tag tag-no">degenerate</span></td></tr>
@@ -935,6 +938,8 @@ footer a{color:var(--muted)}
             on. The registered prediction still failed, and the switch is only bracketed between
             0.35 and 0.73 nats, not located
             <span class="tag tag-ok">a step, and we know what steps it</span></td></tr>
+      <tr><td>Position and accumulated context are confounded with provenance</td>
+          <td class="n prose">The warm-up sits at letters 1&ndash;13 where the attention state is nearly empty; the repeats sit at 22&ndash;77. Inside the warm-up, layer-2 activity at n=8,192 rises from 3.95% at letter 1 to 16.10% at letter 12 while surprise stays near 0.0003 nats, and all thirteen letters are equally weight-held, so provenance does not explain that gradient. The partial counter: in a two-period sequence the warm-up reappears at letter 78 with 77 letters of context behind it and still fires at 12.7% against 5.5% for the repeats (experiments/results/one_period_vs_two.md), so accumulation alone does not close the gap. We have not separated the two <span class="tag tag-no">against us</span></td></tr>
       <tr><td>This is a toy trained here, not an official BDH checkpoint</td>
           <td class="n prose">architecture is Pathway's, unmodified; weights are ours</td></tr>
       <tr><td>Synthetic task, not natural language</td>
@@ -1442,7 +1447,7 @@ const TOUR = [
            has to learn it from scratch again, and the same drop should happen. If the shape
            survives an arbitrary word, it is not a property of that word.<br><br>
            <span class="cav">We chose this word because it shows the jump clearly in the last
-           step; 4 of 15 random words do not, and the last step says why.</span>`,
+           step; 5 of 15 random words do not, and the last step says why.</span>`,
     // Measured on the shipped checkpoint before being hardcoded. Per-word scatter in the
     // injection jump is large (-8% to +33% across 15 words at layer 2), so the tour word is
     // one that lands well: xswedcvf reads 4.98% -> 6.25%, +25% at layer 2, and layer 0 runs

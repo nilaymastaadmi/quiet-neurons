@@ -22,6 +22,8 @@ The only difference is `--stop-at 4000` instead of `--stop-at 2309`.
 | 3 | 0.9654 | 0.9863 | +0.021 |
 | final training loss | 0.1739 | 0.1705 | −0.0034 |
 
+The n=2,048 step-matched run's final loss of 0.1739 was read from the training console; its log was not retained. The nearest shipped evidence is train_n2048_full4000.log at step 2300: 0.1741.
+
 **The effect survives.** Layer 2 moves by 0.0085, which is 0.6% of the value and under two
 half-widths of the five-sample spread (±0.0047). Every qualitative feature is preserved: layer 0
 runs backwards, layers 1 and 2 are positive, layer 2 is the peak, layer 3 is flat.

@@ -220,8 +220,8 @@ def g_tour_disclosure():
     ix = norm(read("web/index.html"))
     if "chose this word because" not in ix:
         fail("tour step 2 does not disclose that the word was chosen for a clear jump")
-    if "4 of 15" not in ix and "four of fifteen" not in ix:
-        fail("tour/break-it copy does not state 4 of 15 random words show under +5%")
+    if "5 of 15" not in ix and "five of fifteen" not in ix:
+        fail("tour/break-it copy does not state 5 of 15 random words show below +5%")
 
 def g_verify_honest():
     vs = read("verify.sh")
@@ -315,14 +315,29 @@ def g_live_matches_head():
             fail("live %s differs from %s" % (url or "index", local))
 
 def g_git_pushed():
+    """FAILS, never passes, when git is missing or ROOT is not a repository: an empty
+    stdout from a broken git call used to compare equal to itself and pass."""
     def git(*a):
-        return subprocess.run(["git"] + list(a), cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    dirty = [l for l in git("status", "--porcelain").splitlines()
-             if not l.endswith("train_n8192_full4000.log")]
+        try:
+            r = subprocess.run(["git"] + list(a), cwd=ROOT, capture_output=True, text=True)
+        except OSError as e:
+            fail("git is not available: %s" % e); return None
+        if r.returncode != 0:
+            fail("git %s failed: %s" % (" ".join(a), (r.stderr or r.stdout).strip()[:200])); return None
+        return r.stdout.strip()
+    if git("rev-parse", "--is-inside-work-tree") != "true":
+        fail("%s is not a git repository" % ROOT); return
+    status = git("status", "--porcelain")
+    if status is None:
+        return
+    dirty = [l for l in status.splitlines() if not l.endswith("train_n8192_full4000.log")]
     if dirty:
         fail("working tree not clean: %s" % "; ".join(dirty[:5]))
     subprocess.run(["git", "fetch", "-q", "origin"], cwd=ROOT)
-    if git("rev-parse", "HEAD") != git("rev-parse", "origin/main"):
+    head, remote = git("rev-parse", "HEAD"), git("rev-parse", "origin/main")
+    if head is None or remote is None:
+        return
+    if head != remote:
         fail("HEAD is not pushed to origin/main")
 
 GATES = {
