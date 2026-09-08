@@ -40,3 +40,18 @@ step  1750 loss 0.1708 elapsed    711s
 step  1800 loss 0.1708 elapsed    731s
 step  1850 loss 0.1707 elapsed    756s
 step  1900 loss 0.1707 elapsed    783s
+step  1950 loss 0.1706 elapsed    831s
+step  2000 loss 0.1705 elapsed    863s
+step  2050 loss 0.1704 elapsed    884s
+step  2100 loss 0.1707 elapsed    910s
+step  2150 loss 0.1706 elapsed    938s
+step  2200 loss 0.1705 elapsed    966s
+step  2250 loss 0.1706 elapsed    989s
+step  2300 loss 0.1705 elapsed   1009s
+TRAINED transformer steps=2309 of a 4000-step schedule (stop_at=2309) final_loss=0.1705
+PRECONDITION first_expo=3.2674 repetition=0.0007 TASK_LEARNED=True  (5 eval passes, 1280 sequences)
+  layer 0 mlp_relu: WARM 0.4451 MEM 0.4781 REP 0.4779  mem/rep 1.0005  warm/rep 0.9313
+  layer 1 mlp_relu: WARM 0.4163 MEM 0.4349 REP 0.4872  mem/rep 0.8927  warm/rep 0.8545
+  layer 2 mlp_relu: WARM 0.4362 MEM 0.3769 REP 0.4534  mem/rep 0.8312  warm/rep 0.962
+  layer 3 mlp_relu: WARM 0.4285 MEM 0.3541 REP 0.4220  mem/rep 0.839  warm/rep 1.0154
+appended 4 rows to results/transformer_control.csv

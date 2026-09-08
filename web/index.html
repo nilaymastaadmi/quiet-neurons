@@ -665,6 +665,21 @@ footer a{color:var(--muted)}
     public code whose magnitude lands inside the band the paper reports; the individual vectors sit
     around 19 to 59 percent dense, several times off.</p>
 
+  <p><strong>And the design choice is what carries the effect, not the task.</strong> We trained a
+    dense Transformer on the identical sequences, with the same seed, the same optimiser, the same
+    4,000-step schedule stopped at the same 2,309 steps, and the same 1,280-sequence measurement.
+    Four layers, four heads, a ReLU feed-forward 2,048 units wide so it has exactly as many
+    countable units per layer as the model on this page. It learns the copy task slightly
+    <em>better</em> than BDH does, final loss <strong>0.1705</strong> against 0.1739. And it shows
+    nothing: all eight of its warm-to-repeat and first-sight-to-repeat ratios land between
+    <strong>0.83 and 1.02</strong>, where BDH's layer 2 reads <strong>2.35</strong>. Two
+    asymmetries worth your suspicion: the Transformer is the bigger model, 1.13M parameters against
+    0.40M, and its activations are dense, 42 to 49 percent on, so a fair sceptic can say a rectifier
+    sitting near half-on has less room to move. Three of its four layers do move, by up to 17
+    percent, in the opposite direction.
+    <span class="cav">One Transformer, one seed, one size. It says the effect is not just the task.
+    It does not say why BDH has it.</span></p>
+
   <p>Figure 14 counts "the fraction of neurons with non-zero entry <em>y<sub>t,l</sub></em>", so
     which tensor that is decides everything. <strong>The paper defines it, three times over.</strong>
     Equation 8 gives the BDH-GPU form as

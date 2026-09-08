@@ -17,7 +17,8 @@ FILES = ["START_HERE.txt", "README.md", "AI_DISCLOSURE.md", "LICENSE", "concept-
     "tools/manual_gates.py",
     "tools/parity_check.sh",
          "experiments/LICENSES.md", "experiments/bdh.py", "experiments/sparsity_scan.py",
-         "experiments/measure.py", "experiments/export_weights.py", "experiments/make_scaling.py"]
+         "experiments/measure.py", "experiments/export_weights.py", "experiments/make_scaling.py",
+         "experiments/transformer_control.py"]
 # NOT "experiments/scaling_results.csv". It is the single-sample scan sparsity_scan.py writes
 # during training, and it states its own answers to the published ratios: 1.0041/1.0132/1.547
 # where measured.csv says 1.4705, and 2.196 where full_schedule.csv says 2.2000. It was removed

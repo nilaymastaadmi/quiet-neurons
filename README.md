@@ -486,6 +486,47 @@ published run is bit-identical to before it existed.
 
 ---
 
+## Is it BDH, or is it the task?
+
+This is the first question every reader of this project has asked, and until 2026-09-08 the answer
+was a table *describing* how BDH differs from a Transformer. A description is not a control.
+
+We trained a dense Transformer on the identical task with everything held fixed but the
+architecture: same seed, same warm-up sequence drawn at the same point in the RNG stream, same
+AdamW at lr 3e-3, same 4,000-step OneCycle schedule, same `--stop-at 2309`, same 1,280-sequence
+evaluation with the same warm-up / first-sight / repeat blocks. Four layers, d=64, four heads,
+ReLU MLP of width 2,048 so it has the same 2,048 countable units per layer that BDH does.
+
+**It learns the task at least as well.** Final loss **0.1705** against BDH's 0.1739, repetition
+loss 0.0007 against 0.0090. It is not failing to copy in context.
+
+**It shows no provenance signature at any layer.**
+
+| layer | BDH warm/rep | Transformer warm/rep | BDH mem/rep | Transformer mem/rep |
+|---|---|---|---|---|
+| 0 | 0.597 | 0.931 | 0.803 | 1.001 |
+| 1 | 1.181 | 0.855 | 1.222 | 0.893 |
+| **2** | **2.354** | **0.962** | **1.471** | **0.831** |
+| 3 | 1.928 | 1.015 | 0.965 | 0.839 |
+
+All eight Transformer ratios sit between **0.83 and 1.02**, with five-sample spreads at most 0.002
+wide. BDH's layer 2 reads 2.354 on the same measurement. **So the effect is not simply a property
+of the task**, and on this comparison it is a property of the architecture.
+
+Three things this does not do. It is one Transformer, one seed, one size. It does not explain
+*why* BDH behaves this way, which is still the open question. And the comparison is asymmetric in
+two ways we state rather than bury: the Transformer carries **1,129,216 parameters against BDH's
+397,312**, so it is 2.8x the larger model and was not starved; and its activations are dense, 42%
+to 49% of units on against BDH layer 2's 5.8% to 13.6%, so a sceptic can fairly say a ReLU sitting
+near half-on has less room to move. The counter is that room was available: three of its four
+layers do move, by up to 17%, just in the opposite direction.
+
+Method, data and the full argument in
+[`experiments/results/transformer_control.README.md`](experiments/results/transformer_control.README.md).
+Reproduce with `python transformer_control.py --stop-at 2309 --repeats 5`, about 17 minutes of CPU.
+
+---
+
 ## Where the effect is absent
 
 | Limit | What we actually measure |
@@ -497,6 +538,7 @@ published run is bit-identical to before it existed.
 | A single sequence is noisy | the surprise-injection jump ranges −8% to +33% across 15 words, median +9%, all in `experiments/results/word_scatter.csv`. The 1,280-sequence ratios do not scatter: every five-sample spread is under 0.02 |
 | Surprise and sparsity do **not** track per letter | at n=8192, layer 2: **Pearson 0.30, Spearman −0.05**. Across the eight letters of first sight, surprise is flat at 3.27 to 3.29 nats while sparsity falls 13.3% to 4.5%. The relationship is between phases, not letters, and a near-zero Spearman is what says so. This killed a stronger claim we wanted to make. Printed by `measure.py`, recorded in `experiments/results/correlations.csv` |
 | We show the signature, not its cause | we ran the intervention: moving the word from context into the weights collapses the gap 2.354× → 1.035×. But that control is **degenerate**, every cell converging on one activation level (spread 1.7–2.2% against 15–33% in the real model, and rise factor correlating −0.86 with starting value), so it cannot separate provenance from task difficulty and an asymmetry argument we briefly published on it was wrong and is retracted above. Nothing here explains *why* weight-held knowledge needs more neurons. An independent reader of the one-page summary raised exactly this, and they were right |
+| The effect is **absent in a dense Transformer** trained identically | all eight ratios between 0.83 and 1.02 against BDH layer 2's 2.354, on a model that learns the task to a slightly better loss. Section above; data in `experiments/results/transformer_control.csv` |
 | Toy model, not an official BDH checkpoint | architecture is Pathway's and unmodified; the weights are ours |
 | Synthetic task, not natural language | so is the paper's §6.4 protocol, deliberately |
 

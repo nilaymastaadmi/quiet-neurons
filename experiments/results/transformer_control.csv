@@ -1,0 +1,5 @@
+model,d,layers,hidden_units,params,steps_trained,task_learned,first_expo_loss,repetition_loss,layer,tensor,warmup,mem,rep,mem_over_rep,warm_over_rep,ratio_min,ratio_max,eval_passes
+transformer,64,4,2048,1129216,2309,True,3.2674,0.0007,0,mlp_relu,0.44509,0.47813,0.47791,1.0005,0.9313,1.0001,1.0006,5
+transformer,64,4,2048,1129216,2309,True,3.2674,0.0007,1,mlp_relu,0.41628,0.43489,0.48718,0.8927,0.8545,0.8916,0.8938,5
+transformer,64,4,2048,1129216,2309,True,3.2674,0.0007,2,mlp_relu,0.4362,0.3769,0.45343,0.8312,0.962,0.8309,0.8317,5
+transformer,64,4,2048,1129216,2309,True,3.2674,0.0007,3,mlp_relu,0.42854,0.35407,0.42203,0.839,1.0154,0.8378,0.8399,5
