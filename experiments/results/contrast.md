@@ -36,6 +36,28 @@ in what state. **The floor and the zero are the claim; the count is not.**
 
 Threshold 4.5:1 for normal text, 3:1 for large (≥24 px, or ≥18.66 px at weight ≥700).
 
+## explain.html, the one-screen view, 2026-09-08
+
+Same script, both themes, on the page added 2026-09-08.
+
+| theme | text elements | failures | floor |
+|---|---|---|---|
+| dark | 25 | **0** | **6.25:1** |
+| light | 25 | **0** | **5.17:1** |
+
+**The standard script misses this page's chart labels**, because SVG text is coloured by `fill`
+and the script reads `color`. They were measured separately, each against the band it is actually
+drawn over rather than against the card behind it, which is the same "score it against what is
+really behind it" rule the script uses for HTML:
+
+| label | band | light | dark |
+|---|---|---|---|
+| warm-up | `--fire-soft` | **5.19:1** | 6.25:1 |
+| first sight | `--surface-2` | **5.29:1** | 6.25:1 |
+| the same word, 8 repeats / axis figures | `--surface` | 6.28:1 | 6.25:1 |
+
+Zero failures, and the floor across both themes and both kinds of text is **5.17:1**.
+
 ## What was wrong before
 
 An earlier version of the README claimed a 4.69:1 floor. It was not reproducible on the shipped

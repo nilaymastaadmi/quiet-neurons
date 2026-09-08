@@ -63,6 +63,14 @@ p{max-width:66ch}
 a{color:var(--fire);text-decoration-thickness:1px;text-underline-offset:2px}
 
 /* masthead */
+.jump{
+  display:block; margin:0 0 14px; padding:11px 14px; border-radius:9px; text-decoration:none;
+  background:var(--fire-soft); border:1px solid var(--fire-line); color:var(--ink);
+}
+.jump strong{display:block; color:var(--fire); font-size:16px; margin-bottom:2px}
+.jump span{display:block; color:var(--ink-2); font-size:13.5px; line-height:1.4; max-width:80ch}
+.jump:hover strong{text-decoration:underline}
+
 .eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
          color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px}
 h1{font-family:var(--f-disp);font-weight:700;font-size:clamp(34px,5.6vw,58px);line-height:1.02;
@@ -243,6 +251,11 @@ footer a{color:var(--muted)}
   <div class="eyebrow">
     <span>Dragon Hatchling</span><span>arXiv:2509.26507 §6.4</span><span>Sparse non-negative activations</span>
   </div>
+  <a href="explain.html" class="jump">
+    <strong>In a hurry? The whole claim on one screen.</strong>
+    <span>Two live bars over the same 77 letters: how many neurons fire, and how surprised the
+      model is. One steps down by half, the other does not move. About ten seconds &rarr;</span>
+  </a>
   <h1>Quiet Neurons</h1>
   <p class="standfirst">There is a small artificial brain running on this page right now. Not a
     video of one, not a simulation: the real thing, doing arithmetic in your browser as you
@@ -932,6 +945,10 @@ footer a{color:var(--muted)}
   §6.4 and Fig.&nbsp;14 &mdash; the claim reproduced here.
   <a href="https://arxiv.org/abs/2608.09888">BDH-CQ</a>, arXiv:2608.09888 (2026) &mdash; cited only.
   <a href="https://github.com/pathwaycom/bdh">pathwaycom/bdh</a>, MIT &mdash; the architecture, used unmodified.<br>
+  <strong style="color:var(--ink)">One screen.</strong>
+  <a href="explain.html">explain.html</a> &mdash; the single measurement this project rests on,
+  drawn so you can see it in one look, with the same live model and one control that could break
+  it.<br>
   <strong style="color:var(--ink)">One-page summary.</strong>
   <a href="concept-summary.pdf">concept-summary.pdf</a> &mdash; the claim, the evidence and its
   limits on one page, for a reader who wants it without the interaction.<br>

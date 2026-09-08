@@ -15,7 +15,7 @@ this repository's own licence text is in [`../LICENSE`](../LICENSE) (MIT).
 | `experiments/export_weights.py` | This repo. Exports weights and a PyTorch reference trace for the browser | MIT, `../LICENSE` |
 | `experiments/make_scaling.py` | This repo. Builds `web/data/scaling.json` from `results/measured.csv` | MIT, `../LICENSE` |
 | `web/bdh.js` | This repo. A port of `bdh.py` to JavaScript, verified against it by `web/parity.html` | MIT, `../LICENSE` |
-| `web/index.html`, `web/worker.js`, `web/parity.html`, `web/profile.html` | This repo | MIT, `../LICENSE` |
+| `web/index.html`, `web/explain.html`, `web/worker.js`, `web/parity.html`, `web/profile.html` | This repo | MIT, `../LICENSE` |
 | `concept-summary.html` and the `web/concept-summary.pdf` it renders to | This repo. The one-page concept summary; the PDF is generated from the HTML by headless Chrome, so it is reproducible rather than hand-laid | MIT, `../LICENSE` |
 | PyTorch | Dependency, installed by the reader, not vendored here | BSD-3-Clause |
 
@@ -37,7 +37,7 @@ this repository's own licence text is in [`../LICENSE`](../LICENSE) (MIT).
 
 | Asset | Origin | Licence |
 |---|---|---|
-| IBM Plex Sans, IBM Plex Sans Condensed, IBM Plex Mono | Served from Google Fonts by `web/index.html`; not vendored | SIL Open Font License 1.1 |
+| IBM Plex Sans, IBM Plex Sans Condensed, IBM Plex Mono | Served from Google Fonts by `web/index.html` and `web/explain.html`; not vendored | SIL Open Font License 1.1 |
 | Charts, neuron grid, attention heatmap, all page styling | Written for this submission: inline CSS, hand-written SVG, canvas drawing. No UI framework, no chart library, no icons, no images | MIT, `../LICENSE` |
 
 No images, video, audio or third-party JavaScript are used anywhere in this project.

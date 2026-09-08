@@ -39,7 +39,7 @@ What that does and does not mean here:
 | `experiments/sparsity_scan.py`, `measure.py`, `export_weights.py`, `make_scaling.py` | Written for this submission | MIT, see `LICENSE` |
 | `verify.sh`, `tools/sweep.py`, `tools/ladder.py`, `tools/gate_checks.py`, `tools/build_zip.py`, `tools/manual_gates.py`, `tools/parity_check.sh` | Written for this submission. The checking chain: verify.sh re-derives the headline ratios and runs the rest; sweep.py checks cross-surface consistency; ladder.py applies the pre-registered ladder test; gate_checks.py reads every published number off the README, page and one-pager and ships a negative control that must fail on a planted error; build_zip.py builds the submission zip from a list so no shipped file can be omitted by hand; manual_gates.py gives the four hand-judged gates a machine check of their record, and says in its own docstring that checking a record is weaker than re-measuring; parity_check.sh runs the browser parity check on its own, because running it through verify.sh --with-page re-derived every ratio first and timed the gate checker out | MIT, see `LICENSE` |
 | `web/bdh.js` | Written for this submission: a port of `bdh.py` to JavaScript, verified against it by `web/parity.html` | MIT, see `LICENSE` |
-| `web/index.html`, `worker.js`, `parity.html`, `profile.html` | Written for this submission | MIT, see `LICENSE` |
+| `web/index.html`, `web/explain.html`, `worker.js`, `parity.html`, `profile.html` | Written for this submission. `explain.html` is the one-screen view added 2026-09-08; it loads the same weights through the same worker and forward pass as `index.html` and hardcodes no measured value except the two published population ratios it compares a single run against | MIT, see `LICENSE` |
 | `concept-summary.html`, and `web/concept-summary.pdf` rendered from it | Written for this submission. Text is ours; the PDF is produced from the HTML by headless Chrome so it can be regenerated | MIT, see `LICENSE` |
 | PyTorch | Dependency, not vendored | BSD-3-Clause |
 
@@ -64,7 +64,7 @@ contribution sits alongside it rather than inside it.
 
 | Asset | Origin | Licence |
 |---|---|---|
-| IBM Plex Sans, IBM Plex Sans Condensed, IBM Plex Mono | Served from Google Fonts by `web/index.html`; not vendored into this repository | SIL Open Font License 1.1 |
+| IBM Plex Sans, IBM Plex Sans Condensed, IBM Plex Mono | Served from Google Fonts by `web/index.html` and `web/explain.html`; not vendored into this repository | SIL Open Font License 1.1 |
 | Colours, layout, charts, the neuron grid, the attention heatmap | Written for this submission as inline CSS and hand-written SVG and canvas drawing; no UI framework, no chart library, no icon set, no images | MIT, see `LICENSE` |
 
 There are no images, no video, no audio, no icons and no third-party JavaScript in this

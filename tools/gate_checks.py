@@ -305,6 +305,7 @@ def g_live_matches_head():
     import urllib.request
     base = "https://nilaymastaadmi.github.io/quiet-neurons/"
     for url, local in (("", "web/index.html"), ("concept-summary.pdf", "web/concept-summary.pdf"),
+                       ("explain.html", "web/explain.html"),
                        ("parity.html", "web/parity.html"), ("bdh.js", "web/bdh.js")):
         try:
             remote = urllib.request.urlopen(base + url, timeout=30).read()

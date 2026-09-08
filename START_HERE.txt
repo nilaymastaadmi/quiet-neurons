@@ -13,6 +13,14 @@ FASTEST PATH  --  the live artifact, no install, no sign-in, opens in a browser:
 
     https://nilaymastaadmi.github.io/quiet-neurons/
 
+ONE SCREEN, ABOUT TEN SECONDS  --  the whole claim in a single picture, live:
+
+    https://nilaymastaadmi.github.io/quiet-neurons/explain.html
+
+  Two bars over the same 77 letters: how many neurons fire, and how surprised the
+  model is. The first steps down by half where the model stops recalling and starts
+  reading. The second does not move. That gap is the entire finding.
+
 Public source repository, everything in this zip and more:
 
     https://github.com/nilaymastaadmi/quiet-neurons
@@ -31,6 +39,7 @@ WHAT IS IN THIS ZIP
                           illustrative, how to reproduce every number, credits, licences
   concept-summary.html    source of the one-page summary, so the PDF can be regenerated
   web/concept-summary.pdf the required one-page concept summary (also served live)
+  web/explain.html        the one-screen view: the claim in a single live picture
   web/                    the artifact itself: static files, no backend, no build step
   experiments/            training, measurement and export scripts, plus the raw
                           results and run logs every published number comes from

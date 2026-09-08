@@ -67,6 +67,15 @@ rise is not a refutation. A change in the preceding letter would be.
 
 ## Who this is for
 
+**Start here if you have one minute.**
+[`web/explain.html`](web/explain.html), live at
+<https://nilaymastaadmi.github.io/quiet-neurons/explain.html>, is the whole claim on one screen:
+two bars over the same 77 letters, one for how many neurons fire and one for how surprised the
+model is. The first steps down by half at the phase boundary. The second does not move. Every
+number on it is computed in your tab from the shipped weights, and one button runs eight random
+words so no chosen word decides anything. The rest of this README is why that picture should be
+believed.
+
 **Audience.** Anyone willing to read the four primer boxes at the top of the page. No
 machine-learning background is assumed; researchers who want the BDH sparsity result checked
 rather than described can skip them.
@@ -98,6 +107,7 @@ The rubric asks for this explicitly, so it is near the top rather than buried.
 | The model on the page (n=2048, 397,312 params) | **Live.** Real weights, real forward pass, computed in your browser on every interaction. Not a recording. |
 | Neuron grid, sparsity trace, counterexample panel, surprise test | **Live.** All recomputed from that forward pass. |
 | Attention heatmap and binding-by-lag chart | **Live**, from the same run. |
+| `explain.html`, the one-screen view | **Live.** Same weights, same worker, same forward pass as the main page; both bars and every figure on it are computed in your tab |
 | Batch of eight random words | **Live.** Eight forward passes, words drawn in the browser at click time, nothing pre-selected. |
 | Which individual dot lights up in the neuron grid | **Count live, placement illustrative.** The number of lit cells is computed by the forward pass and printed under the grid. Where they sit is a fixed scatter keyed to the letter position, because which particular neuron fires is not what the claim is about. The grid's own caption says exactly this. |
 | Scaling chart points, and the larger-model curves the size switcher overlays | **Precomputed** by `experiments/measure.py`, shipped as `web/data/scaling.json` and `web/data/traces/`. Only n=2048 runs live; n=8192 and n=16384 are 8x and 16x the compute and cannot, and the page labels their curves "measured, not live". |

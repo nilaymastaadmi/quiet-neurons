@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quiet Neurons — the whole claim, on one screen</title>
+<!--
+  The one-screen version. index.html is the full case: the primers, the architecture, the
+  provenance ladder, the limits, the sources. It is long on purpose, because the claim needs
+  every one of those to be believed.
+
+  This page is not a summary of that. It is the single measurement the whole project rests on,
+  drawn so a reader can see it in one look, and one control that could break it. Two bars over
+  the same 77 letters: how many neurons fire, and how surprised the model is. The first steps
+  down by half. The second does not move. If both halves of the sequence are predicted almost
+  perfectly and only one of them is quiet, then predictability is not what makes it quiet.
+
+  It runs the same weights, the same worker and the same forward pass as index.html. No numbers
+  are hardcoded here except the two published population values it compares against, both of
+  which trace to experiments/results/measured.csv.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#F3F4F7; --surface:#FFFFFF; --surface-2:#EAECF1;
+  --line:#D5D9E2; --ink:#191C25; --ink-2:#3E4455; --muted:#5A6070;
+  --fire:#9A4A0E; --fire-soft:#F7E7D6; --fire-line:#D98A3C; --on-fire:#FFFFFF;
+  --control-edge:#767F94;
+  --cool:#2A5B73; --cool-soft:#DDEAF1;
+  --f-disp:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0F1118; --surface:#161922; --surface-2:#1D212B;
+  --line:#2B3040; --ink:#E9EBF1; --ink-2:#C0C5D2; --muted:#939AAE;
+  --fire:#FF9E3D; --fire-soft:#37270F; --fire-line:#B4712A; --on-fire:#0F1118;
+  --control-edge:#606B92;
+  --cool:#79B6D2; --cool-soft:#14262F;
+}}
+:root[data-theme="dark"]{
+  --ground:#0F1118; --surface:#161922; --surface-2:#1D212B;
+  --line:#2B3040; --ink:#E9EBF1; --ink-2:#C0C5D2; --muted:#939AAE;
+  --fire:#FF9E3D; --fire-soft:#37270F; --fire-line:#B4712A; --on-fire:#0F1118;
+  --control-edge:#606B92;
+  --cool:#79B6D2; --cool-soft:#14262F;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ground); color:var(--ink); font-family:var(--f-body);
+  font-size:15px; line-height:1.45; min-height:100vh;
+  display:flex; flex-direction:column; padding:16px 20px 10px;
+}
+a{color:var(--fire)}
+header{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:2px}
+h1{font-family:var(--f-disp); font-size:22px; letter-spacing:.01em; margin:0; font-weight:700}
+.sub{color:var(--muted); font-size:13px; margin:0}
+header .spacer{flex:1}
+.full{font-size:13px; white-space:nowrap}
+.claim{
+  font-family:var(--f-disp); font-size:clamp(20px,2.9vw,34px); line-height:1.16;
+  margin:8px 0 2px; max-width:30ch; font-weight:700;
+}
+.claim em{color:var(--fire); font-style:normal}
+.stage{
+  flex:1; min-height:0; background:var(--surface); border:1px solid var(--line);
+  border-radius:10px; padding:11px 14px 8px; margin:8px 0 0;
+  display:flex; flex-direction:column; gap:6px;
+}
+.rowlab{
+  font-family:var(--f-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+}
+.rowlab b{color:var(--ink); font-size:13px; letter-spacing:0; text-transform:none;
+  font-family:var(--f-body)}
+svg{display:block; width:100%; height:100%}
+svg text{font-family:var(--f-mono); font-size:13px; fill:var(--muted)}
+svg .ph-warm{fill:var(--fire-soft)}
+svg .ph-first{fill:var(--surface-2)}
+svg .bar-act{fill:var(--fire)}
+svg .bar-sur{fill:var(--cool)}
+svg .axis{stroke:var(--line); stroke-width:1.5}
+svg .sep{stroke:var(--fire-line); stroke-width:1.5}
+svg .sep.dash{stroke-dasharray:4 3}
+svg text.hi{fill:var(--fire)}
+.chart{flex:1; min-height:54px}
+.verdict{
+  font-size:clamp(14px,1.5vw,17px); line-height:1.32; margin:6px 0 0; max-width:78ch;
+}
+.verdict strong{color:var(--fire)}
+.ctl{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px}
+label{font-family:var(--f-mono); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted)}
+input[type=text]{
+  font-family:var(--f-mono); font-size:15px; width:11ch; padding:6px 8px;
+  border:1px solid var(--control-edge); border-radius:6px;
+  background:var(--surface-2); color:var(--ink);
+}
+button{
+  font-family:var(--f-body); font-size:13.5px; font-weight:600; padding:7px 13px;
+  border-radius:6px; border:1px solid var(--control-edge);
+  background:var(--surface-2); color:var(--ink); cursor:pointer;
+}
+button.primary{background:var(--fire); color:var(--on-fire); border-color:var(--fire)}
+button:disabled{opacity:.55; cursor:progress}
+.badge{
+  font-family:var(--f-mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+  padding:3px 7px; border-radius:999px; border:1px solid var(--fire-line);
+  background:var(--fire-soft); color:var(--fire);
+}
+.foot{color:var(--muted); font-size:11.5px; line-height:1.4; margin-top:7px; max-width:118ch}
+.foot a{color:var(--fire)}
+#batch{margin-top:8px; font-family:var(--f-mono); font-size:12px; color:var(--ink-2)}
+#batch table{border-collapse:collapse; width:100%; max-width:640px}
+#batch td,#batch th{padding:1px 8px 1px 0; text-align:right; font-weight:400}
+#batch th{color:var(--muted); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase}
+#batch td:first-child,#batch th:first-child{text-align:left}
+@media (max-width:720px){
+  body{padding:14px 13px}
+  .claim{font-size:21px}
+  .stage{padding:11px 11px 8px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Quiet Neurons</h1>
+  <p class="sub">a 397,000-parameter Dragon Hatchling, running in this tab</p>
+  <span class="spacer"></span>
+  <span class="badge" id="badge">starting</span>
+  <a class="full" href="index.html">The full case, with every limitation &rarr;</a>
+</header>
+
+<p class="claim">It goes quiet on what it <em>just learned</em>,<br>not on what is easy to guess.</p>
+
+<div class="stage">
+  <div class="rowlab">
+    <span>one pass &middot; 77 letters &middot; layer 2</span>
+    <span id="perf">&nbsp;</span>
+  </div>
+
+  <div class="rowlab"><b>How many neurons fire</b><span id="lab1">&nbsp;</span></div>
+  <div class="rowlab" style="margin:-4px 0 0"><span>warm-up = the same 13 letters in every training sequence, so it lives in the weights &middot; repeats = a word it met seconds ago, so it can only be in the context</span></div>
+  <div class="chart"><svg id="act" preserveAspectRatio="none" aria-label="neurons firing per letter"></svg></div>
+
+  <div class="rowlab"><b>How surprised it is</b><span id="lab2">&nbsp;</span></div>
+  <div class="chart"><svg id="sur" preserveAspectRatio="none" aria-label="surprise per letter"></svg></div>
+</div>
+
+<p class="verdict" id="verdict">&nbsp;</p>
+
+<div class="ctl">
+  <label for="word">the repeated word</label>
+  <input id="word" type="text" maxlength="8" value="fact" spellcheck="false" autocomplete="off">
+  <button id="dice">New random word</button>
+  <button id="run8" class="primary">Run 8 random words</button>
+</div>
+<div id="batch"></div>
+
+<p class="foot">
+  Computed in this tab from the shipped weights; nothing here is a recording. One word is one
+  sequence and single words scatter, which is what the eight-word button is for. This is the
+  signature, not its cause, on a toy model and a synthetic task. The
+  <a href="index.html">full page</a> has the architecture, the provenance ladder, a dense
+  Transformer trained on the same task that shows none of this, and every limitation we found.
+  <a href="concept-summary.pdf">One-page summary</a> &middot;
+  <a href="parity.html">check it against PyTorch</a> &middot;
+  <a href="https://github.com/nilaymastaadmi/quiet-neurons">source</a>
+</p>
+
+<script type="module">
+const $ = s => document.querySelector(s);
+const BUILD = "e1";
+const WARM = 13, WORD = 8, REPS = 8, PERIOD = 77, T = 77;
+const LETTERS = "abcdefghijklmnopqrstuvwxyz";
+// The two population values this screen compares a single run against. Both are layer 2, xy,
+// n=2048, 2309 steps, five pinned samples over 1,280 sequences, from
+// experiments/results/measured.csv. They are the only numbers on this page not computed here.
+const POP_WARM_OVER_REP = 2.35, POP_MEM_OVER_REP = 1.47;
+
+let warmup = null, worker = null, reqId = 0, cur = null;
+
+const mean = a => { const v = a.filter(Number.isFinite);
+                    return v.length ? v.reduce((p, q) => p + q, 0) / v.length : NaN; };
+
+function tokensFor(word) {
+  const w = [];
+  for (let i = 0; i < WORD; i++) {
+    const ch = (word[i] || "a").toLowerCase();
+    const k = LETTERS.indexOf(ch);
+    w.push(k < 0 ? 0 : k);
+  }
+  const block = warmup.concat(...Array(REPS).fill(w));
+  const seq = [];
+  while (seq.length < T) seq.push(...block);
+  return seq.slice(0, T);
+}
+
+/* Both rows are drawn by the same function so the two pictures are directly comparable:
+   same width, same left edge, same phase shading. The only difference a reader should see
+   between them is the shape of the data. */
+function draw(svg, series, colour, fmt, forceMax) {
+  const W = 1000, H = 130, padT = 8, padB = 20;
+  const vals = series.map(v => Number.isFinite(v) ? v : 0);
+  const max = forceMax !== undefined ? forceMax : Math.max(...vals, 1e-9);
+  const bw = W / PERIOD;
+  const y = v => padT + (H - padT - padB) * (1 - v / max);
+  const bars = vals.map((v, i) =>
+    `<rect x="${(i * bw).toFixed(2)}" y="${y(v).toFixed(2)}" width="${(bw * .82).toFixed(2)}" ` +
+    `height="${Math.max(0.6, H - padB - y(v)).toFixed(2)}" class="${colour}" />`).join("");
+  const split = WARM * bw, split2 = (WARM + WORD) * bw;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML =
+    `<rect x="0" y="0" width="${split}" height="${H - padB}" class="ph-warm"/>` +
+    `<rect x="${split}" y="0" width="${split2 - split}" height="${H - padB}" class="ph-first"/>` +
+    bars +
+    `<line x1="0" y1="${H - padB}" x2="${W}" y2="${H - padB}" class="axis"/>` +
+    `<line x1="${split}" y1="0" x2="${split}" y2="${H - padB}" class="sep"/>` +
+    `<line x1="${split2}" y1="0" x2="${split2}" y2="${H - padB}" class="sep dash"/>` +
+    // Three phases, each labelled inside its own band. The middle one is only 8 of 77 letters
+    // wide but it is the phase that separates the other two, so it does not get to be silent.
+    `<text x="${(split / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle">warm-up</text>` +
+    `<text x="${((split + split2) / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle" class="hi">first sight</text>` +
+    `<text x="${(split2 + (W - split2) / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle">the same word, 8 repeats</text>` +
+    `<text x="${W - 4}" y="18" text-anchor="end">${fmt(max)}</text>`;
+}
+
+function render() {
+  if (!cur) return;
+  const act = cur.sparsity[2].xy;
+  const sur = cur.surprise;
+  const aw = mean(act.slice(0, WARM)), am = mean(act.slice(WARM, WARM + WORD)),
+        ar = mean(act.slice(WARM + WORD, PERIOD));
+  const sw = mean(sur.slice(1, WARM)), sr = mean(sur.slice(WARM + WORD, PERIOD));
+
+  draw($("#act"), act, "bar-act", v => (v * 100).toFixed(0) + "% of neurons");
+  // Surprise is drawn on a fixed axis up to the random baseline, log 26 = 3.26 nats, which is
+  // what "the model has no idea" costs. On its own auto-scaled axis a flat line of noise looks
+  // like structure, and that would be a picture that argues for us dishonestly.
+  draw($("#sur"), sur.map(v => Number.isFinite(v) ? v : 0), "bar-sur",
+       () => "3.26 nats = a letter it cannot know", Math.log(26));
+
+  $("#lab1").textContent =
+    `warm-up ${(aw * 100).toFixed(1)}%   repeats ${(ar * 100).toFixed(1)}%   ` +
+    `ratio ${(aw / ar).toFixed(2)}×`;
+  $("#lab2").textContent =
+    `warm-up ${sw.toFixed(3)} nats   repeats ${sr.toFixed(3)} nats`;
+
+  const bothFlat = sw < 0.05 && sr < 0.05;
+  $("#verdict").innerHTML = bothFlat
+    ? `Both blocks are predicted almost perfectly &mdash; ${sw.toFixed(3)} and ${sr.toFixed(3)} nats
+       against the ${Math.log(26).toFixed(2)} a letter it cannot know would cost &mdash; and the model
+       still uses <strong>${(aw / ar).toFixed(2)}&times; more neurons</strong> on the warm-up.
+       The warm-up is identical in every training sequence, so it lives in the <strong>weights</strong>.
+       The repeated word is new every run, so it can only have come from the <strong>context</strong>,
+       seconds ago. Over 1,280 sequences this same model reads ${POP_WARM_OVER_REP.toFixed(2)}&times;.`
+    : `On this word the two blocks are <em>not</em> equally predictable
+       (${sw.toFixed(3)} against ${sr.toFixed(3)} nats), so this particular run does not make the
+       point cleanly. That is worth seeing too. Try another word.`;
+  $("#perf").textContent = `${cur.ms.toFixed(0)} ms in this tab, ${cur.nNeurons.toLocaleString()} neurons`;
+}
+
+function run() {
+  $("#badge").textContent = "computing";
+  worker.postMessage({ id: ++reqId, tokens: tokensFor($("#word").value || "fact"), wantScores: false });
+}
+
+const settle = () => new Promise(r => {
+  const h = () => $("#badge").textContent === "live" ? r() : setTimeout(h, 40);
+  setTimeout(h, 60);
+});
+
+(async function main() {
+  const manifest = await fetch("data/manifest.json").then(r => r.json());
+  const ref = await fetch("data/reference.json").then(r => r.json());
+  warmup = ref.tokens.slice(0, WARM);
+  $("#word").value = ref.word.map(k => LETTERS[k]).join("");
+
+  worker = new Worker("worker.js?v=" + BUILD, { type: "module" });
+  worker.onmessage = ev => {
+    const d = ev.data;
+    if (d.error) { $("#badge").textContent = "error"; console.error(d.error); return; }
+    if (d.id !== reqId) return;
+    cur = d;
+    $("#badge").textContent = "live";
+    render();
+  };
+  run();
+
+  $("#word").addEventListener("input", run);
+  $("#dice").addEventListener("click", () => {
+    $("#word").value = Array.from({ length: WORD },
+      () => LETTERS[Math.floor(Math.random() * 26)]).join("");
+    run();
+  });
+
+  $("#run8").addEventListener("click", async () => {
+    const b = $("#run8"), keep = $("#word").value;
+    b.disabled = true;
+    const rows = [];
+    for (let i = 0; i < 8; i++) {
+      b.textContent = `word ${i + 1} of 8…`;
+      $("#word").value = Array.from({ length: WORD },
+        () => LETTERS[Math.floor(Math.random() * 26)]).join("");
+      run();
+      await settle();
+      const a = cur.sparsity[2].xy, s = cur.surprise;
+      rows.push({
+        w: $("#word").value,
+        warm: mean(a.slice(0, WARM)), rep: mean(a.slice(WARM + WORD, PERIOD)),
+        ws: mean(s.slice(1, WARM)), rs: mean(s.slice(WARM + WORD, PERIOD)),
+      });
+    }
+    const f = rows.map(r => r.warm / r.rep).sort((x, y) => x - y);
+    const med = (f[3] + f[4]) / 2;
+    $("#batch").innerHTML =
+      `<table><tr><th>word</th><th>warm-up firing</th><th>repeats firing</th><th>warm / rep</th>` +
+      `<th>warm-up surprise</th><th>repeats surprise</th></tr>` +
+      rows.map(r => `<tr><td>${r.w}</td><td>${(r.warm * 100).toFixed(1)}%</td>` +
+        `<td>${(r.rep * 100).toFixed(1)}%</td><td>${(r.warm / r.rep).toFixed(2)}&times;</td>` +
+        `<td>${r.ws.toFixed(3)}</td><td>${r.rs.toFixed(3)}</td></tr>`).join("") +
+      `</table><p style="margin:6px 0 0">Median <strong>${med.toFixed(2)}&times;</strong>, ` +
+      `${f.filter(x => x > 1.3).length} of 8 above 1.3&times;. Eight words drawn in this tab just ` +
+      `now, nothing chosen. A run where several rows land near 1.0&times; with both surprise ` +
+      `columns near zero would be evidence against the claim.</p>`;
+    $("#word").value = keep;
+    run();
+    b.textContent = "Run 8 random words";
+    b.disabled = false;
+  });
+})();
+</script>
+</body>
+</html>
