@@ -42,6 +42,35 @@ pass is the one that pays for JIT compilation. It did not affect the steady stat
 number the design standard is about and which is within 6 ms of the record. **A strict rerun with
 the tab visible is still worth thirty seconds** before quoting the first-pass figure to anyone.
 
+## Visible-tab rerun, 2026-09-08 08:2x, and it is 2.8x faster than the record
+
+Run by the author, not by the agent, in a foreground Chrome tab on the live site, using the
+script below verbatim. **The Transformer control was training on ten threads at the time**, so
+this is a contended machine, not an idle one.
+
+| | ms |
+|---|---|
+| totals, input to readout | 325, 685, 317, 392 |
+| **median total** | **358** |
+| forward pass | 308, 671, 293, 371 |
+| **median forward pass** | **340** |
+
+**The page has been understating itself by about a factor of three.** The 2026-09-07 record of
+1,010 ms and the agent's 1,004 ms rerun were both taken in the in-app browser pane, which Windows
+runs at background quality-of-service. This one was a normal visible tab, which is what a judge
+uses, and it lands at **358 ms** even with a training job competing for the CPU.
+
+Two honest notes. The four samples are not clean: the second, 685 ms, is more than double its
+neighbours, and the usual warm-up effect did not appear in the first sample, so the ordering
+suggests the outlier is scheduling noise rather than JIT. And **we cannot fully account for the
+2.8x gap**. Background quality-of-service is the only difference we can name with confidence, and
+naming it does not prove it accounts for all of it. What is not in doubt is which number a judge
+will see: the visible-tab one.
+
+The design standard asks for controls that respond in under a second. On the evidence that is met
+with room to spare, and the earlier claim of "about one second" was conservative to the point of
+being wrong.
+
 ## Why this is worth recording
 
 An external audit measured 2,606 / 2,002 / 1,002 ms and concluded the page runs at 1.7 to 2.6 s,

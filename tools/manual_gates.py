@@ -42,10 +42,10 @@ def g19():
 
 
 def g20():
-    """Latency: G20's stated condition includes a VISIBLE tab. A rerun in a hidden tab does not
-    meet it, however close the steady-state numbers land, because the first-pass figure is
-    exactly the one a hidden tab distorts. This check therefore refuses to go green on the
-    rerun of 2026-09-08 rather than quietly redefining the gate to match what was achieved."""
+    """Latency: G20's stated condition includes a VISIBLE tab, and the agent could not produce
+    one. The author ran the recorded script in a foreground tab on 2026-09-08 and got 358 ms
+    median against the 1,010 ms on record. The check requires that rerun, its median, and an
+    acknowledgement that the gap to the earlier number is not fully explained."""
     t = read("experiments/results/latency.md")
     if "Rerun, 2026-09-08" not in t:
         fail("G20", "no rerun dated 2026-09-08 in latency.md")
@@ -53,10 +53,14 @@ def g20():
     blk = t.split("Rerun, 2026-09-08", 1)[1][:2000]
     if not re.search(r"\*\*1,0\d\d\*\*", blk):
         fail("G20", "rerun states no median near the recorded 1,010 ms")
-    if "not visible" in blk:
-        fail("G20", "the recorded rerun was taken in a hidden tab; G20 requires a visible one")
-    elif "tab was visible" not in blk:
-        fail("G20", "rerun does not state that the tab-visible condition was met")
+    if "Visible-tab rerun, 2026-09-08" not in t:
+        fail("G20", "no visible-tab rerun recorded; the hidden-tab one does not meet G20")
+        return
+    vis = t.split("Visible-tab rerun, 2026-09-08", 1)[1][:2200]
+    if "**358**" not in vis:
+        fail("G20", "visible-tab rerun states no median")
+    if "cannot fully account" not in vis:
+        fail("G20", "the 2.8x gap against the earlier record is not acknowledged")
 
 
 def g21():

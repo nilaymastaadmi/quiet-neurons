@@ -455,11 +455,13 @@ footer a{color:var(--muted)}
           <label for="word">The repeated word</label>
           <input id="word" type="text" maxlength="8" value="fact" spellcheck="false" autocomplete="off">
           <p class="hint">Any letters. It is new to the model every time, so it has to learn it from
-            the text rather than recall it. <strong>Each change costs about one second</strong>,
-            measured input to readout across eight words: median <strong>1.01 s</strong>, of which
-            <strong>0.87 s</strong> is the forward pass itself and only ~0.03 s is moving data back
-            from the worker. The <em>first</em> change after the page loads is slower, about 1.8 s,
-            because it also pays for layout and JIT. That is 2,048 neurons through four layers in
+            the text rather than recall it. <strong>Each change costs about a third of a second</strong> in a
+            visible tab on the machine this was built on: median <strong>0.36 s</strong> input to
+            readout, of which <strong>0.34 s</strong> is the forward pass itself and only ~0.03 s is
+            moving data back from the worker. In a background tab, which the operating system runs
+            at reduced priority, the same work takes about <strong>1.0 s</strong>. Both numbers are
+            measured and both are in <code>experiments/results/latency.md</code>; we cannot fully
+            account for the whole of the gap. That is 2,048 neurons through four layers in
             single-threaded JavaScript, in your tab, with no server: the price of this being real
             rather than a recording. Per-phase breakdown in
             <a href="profile.html">profile.html</a>.</p>

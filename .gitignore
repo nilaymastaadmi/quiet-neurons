@@ -6,3 +6,7 @@ dist/
 experiments/scaling_results.csv
 GATES.md
 .unlazy/
+
+# tool caches and editor config, not part of the submission
+graphify-out/
+.claude/
