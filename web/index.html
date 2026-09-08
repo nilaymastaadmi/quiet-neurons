@@ -616,7 +616,7 @@ footer a{color:var(--muted)}
       We expected the effect to keep strengthening with size, and said so on this page until the
       third model finished training. It does not. <strong>n=16384 comes in at 1.87, below
       n=8192's 2.12.</strong> The gap is 0.246, which is <strong>40&times;</strong> the mean
-      half-width of the five-sample spread (0.0061), so it is not evaluation-sampling noise. It is, however, indistinguishable from training-seed noise: a second seed at n=2,048 alone moves layer 2 by 0.2514, larger than this dip (section 07). Whether it is training-seed noise we cannot say: each size was trained once, and the spread here is five re-draws of evaluation words on the same weights. The tables below quote
+      half-width of the five-sample spread (0.0061), so it is not evaluation-sampling noise. It is, however, indistinguishable from training-seed noise: a second seed at n=2,048 alone moves layer 2 by 0.2514, larger than this dip (section 07). Each size was trained once, and the spread quoted here is five re-draws of evaluation words on the same weights, so it measures the measurement, not another training run. The tables below quote
       that spread as a full min-to-max range, which is twice the half-width; on that denominator
       the same gap reads 15&times; and 30&times;.
       <br><br>
