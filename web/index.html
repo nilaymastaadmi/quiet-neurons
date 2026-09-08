@@ -1237,7 +1237,12 @@ function render() {
          side &mdash; and `;
     const caveat = layer === 2
       ? ` <em>This is one word and one sequence, and single words scatter. Over 1,280
-          sequences this same model reads ${POP2048.toFixed(2)}&times;.</em>`
+          sequences this same model reads ${POP2048.toFixed(2)}&times;. That is lower than what you
+          see here for a reason worth knowing: this panel runs one 77-letter period and the
+          published figure averages two. By the second period the warm-up has itself appeared once
+          already, so it is partly context-held too and goes quieter, which pulls the ratio down.
+          One period reads about 2.5 to 2.6, two average to about 2.35, so the published number is
+          the conservative one.</em>`
       : ``;
     $("#cxNote").innerHTML = warmA > repA * 1.3
       ? `${opener}layer ${layer} still uses <strong>${factor.toFixed(1)}&times; more

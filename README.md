@@ -107,6 +107,7 @@ The rubric asks for this explicitly, so it is near the top rather than buried.
 | The model on the page (n=2048, 397,312 params) | **Live.** Real weights, real forward pass, computed in your browser on every interaction. Not a recording. |
 | Neuron grid, sparsity trace, counterexample panel, surprise test | **Live.** All recomputed from that forward pass. |
 | Attention heatmap and binding-by-lag chart | **Live**, from the same run. |
+| Live ratio vs the published 2.35x | The pages run one 77-letter period; `measure.py` averages two, and by the second the warm-up is partly context-held too, so it goes quieter. One period reads 2.5 to 2.6, two average to about 2.35. Measured in `experiments/results/one_period_vs_two.md`; the published number is the conservative one |
 | `explain.html`, the one-screen view | **Live.** Same weights, same worker, same forward pass as the main page; both bars and every figure on it are computed in your tab |
 | Batch of eight random words | **Live.** Eight forward passes, words drawn in the browser at click time, nothing pre-selected. |
 | Which individual dot lights up in the neuron grid | **Count live, placement illustrative.** The number of lit cells is computed by the forward pass and printed under the grid. Where they sit is a fixed scatter keyed to the letter position, because which particular neuron fires is not what the claim is about. The grid's own caption says exactly this. |

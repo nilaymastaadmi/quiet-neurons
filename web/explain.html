@@ -91,6 +91,7 @@ svg text.hi{fill:var(--fire)}
   font-size:clamp(14px,1.5vw,17px); line-height:1.32; margin:6px 0 0; max-width:78ch;
 }
 .verdict strong{color:var(--fire)}
+.verdict .note{display:block; color:var(--muted); font-size:12.5px; line-height:1.4; margin-top:4px}
 .ctl{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px}
 label{font-family:var(--f-mono); font-size:11px; letter-spacing:.08em;
   text-transform:uppercase; color:var(--muted)}
@@ -129,7 +130,7 @@ button:disabled{opacity:.55; cursor:progress}
 
 <header>
   <h1>Quiet Neurons</h1>
-  <p class="sub">a 397,000-parameter Dragon Hatchling, running in this tab</p>
+  <p class="sub">a 397,000-parameter Dragon Hatchling (BDH, <a href="https://arxiv.org/abs/2509.26507">arXiv:2509.26507</a>), running in this tab</p>
   <span class="spacer"></span>
   <span class="badge" id="badge">starting</span>
   <a class="full" href="index.html">The full case, with every limitation &rarr;</a>
@@ -144,7 +145,7 @@ button:disabled{opacity:.55; cursor:progress}
   </div>
 
   <div class="rowlab"><b>How many neurons fire</b><span id="lab1">&nbsp;</span></div>
-  <div class="rowlab" style="margin:-4px 0 0"><span>warm-up = the same 13 letters in every training sequence, so it lives in the weights &middot; repeats = a word it met seconds ago, so it can only be in the context</span></div>
+  <div class="rowlab" style="margin:-4px 0 0"><span>firing = a strictly non-zero value after the rectifier, so there is no threshold we chose &middot; warm-up = the same 13 letters in every training sequence, so it lives in the weights &middot; repeats = a word it met seconds ago, so it can only be in the context</span></div>
   <div class="chart"><svg id="act" preserveAspectRatio="none" aria-label="neurons firing per letter"></svg></div>
 
   <div class="rowlab"><b>How surprised it is</b><span id="lab2">&nbsp;</span></div>
@@ -225,7 +226,7 @@ function draw(svg, series, colour, fmt, forceMax) {
     // wide but it is the phase that separates the other two, so it does not get to be silent.
     `<text x="${(split / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle">warm-up</text>` +
     `<text x="${((split + split2) / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle" class="hi">first sight</text>` +
-    `<text x="${(split2 + (W - split2) / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle">the same word, 8 repeats</text>` +
+    `<text x="${(split2 + (W - split2) / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle">the same word, 7 more times</text>` +
     `<text x="${W - 4}" y="18" text-anchor="end">${fmt(max)}</text>`;
 }
 
@@ -242,7 +243,7 @@ function render() {
   // what "the model has no idea" costs. On its own auto-scaled axis a flat line of noise looks
   // like structure, and that would be a picture that argues for us dishonestly.
   draw($("#sur"), sur.map(v => Number.isFinite(v) ? v : 0), "bar-sur",
-       () => "3.26 nats = a letter it cannot know", Math.log(26));
+       () => "3.26 nats = ln 26, a uniform guess at the alphabet", Math.log(26));
 
   $("#lab1").textContent =
     `warm-up ${(aw * 100).toFixed(1)}%   repeats ${(ar * 100).toFixed(1)}%   ` +
@@ -257,7 +258,14 @@ function render() {
        still uses <strong>${(aw / ar).toFixed(2)}&times; more neurons</strong> on the warm-up.
        The warm-up is identical in every training sequence, so it lives in the <strong>weights</strong>.
        The repeated word is new every run, so it can only have come from the <strong>context</strong>,
-       seconds ago. Over 1,280 sequences this same model reads ${POP_WARM_OVER_REP.toFixed(2)}&times;.`
+       seconds ago.
+       <span class="note">This screen runs one period of 77 letters. The published
+       ${POP_WARM_OVER_REP.toFixed(2)}&times; averages two, and by the second the warm-up has itself
+       appeared once already, so it goes quieter too (14.4% to about 12.7%) and the ratio falls.
+       One period reads 2.5 to 2.6; two average to about 2.35. The published number is the
+       conservative one. Watch the first-sight block as well: firing halves across those eight
+       letters while surprise stays flat at the baseline, so position and accumulation move this
+       curve too, not provenance alone.</span>`
     : `On this word the two blocks are <em>not</em> equally predictable
        (${sw.toFixed(3)} against ${sr.toFixed(3)} nats), so this particular run does not make the
        point cleanly. That is worth seeing too. Try another word.`;
