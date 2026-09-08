@@ -9,7 +9,7 @@
 
 # Quiet Neurons: document-only review
 
-Source: `C:\Users\toshn\Downloads\concept-summary.pdf`
+Source: a copy of `web/concept-summary.pdf`
 
 ## Part 1
 

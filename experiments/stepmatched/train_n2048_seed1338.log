@@ -1,0 +1,2 @@
+n=2048 d=64 L=4 params=397,312 T=154 B=16 budget=14400s
+step    50 loss 3.2832 elapsed    273s

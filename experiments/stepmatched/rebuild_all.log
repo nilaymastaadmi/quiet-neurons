@@ -1,6 +1,4 @@
 === step-matched family, all three at 2309 steps of the same 4000-step schedule ===
-C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f629\scratchpad\bdhvenv\Lib\site-packages\torch\_subclasses\functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\utils\tensor_numpy.cpp:84.)
-  cpu = _conversion_method_template(device=torch.device("cpu"))
 wrote per-letter curves to ../web/data/traces/n2048.json
 n=2048 params=397,312  TASK_LEARNED=True  first_expo=3.2738 repetition=0.0090  (5 eval passes, 1280 sequences)
   layer 0 xy: MEM 0.1661 REP 0.2070 ratio 0.8028  [0.8003 .. 0.8044]
@@ -16,8 +14,6 @@ n=2048 params=397,312  TASK_LEARNED=True  first_expo=3.2738 repetition=0.0090  (
   layer 3: Pearson -0.144  Spearman -0.607   first sight: surprise 3.26 to 3.28 nats, sparsity 9.0% to 6.5%
 appended 4 rows to results/correlations.csv
 appended 12 rows to results/measured.csv
-C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f629\scratchpad\bdhvenv\Lib\site-packages\torch\_subclasses\functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\utils\tensor_numpy.cpp:84.)
-  cpu = _conversion_method_template(device=torch.device("cpu"))
 wrote per-letter curves to ../web/data/traces/n8192.json
 n=8192 params=3,153,920  TASK_LEARNED=True  first_expo=3.2774 repetition=0.0041  (5 eval passes, 1280 sequences)
   layer 0 xy: MEM 0.2297 REP 0.2875 ratio 0.799  [0.7981 .. 0.8007]
@@ -33,8 +29,6 @@ n=8192 params=3,153,920  TASK_LEARNED=True  first_expo=3.2774 repetition=0.0041 
   layer 3: Pearson -0.142  Spearman -0.478   first sight: surprise 3.27 to 3.29 nats, sparsity 7.3% to 4.4%
 appended 4 rows to results/correlations.csv
 appended 12 rows to results/measured.csv
-C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f629\scratchpad\bdhvenv\Lib\site-packages\torch\_subclasses\functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\utils\tensor_numpy.cpp:84.)
-  cpu = _conversion_method_template(device=torch.device("cpu"))
 wrote per-letter curves to ../web/data/traces/n16384.json
 n=16384 params=6,299,648  TASK_LEARNED=True  first_expo=3.2766 repetition=0.0021  (5 eval passes, 1280 sequences)
   layer 0 xy: MEM 0.2607 REP 0.3044 ratio 0.8564  [0.8549 .. 0.8581]
@@ -52,8 +46,6 @@ appended 4 rows to results/correlations.csv
 appended 12 rows to results/measured.csv
 
 === the earlier wall-clock-cut family, kept as the before-and-after evidence ===
-C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f629\scratchpad\bdhvenv\Lib\site-packages\torch\_subclasses\functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\utils\tensor_numpy.cpp:84.)
-  cpu = _conversion_method_template(device=torch.device("cpu"))
 n=2048 params=397,312  TASK_LEARNED=True  first_expo=3.2825 repetition=0.0084  (5 eval passes, 1280 sequences)
   layer 0 xy: MEM 0.1714 REP 0.2093 ratio 0.819  [0.8167 .. 0.8213]
   layer 1 xy: MEM 0.1614 REP 0.1254 ratio 1.2868  [1.2851 .. 1.2885]
@@ -68,8 +60,6 @@ n=2048 params=397,312  TASK_LEARNED=True  first_expo=3.2825 repetition=0.0084  (
   layer 3: Pearson -0.179  Spearman -0.626   first sight: surprise 3.28 to 3.30 nats, sparsity 9.0% to 6.5%
 appended 4 rows to results/correlations.csv
 appended 12 rows to results/measured.csv
-C:\Users\toshn\AppData\Local\Temp\claude\C--\28f7f38b-420a-47d0-9d55-b6aa2499f629\scratchpad\bdhvenv\Lib\site-packages\torch\_subclasses\functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\utils\tensor_numpy.cpp:84.)
-  cpu = _conversion_method_template(device=torch.device("cpu"))
 n=8192 params=3,153,920  TASK_LEARNED=True  first_expo=3.2821 repetition=0.0079  (5 eval passes, 1280 sequences)
   layer 0 xy: MEM 0.2295 REP 0.2901 ratio 0.7913  [0.7904 .. 0.7928]
   layer 1 xy: MEM 0.0838 REP 0.0564 ratio 1.4856  [1.4828 .. 1.4898]
